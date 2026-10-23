@@ -553,6 +553,7 @@ function vCodigos(){
    Cada gasto lleva su moneda; los pesos chilenos se pasan a dólares con el dólar de referencia de la pestaña. */
 const COSTOS_INI=[
   {id:'certificado',nombre:'Certificado de uso',lineas:[{c:'Registro consular y aranceles consulares',m:150,mon:'USD'},{c:'Habilitación',m:200,mon:'USD'},{c:'Envío Chile → Brasilia',m:50,mon:'USD'},{c:'Envío Brasilia → Pacaraima',m:30,mon:'USD'}],precio:500,orden:1},
+  {id:'certificado-mar',nombre:'Certificado de uso, vía marítima desde Chile',desc:'Los documentos van del consulado a Pacaraima y de ahí por MRW a Caracas. Plazo: unos 15 días hábiles desde el pago (5 de trámite, 5 de envío a Pacaraima y 5 hasta Caracas).',lineas:[{c:'Registro consular y aranceles consulares',m:150,mon:'USD'},{c:'Habilitación',m:200,mon:'USD'},{c:'Envío Chile → Brasilia',m:50,mon:'USD'},{c:'Envío Brasilia → Pacaraima',m:30,mon:'USD'},{c:'Envío Pacaraima → Caracas por MRW',m:30,mon:'USD'},{c:'Envío adicional hasta Caracas',m:30,mon:'USD'}],precio:500,orden:1.5},
   {id:'exportacion',nombre:'Exportación y baja en el Registro Civil (Chile)',lineas:[{c:'Agente de aduanas en Chile',m:250,mon:'USD'},{c:'Envío de documentos a la aduana',m:20000,mon:'CLP'},{c:'Envío de la frontera a Santiago',m:90,mon:'USD'},{c:'Gestión de la baja en el Registro Civil',m:90,mon:'USD'}],precio:null,orden:2}];
 let tasaClp=+(pref.get('clp')||950);
 const enUsd=l=>(+l.m||0)/(l.mon==='CLP'?tasaClp:1);
