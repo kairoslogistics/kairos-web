@@ -528,6 +528,14 @@ const COD_TIPOS=[['asesoria','Asesoría 40 USD: desglose y plan de viaje'],['cal
 // Un vehículo extra (15 USD) es un código de tipo «calculo» con un vehículo.
 const codTipo=k=>(COD_TIPOS.find(x=>x[0]===k)||[,k])[1];
 function nuevoCodigo(){const A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',b=new Uint32Array(6);crypto.getRandomValues(b);let c;do{c='KAI-'+[...b].map(n=>A[n%32]).join('');crypto.getRandomValues(b);}while(S.codigos.some(x=>x.id===c));return c;}
+// Lo que el cliente vio cuando usó el código: datos del vehículo, el desglose y, si aplica, el plan de viaje.
+function verSim(c){
+  const s=c.sim||{}, simple=Object.entries(s).filter(([,v])=>!Array.isArray(v)), listas=Object.entries(s).filter(([,v])=>Array.isArray(v));
+  return '<details><summary style="cursor:pointer;color:var(--brand);font-weight:700;font-size:14px">Ver lo que se le generó</summary><div style="display:grid;gap:8px;margin-top:8px;font-size:14px">'+
+    '<dl class="kv">'+simple.map(([k,v])=>'<dt>'+esc(k)+'</dt><dd>'+esc(v)+'</dd>').join('')+'</dl>'+
+    listas.map(([k,v])=>'<div><b>'+esc(k)+'</b><div style="display:grid;gap:2px;margin-top:4px">'+v.map(t=>'<span'+(String(t).startsWith('· ')?' style="color:var(--muted);padding-left:12px"':'')+'>'+esc(t)+'</span>').join('')+'</div></div>').join('')+
+    '</div></details>';
+}
 function vCodigos(){
   const L=S.codigos.slice().sort((a,b)=>(b.created_at||0)-(a.created_at||0));
   const libres=L.filter(c=>(+c.usos||0)<(+c.max||1)).length;
@@ -536,7 +544,7 @@ function vCodigos(){
     '<form class="cod-new" id="cod-new"><label>Qué compró<select id="cod-tipo">'+COD_TIPOS.map(([k,l])=>'<option value="'+k+'">'+esc(l)+'</option>').join('')+'</select></label>'+
     '<label>Vehículos<input id="cod-max" type="number" min="1" max="20" value="1" inputmode="numeric"></label>'+
     '<label>Cliente<input id="cod-cli" type="text" autocomplete="off" placeholder="Nombre y WhatsApp"></label><button class="btn" type="submit">Crear código</button></form>'+
-    (L.length?'<div class="list">'+L.map(c=>{const u=+c.usos||0,m=+c.max||1;return '<div class="row"><div style="min-width:0;display:grid;gap:6px"><b class="code">'+esc(c.id)+'</b><div class="meta"><span>'+esc(codTipo(c.tipo))+'</span><span>'+esc(c.cliente||'Sin cliente')+'</span>'+(c.ultimo_uso?'<span>Último uso: '+new Date(+c.ultimo_uso).toLocaleString('es-CL')+'</span>':'')+'</div></div>'+
+    (L.length?'<div class="list">'+L.map(c=>{const u=+c.usos||0,m=+c.max||1;return '<div class="row"><div style="min-width:0;display:grid;gap:6px"><b class="code">'+esc(c.id)+'</b><div class="meta"><span>'+esc(codTipo(c.tipo))+'</span><span>'+esc(c.cliente||'Sin cliente')+'</span>'+(c.ultimo_uso?'<span>Usado el '+new Date(+c.ultimo_uso).toLocaleString('es-CL')+'</span>':'')+(c.orden?'<span>Orden '+esc(c.orden)+'</span>':'')+'</div>'+(c.sim?verSim(c):'')+'</div>'+
       '<div class="side"><span class="pill '+(u>=m?'off':u?'mid':'done')+'">'+(u>=m?'Usado':'Libre')+' · '+u+' de '+m+'</span><span><button class="btn sm ghost" data-codcopy="'+esc(c.id)+'">Copiar</button> <button class="btn sm danger" data-coddel="'+esc(c.id)+'">Borrar</button></span></div></div>';}).join('')+'</div>'
     :'<p class="empty">Todavía no hay códigos. Crea el primero arriba.</p>');
 }
