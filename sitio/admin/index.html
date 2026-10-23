@@ -552,7 +552,7 @@ function vCodigos(){
 /* Costos por servicio (Elise, 23 oct. 2026): lo que nos cobran, el total de gasto en USD y al lado lo que cobramos.
    Cada gasto lleva su moneda; los pesos chilenos se pasan a dólares con el dólar de referencia de la pestaña. */
 const COSTOS_INI=[
-  {id:'certificado',nombre:'Certificado de uso',lineas:[{c:'Registro consular y aranceles consulares',m:150,mon:'USD'},{c:'Habilitación',m:200,mon:'USD'},{c:'Envío Chile → Brasilia',m:50,mon:'USD'},{c:'Envío Brasilia → Pacaraima',m:30,mon:'USD'}],precio:null,orden:1},
+  {id:'certificado',nombre:'Certificado de uso',lineas:[{c:'Registro consular y aranceles consulares',m:150,mon:'USD'},{c:'Habilitación',m:200,mon:'USD'},{c:'Envío Chile → Brasilia',m:50,mon:'USD'},{c:'Envío Brasilia → Pacaraima',m:30,mon:'USD'}],precio:500,orden:1},
   {id:'exportacion',nombre:'Exportación y baja en el Registro Civil (Chile)',lineas:[{c:'Agente de aduanas en Chile',m:250,mon:'USD'},{c:'Envío de documentos a la aduana',m:20000,mon:'CLP'},{c:'Envío de la frontera a Santiago',m:90,mon:'USD'},{c:'Gestión de la baja en el Registro Civil',m:90,mon:'USD'}],precio:null,orden:2}];
 let tasaClp=+(pref.get('clp')||950);
 const enUsd=l=>(+l.m||0)/(l.mon==='CLP'?tasaClp:1);
