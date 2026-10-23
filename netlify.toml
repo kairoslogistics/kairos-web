@@ -1,0 +1,7 @@
+# Kairos Logistics en Netlify. La web está en sitio/ (la arma web/netlify/preparar.py) y los pagos en netlify/functions.
+[build]
+  publish = "sitio"
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"

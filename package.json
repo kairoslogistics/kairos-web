@@ -1,0 +1,9 @@
+{
+  "name": "kairos-web",
+  "private": true,
+  "type": "module",
+  "description": "Kairos Logistics: web, panel y pagos con NOWPayments",
+  "dependencies": {
+    "nodemailer": "^6.9.16"
+  }
+}
