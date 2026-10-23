@@ -1575,9 +1575,26 @@ footer a{color:var(--hero-muted)}
       const r=await fetch('/api/crear-orden',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({producto:payProd,nombre:nom,correo:m1,correo2:m2,whatsapp:wa,pais:$('pay-pais').value,acepto:true,sim:datosSim()})});
       const j=await r.json().catch(()=>({}));
       if(!r.ok||!j.url) throw new Error(j.error||'');
-      guardarSim(); ss.set('kairos-orden',j.orden); location.href=j.url;
+      guardarSim(); ss.set('kairos-orden',JSON.stringify({orden:j.orden,correo:m1})); location.href=j.url;
     }catch(x){ falla(x.message||'No pudimos abrir el pago. Inténtalo de nuevo o escríbenos por WhatsApp.'); btn.disabled=false; btn.textContent='Pagar '+PAGO[payProd].p+' USD'; }
   });
+  // Después de pagar se pregunta cada 10 segundos por la orden (hasta 30 minutos). Cuando el pago se confirma,
+  // el código aparece en pantalla y se abre solo; también le llega por correo.
+  async function esperarCodigo(){
+    let o=null; try{o=JSON.parse(ss.get('kairos-orden')||'null')}catch(e){} if(!o||!o.orden) return;
+    const msg=$('v-pago-msg'), fin=Date.now()+30*60e3;
+    while(Date.now()<fin){
+      try{
+        const r=await fetch('/api/orden?orden='+encodeURIComponent(o.orden)+'&correo='+encodeURIComponent(o.correo)); const j=await r.json().catch(()=>({}));
+        if(j.estado==='pagada'&&j.codigo){
+          msg.className='pago-msg ok'; msg.textContent='¡Pago confirmado! Tu código es '+j.codigo+'. Ya abrimos tu detalle; también te lo enviamos por correo. Guárdalo: queda ligado a este vehículo.';
+          ss.set('kairos-orden',''); $('v-code').value=j.codigo; $('v-calc').click(); return;
+        }
+        if(j.estado==='incompleto'){ msg.className='pago-msg err'; msg.textContent='Tu pago llegó incompleto. Escríbenos por WhatsApp y lo resolvemos.'; return; }
+      }catch(e){}
+      await new Promise(res=>setTimeout(res,10e3));
+    }
+  }
   // Al volver de NOWPayments (?pago=ok o ?pago=cancelado) o desde el enlace del correo (?codigo=XXXXXXXX).
   function alVolver(){
     let q; try{q=new URLSearchParams(location.search)}catch(e){return}
@@ -1589,6 +1606,7 @@ footer a{color:var(--hero-muted)}
     if(pago==='cancelado'){msg.hidden=false;msg.className='pago-msg err';msg.textContent='El pago no se completó y no se te cobró nada. Puedes intentarlo otra vez cuando quieras.';}
     try{history.replaceState(null,'',location.pathname+'#vehiculo')}catch(e){}
     if(cod){ $('v-code').value=cod; $('v-calc').click(); }
+    if(pago==='ok') esperarCodigo();
     setTimeout(()=>$('v-slip').scrollIntoView({block:'start'}),50);
   }
   /* ---------- Resumen en una hoja ---------- */
