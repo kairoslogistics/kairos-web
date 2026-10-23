@@ -104,6 +104,22 @@ main .wrap{padding-block:18px 60px;display:grid;gap:16px}
 .cod-new input,.cod-new select{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:8px;width:100%;min-width:0;font:inherit}
 @media (max-width:640px){.cod-new{grid-template-columns:1fr 1fr}.cod-new label:first-child,.cod-new label:nth-child(3){grid-column:1/-1}}
 .code{font-family:var(--mono);letter-spacing:.06em}
+.costo{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;display:grid;gap:10px;margin-bottom:14px}
+.costo h3{font-size:17px;margin:0}
+.c-row{display:grid;grid-template-columns:minmax(0,1fr) 120px 84px 32px;gap:6px;align-items:center}
+.c-row input,.c-row select,.c-fin input{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:7px 8px;width:100%;min-width:0;font:inherit}
+.c-row input[type=number],.c-fin input{text-align:right;font-variant-numeric:tabular-nums}
+.c-row .x{background:none;border:0;color:var(--muted);font-size:20px;cursor:pointer}
+.c-fin{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;align-items:end;border-top:1px solid var(--line);padding-top:10px}
+.c-fin small{display:block;color:var(--muted);font-size:13px;margin-bottom:4px}
+.c-fin b{font-family:var(--mono);font-size:17px}
+.c-fin .neg{color:var(--warn)}
+.c-desc{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:7px 8px;width:100%;font:inherit;min-height:44px;resize:vertical}
+.c-modal{position:fixed;inset:0;z-index:50;background:rgba(10,20,22,.6);overflow:auto;padding:16px}
+.c-modal form{max-width:560px;margin:24px auto;background:var(--surface);border-radius:12px;padding:18px;display:grid;gap:10px}
+.c-modal label{display:grid;gap:4px;font-size:14px;color:var(--muted)}
+.c-modal input,.c-modal textarea{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:8px;width:100%;font:inherit}
+@media (max-width:640px){.c-row{grid-template-columns:minmax(0,1fr) 84px 28px;border-bottom:1px dashed var(--line);padding-bottom:8px}.c-row>input:first-child{grid-column:1/-1}.c-fin{grid-template-columns:1fr 1fr}}
 .empty{color:var(--muted);background:var(--surface);border:1px dashed var(--line);border-radius:12px;padding:18px;text-align:center}
 .back{background:none;border:0;color:var(--brand);font-weight:700;cursor:pointer;padding:0}
 .ally-head{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;display:grid;gap:10px}
@@ -316,9 +332,9 @@ const SEED=()=>{
 
 /* ===== Datos: este navegador o Supabase ===== */
 function uid(){try{return crypto.randomUUID()}catch(e){return 'id'+Date.now().toString(36)+Math.random().toString(36).slice(2)}}
-const TABLAS=['aliados','casos','contactos','cargas','referidos','descartados','codigos'];
+const TABLAS=['aliados','casos','contactos','cargas','referidos','descartados','codigos','costos'];
 const LS='kairos-admin-demo-2';
-const S={aliados:[],casos:[],contactos:[],cargas:[],referidos:[],descartados:[],codigos:[]};
+const S={aliados:[],casos:[],contactos:[],cargas:[],referidos:[],descartados:[],codigos:[],costos:[]};
 let db=null, auth=null, MODO=FB.apiKey&&FB.projectId?'real':'demo';
 const limpio=o=>JSON.parse(JSON.stringify(o));
 const DB={
@@ -361,7 +377,7 @@ const pref={get(k){try{return localStorage.getItem('kairos-admin-'+k)}catch(e){r
 
 /* ===== Pantallas ===== */
 function shell(){
-  const T=[['aliados','Aliados por país'],['alianzas','Posibles alianzas'],['contactos','Contactos y negociación'],['cargas','Cargas'],['referidos','Referidos'],['codigos','Códigos']];
+  const T=[['aliados','Aliados por país'],['alianzas','Posibles alianzas'],['contactos','Contactos y negociación'],['cargas','Cargas'],['referidos','Referidos'],['costos','Costos y precios'],['codigos','Códigos']];
   $('#app').innerHTML='<header class="top"><div class="wrap"><div class="brand"><b>KAIROS LOGISTICS</b><small>Administración</small></div><span class="mode">'+(MODO==='demo'?'Demostración':'Conectado')+'</span>'+(MODO==='real'?'<button class="btn ghost sm" id="salir" style="color:var(--brand-ink);border-color:var(--brand-ink)">Salir</button>':'')+
     '<nav class="tabs" role="tablist">'+T.map(([k,l])=>'<button role="tab" data-tab="'+k+'" aria-selected="'+(tab===k)+'">'+l+'</button>').join('')+'</nav></div></header><main><div class="wrap" id="view"></div></main>';
   document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;allyOpen=null;pref.set('tab',tab);try{history.replaceState(null,'','#'+tab)}catch(e){};shell();});
@@ -371,7 +387,7 @@ function shell(){
 function render(){
   const v=$('#view');
   const demo=MODO==='demo'?'<div class="demo-note">Modo demostración: los datos son de ejemplo y se guardan solo en este navegador. Cuando conectemos la base de datos, entrarás con tu correo y clave y todo quedará guardado en línea.</div>':'';
-  v.innerHTML=demo+({aliados:vAliados,alianzas:vAlianzas,contactos:vContactos,cargas:vCargas,referidos:vReferidos,codigos:vCodigos}[tab])();
+  v.innerHTML=demo+({aliados:vAliados,alianzas:vAlianzas,contactos:vContactos,cargas:vCargas,referidos:vReferidos,costos:vCostos,codigos:vCodigos}[tab])();
   bind();
 }
 function paisChips(lista){
@@ -525,8 +541,65 @@ function vCodigos(){
     :'<p class="empty">Todavía no hay códigos. Crea el primero arriba.</p>');
 }
 
+/* Costos por servicio (Elise, 23 oct. 2026): lo que nos cobran, el total de gasto en USD y al lado lo que cobramos.
+   Cada gasto lleva su moneda; los pesos chilenos se pasan a dólares con el dólar de referencia de la pestaña. */
+const COSTOS_INI=[
+  {id:'certificado',nombre:'Certificado de uso',lineas:[{c:'Registro consular y aranceles consulares',m:150,mon:'USD'},{c:'Habilitación',m:200,mon:'USD'},{c:'Envío Chile → Brasilia',m:50,mon:'USD'},{c:'Envío Brasilia → Pacaraima',m:30,mon:'USD'}],precio:null,orden:1},
+  {id:'exportacion',nombre:'Exportación y baja en el Registro Civil (Chile)',lineas:[{c:'Agente de aduanas en Chile',m:250,mon:'USD'},{c:'Envío de documentos a la aduana',m:20000,mon:'CLP'},{c:'Envío de la frontera a Santiago',m:90,mon:'USD'},{c:'Gestión de la baja en el Registro Civil',m:90,mon:'USD'}],precio:null,orden:2}];
+let tasaClp=+(pref.get('clp')||950);
+const enUsd=l=>(+l.m||0)/(l.mon==='CLP'?tasaClp:1);
+const costoDe=id=>S.costos.find(x=>x.id===id)||COSTOS_INI.find(x=>x.id===id);
+function listaCostos(){const ids=[...new Set([...COSTOS_INI.map(x=>x.id),...S.costos.map(x=>x.id)])];return ids.map(costoDe).filter(Boolean).sort((a,b)=>(a.orden||99)-(b.orden||99));}
+function vCostos(){
+  const fmt=v=>usd(Math.round(v*100)/100);
+  return '<div class="head"><div><h2>Costos y precios</h2><p>Lo que nos cobran por cada servicio y lo que cobramos nosotros. Escribe en cualquier casilla y se guarda solo.</p></div><button class="btn" data-cnuevo>Nuevo servicio</button></div>'+
+    '<div class="cod-new" style="grid-template-columns:minmax(0,260px)"><label>Dólar de referencia (pesos chilenos por 1 USD)<input type="number" min="1" step="1" id="c-tasa" value="'+tasaClp+'"></label></div>'+
+    (cNuevo?modalServicio():'')+
+    listaCostos().map(sv=>{const tot=sv.lineas.reduce((a,l)=>a+enUsd(l),0), pr=sv.precio==null||sv.precio===''?null:+sv.precio, g=pr==null?null:pr-tot;
+      return '<section class="costo" data-csv="'+esc(sv.id)+'"><input aria-label="Nombre del servicio" data-cf="nombre" value="'+esc(sv.nombre)+'" style="font-weight:700;font-size:17px;border:0;padding:0;background:none;color:var(--ink)">'+
+        '<textarea class="c-desc" data-cf="desc" aria-label="Características" placeholder="Características: qué incluye, plazos, requisitos">'+esc(sv.desc||'')+'</textarea>'+
+        sv.lineas.map((l,i)=>'<div class="c-row"><input aria-label="Gasto" data-cl="'+i+'" data-ck="c" value="'+esc(l.c)+'"><input type="number" step="any" min="0" aria-label="Monto" data-cl="'+i+'" data-ck="m" value="'+esc(l.m)+'"><select aria-label="Moneda" data-cl="'+i+'" data-ck="mon"><option'+(l.mon==='USD'?' selected':'')+'>USD</option><option'+(l.mon==='CLP'?' selected':'')+'>CLP</option></select><button class="x" type="button" data-cdel="'+i+'" aria-label="Quitar gasto">×</button></div>').join('')+
+        '<div><button class="btn sm ghost" type="button" data-cadd>Agregar gasto</button></div>'+
+        '<div class="c-fin"><div><small>Total de gasto</small><b>'+fmt(tot)+'</b></div><label><small>Cobramos (USD)</small><input type="number" step="any" min="0" data-cf="precio" value="'+(pr==null?'':pr)+'" placeholder="Precio"></label>'+
+        '<div><small>Ganancia</small><b class="'+(g<0?'neg':'')+'">'+(g==null?'—':fmt(g))+'</b></div><div><small>% de ganancia</small><b class="'+(g<0?'neg':'')+'">'+(g==null||!pr?'—':Math.round(g/pr*100)+' %')+'</b></div></div></section>';}).join('');
+}
+let cNuevo=null;
+function modalServicio(){
+  const n=cNuevo;
+  return '<div class="c-modal" id="c-modal" role="dialog" aria-modal="true" aria-labelledby="cm-t"><form id="cm-form" novalidate><h3 id="cm-t" style="margin:0">Nuevo servicio</h3>'+
+    '<label>Nombre del servicio<input id="cm-nom" value="'+esc(n.nombre)+'" placeholder="Ej.: Envío de vehículo por tierra"></label>'+
+    '<label>Características<textarea id="cm-desc" rows="3" placeholder="Qué incluye, plazos, requisitos">'+esc(n.desc)+'</textarea></label>'+
+    '<div style="font-size:14px;color:var(--muted)">Lo que pagaremos</div>'+
+    n.lineas.map((l,i)=>'<div class="c-row"><input aria-label="Gasto" data-ml="'+i+'" data-mk="c" value="'+esc(l.c)+'" placeholder="Gasto"><input type="number" step="any" min="0" aria-label="Monto" data-ml="'+i+'" data-mk="m" value="'+esc(l.m)+'" placeholder="Monto"><select aria-label="Moneda" data-ml="'+i+'" data-mk="mon"><option'+(l.mon==='USD'?' selected':'')+'>USD</option><option'+(l.mon==='CLP'?' selected':'')+'>CLP</option></select><button class="x" type="button" data-mdel="'+i+'" aria-label="Quitar gasto">×</button></div>').join('')+
+    '<div><button class="btn sm ghost" type="button" id="cm-add">Agregar gasto</button></div>'+
+    '<label>Lo que cobraremos (USD)<input id="cm-precio" type="number" step="any" min="0" value="'+esc(n.precio??'')+'"></label>'+
+    '<div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn ghost" type="button" id="cm-x">Cancelar</button><button class="btn" type="submit">Crear servicio</button></div></form></div>';
+}
+function leerModal(){cNuevo.nombre=$('#cm-nom').value;cNuevo.desc=$('#cm-desc').value;cNuevo.precio=$('#cm-precio').value;
+  document.querySelectorAll('[data-ml]').forEach(i=>{const l=cNuevo.lineas[+i.dataset.ml];l[i.dataset.mk]=i.dataset.mk==='m'?i.value:i.value;});}
+async function guardarCosto(sv){await guardar('costos',{...sv,lineas:sv.lineas.map(l=>({...l}))},'Guardado');}
+
 /* ===== Acciones ===== */
 function bind(){
+  const ct=$('#c-tasa'); if(ct) ct.onchange=()=>{const v=+ct.value; if(v>0){tasaClp=v;pref.set('clp',String(v));} render();};
+  document.querySelectorAll('[data-csv]').forEach(sec=>{
+    const sv=()=>{const o=costoDe(sec.dataset.csv);return {...o,lineas:o.lineas.map(l=>({...l}))};};
+    sec.querySelectorAll('[data-cl]').forEach(inp=>inp.onchange=()=>{const o=sv(),l=o.lineas[+inp.dataset.cl];l[inp.dataset.ck]=inp.dataset.ck==='m'?(+inp.value||0):inp.value;guardarCosto(o);});
+    sec.querySelectorAll('[data-cf]').forEach(inp=>inp.onchange=()=>{const o=sv();o[inp.dataset.cf]=inp.dataset.cf==='precio'?(inp.value===''?null:+inp.value):inp.value.trim()||o.nombre;guardarCosto(o);});
+    sec.querySelectorAll('[data-cdel]').forEach(b=>b.onclick=()=>{const o=sv();o.lineas.splice(+b.dataset.cdel,1);guardarCosto(o);});
+    const add=sec.querySelector('[data-cadd]'); if(add) add.onclick=()=>{const o=sv();o.lineas.push({c:'Nuevo gasto',m:0,mon:'USD'});guardarCosto(o);};
+  });
+  const cn=document.querySelector('[data-cnuevo]'); if(cn) cn.onclick=()=>{cNuevo={nombre:'',desc:'',lineas:[{c:'',m:'',mon:'USD'}],precio:''};render();$('#cm-nom').focus();};
+  const cm=$('#cm-form'); if(cm){
+    $('#cm-x').onclick=()=>{cNuevo=null;render();};
+    $('#cm-add').onclick=()=>{leerModal();cNuevo.lineas.push({c:'',m:'',mon:'USD'});render();};
+    document.querySelectorAll('[data-mdel]').forEach(b=>b.onclick=()=>{leerModal();cNuevo.lineas.splice(+b.dataset.mdel,1);render();});
+    cm.onsubmit=async e=>{e.preventDefault();leerModal();const n=cNuevo;
+      if(!n.nombre.trim()){toast('Ponle un nombre al servicio');$('#cm-nom').focus();return;}
+      const lineas=n.lineas.filter(l=>l.c.trim()||+l.m).map(l=>({c:l.c.trim()||'Gasto',m:+l.m||0,mon:l.mon}));
+      cNuevo=null;
+      await guardar('costos',{id:'s'+Date.now().toString(36),nombre:n.nombre.trim(),desc:n.desc.trim(),lineas,precio:n.precio===''?null:+n.precio,orden:50+S.costos.length},'Servicio creado');};
+  }
   const cf=$('#cod-new'); if(cf) cf.onsubmit=async e=>{e.preventDefault();const id=nuevoCodigo();
     if(await guardar('codigos',{id,tipo:$('#cod-tipo').value,max:Math.max(1,Math.round(+$('#cod-max').value||1)),usos:0,cliente:$('#cod-cli').value.trim()},'Código '+id+' creado')){const ok=await copiar(id); if(ok) toast('Código '+id+' copiado');}};
   document.querySelectorAll('[data-codcopy]').forEach(b=>b.onclick=async()=>toast((await copiar(b.dataset.codcopy))?'Código copiado':'No se pudo copiar'));
@@ -668,7 +741,7 @@ async function start(){
   shell();
 }
 (function boot(){
-  const h=(location.hash||'').slice(1); tab=['aliados','alianzas','contactos','cargas','referidos','codigos'].includes(h)?h:(pref.get('tab')||'aliados');
+  const h=(location.hash||'').slice(1); tab=['aliados','alianzas','contactos','cargas','referidos','costos','codigos'].includes(h)?h:(pref.get('tab')||'aliados');
   if(MODO==='demo'){start();return;}
   const base='https://cdn.jsdelivr.net/npm/firebase@10.12.2/';
   const cargar=f=>new Promise((ok,mal)=>{const s=document.createElement('script');s.src=base+f;s.onload=ok;s.onerror=mal;document.head.appendChild(s);});
