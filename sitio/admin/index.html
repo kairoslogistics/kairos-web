@@ -580,10 +580,11 @@ function vCodigos(){
 const COSTOS_INI=[
   {id:'certificado',cuando:{via:'terr',reg:'equi'},nombre:'Certificado de uso, vía terrestre',lineas:[{c:'Registro consular y aranceles consulares',m:150,mon:'USD'},{c:'Habilitación',m:200,mon:'USD'},{c:'Envío Chile → Brasilia',m:50,mon:'USD'},{c:'Envío Brasilia → Pacaraima',m:30,mon:'USD'}],precio:500,orden:1},
   {id:'certificado-mar',cuando:{via:'mar',reg:'equi',pais:['cl']},nombre:'Certificado de uso, vía marítima desde Chile',desc:'Los documentos van del consulado a Pacaraima y de ahí por MRW a Caracas. Plazo: unos 15 días hábiles desde el pago (5 de trámite, 5 de envío a Pacaraima y 5 hasta Caracas).',lineas:[{c:'Registro consular y aranceles consulares',m:150,mon:'USD'},{c:'Habilitación',m:200,mon:'USD'},{c:'Envío Chile → Brasilia',m:50,mon:'USD'},{c:'Envío Brasilia → Pacaraima',m:30,mon:'USD'},{c:'Envío Pacaraima → Caracas por MRW',m:30,mon:'USD'},{c:'Envío adicional hasta Caracas',m:30,mon:'USD'}],precio:500,orden:1.5},
-  {id:'exportacion',cuando:{pais:['cl']},nombre:'Exportación y baja en el Registro Civil (Chile)',lineas:[{c:'Agente de aduanas en Chile',m:250,mon:'USD'},{c:'Envío de documentos a la aduana',m:20000,mon:'CLP'},{c:'Envío de la frontera a Santiago',m:90,mon:'USD'},{c:'Gestión de la baja en el Registro Civil',m:90,mon:'USD'}],precio:null,orden:2},
+  {id:'exportacion',cuando:{pais:['cl'],via:'terr'},nombre:'Exportación y baja en el Registro Civil (Chile)',lineas:[{c:'Agente de aduanas en Chile',m:250,mon:'USD'},{c:'Envío de documentos a la aduana',m:20000,mon:'CLP'},{c:'Envío de la frontera a Santiago',m:90,mon:'USD'},{c:'Gestión de la baja en el Registro Civil',m:90,mon:'USD'}],precio:null,orden:2},
   /* Elise (24 oct. 2026). Sin gastos cargados todavía: el panel muestra el gasto como «—». */
   {id:'caravana',cuando:{via:'terr',pais:['cl']},nombre:'Viaje en caravana con Kairos (vía terrestre desde Chile)',lineas:[],precio:300,orden:3},
   {id:'agencia-se',cuando:{via:'terr'},nombre:'Agenciamiento aduanal en Santa Elena de Uairén',lineas:[],precio:1650,orden:4},
+  {id:'gnb',cuando:{via:'terr'},nombre:'Revisión de la Guardia Nacional en Santa Elena de Uairén',lineas:[{c:'Revisión de la Guardia Nacional',m:500,mon:'USD'}],precio:500,orden:4.5},
   {id:'homologacion',nombre:'Homologación',lineas:[],precio:700,orden:5},
   {id:'titulo',nombre:'Título y placas',lineas:[],precio:800,orden:6},
   {id:'sencamer',cuando:{reg:'ord'},nombre:'SENCAMER (solo importación ordinaria)',lineas:[],precio:450,orden:7}];
