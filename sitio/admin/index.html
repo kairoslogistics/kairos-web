@@ -119,6 +119,15 @@ main .wrap{padding-block:18px 60px;display:grid;gap:16px}
 .c-body>input{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:7px 8px;font:inherit}
 .cotiza{background:var(--surface);border:2px solid var(--line);border-radius:12px;padding:14px;display:grid;gap:8px;margin-top:16px}
 .cotiza h3{margin:0;font-size:17px}
+.cz-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.cz-form label{display:grid;gap:4px;font-size:14px;color:var(--muted)}
+.cz-form input:not([type=checkbox]),.cz-form select{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:8px;width:100%;min-width:0;font:inherit}
+.cz-form label.cz-sv{display:grid;grid-template-columns:22px minmax(0,1fr) auto;align-items:center;gap:8px;color:var(--ink);padding:8px 0;border-bottom:1px dashed var(--line);font-size:15px}
+.cz-sv input{width:18px;height:18px}
+.cz-sv b{font-family:var(--mono)}
+.cz-item .c-nom::before{content:none}
+.cz-item .c-sum{grid-template-columns:minmax(0,1fr) auto auto auto}
+@media (max-width:640px){.cz-item .c-sum{grid-template-columns:1fr 1fr auto}}
 .cz-row{display:grid;grid-template-columns:minmax(0,1fr) auto 32px;gap:8px;align-items:center;border-bottom:1px dashed var(--line);padding-bottom:6px}
 .cz-row b{font-family:var(--mono)}
 .cz-row .x{background:none;border:0;color:var(--muted);font-size:20px;cursor:pointer}
@@ -349,7 +358,7 @@ const SEED=()=>{
 
 /* ===== Datos: este navegador o Supabase ===== */
 function uid(){try{return crypto.randomUUID()}catch(e){return 'id'+Date.now().toString(36)+Math.random().toString(36).slice(2)}}
-const TABLAS=['aliados','casos','contactos','cargas','referidos','descartados','codigos','costos'];
+const TABLAS=['aliados','casos','contactos','cargas','referidos','descartados','codigos','costos','cotizaciones'];
 const LS='kairos-admin-demo-2';
 const S={aliados:[],casos:[],contactos:[],cargas:[],referidos:[],descartados:[],codigos:[],costos:[]};
 let db=null, auth=null, MODO=FB.apiKey&&FB.projectId?'real':'demo';
@@ -394,7 +403,7 @@ const pref={get(k){try{return localStorage.getItem('kairos-admin-'+k)}catch(e){r
 
 /* ===== Pantallas ===== */
 function shell(){
-  const T=[['aliados','Aliados por país'],['alianzas','Posibles alianzas'],['contactos','Contactos y negociación'],['cargas','Cargas'],['referidos','Referidos'],['costos','Costos y precios'],['codigos','Códigos']];
+  const T=[['aliados','Aliados por país'],['alianzas','Posibles alianzas'],['contactos','Contactos y negociación'],['cargas','Cargas'],['referidos','Referidos'],['costos','Costos y precios'],['cotizacion','Cotización'],['codigos','Códigos']];
   $('#app').innerHTML='<header class="top"><div class="wrap"><div class="brand"><b>KAIROS LOGISTICS</b><small>Administración</small></div><span class="mode">'+(MODO==='demo'?'Demostración':'Conectado')+'</span>'+(MODO==='real'?'<button class="btn ghost sm" id="salir" style="color:var(--brand-ink);border-color:var(--brand-ink)">Salir</button>':'')+
     '<nav class="tabs" role="tablist">'+T.map(([k,l])=>'<button role="tab" data-tab="'+k+'" aria-selected="'+(tab===k)+'">'+l+'</button>').join('')+'</nav></div></header><main><div class="wrap" id="view"></div></main>';
   document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;allyOpen=null;pref.set('tab',tab);try{history.replaceState(null,'','#'+tab)}catch(e){};shell();});
@@ -404,7 +413,7 @@ function shell(){
 function render(){
   const v=$('#view');
   const demo=MODO==='demo'?'<div class="demo-note">Modo demostración: los datos son de ejemplo y se guardan solo en este navegador. Cuando conectemos la base de datos, entrarás con tu correo y clave y todo quedará guardado en línea.</div>':'';
-  v.innerHTML=demo+({aliados:vAliados,alianzas:vAlianzas,contactos:vContactos,cargas:vCargas,referidos:vReferidos,costos:vCostos,codigos:vCodigos}[tab])();
+  v.innerHTML=demo+({aliados:vAliados,alianzas:vAlianzas,contactos:vContactos,cargas:vCargas,referidos:vReferidos,costos:vCostos,cotizacion:vCotizacion,codigos:vCodigos}[tab])();
   bind();
 }
 function paisChips(lista){
@@ -569,12 +578,18 @@ function vCodigos(){
 /* Costos por servicio (Elise, 23 oct. 2026): lo que nos cobran, el total de gasto en USD y al lado lo que cobramos.
    Cada gasto lleva su moneda; los pesos chilenos se pasan a dólares con el dólar de referencia de la pestaña. */
 const COSTOS_INI=[
-  {id:'certificado',nombre:'Certificado de uso, vía terrestre',lineas:[{c:'Registro consular y aranceles consulares',m:150,mon:'USD'},{c:'Habilitación',m:200,mon:'USD'},{c:'Envío Chile → Brasilia',m:50,mon:'USD'},{c:'Envío Brasilia → Pacaraima',m:30,mon:'USD'}],precio:500,orden:1},
-  {id:'certificado-mar',nombre:'Certificado de uso, vía marítima desde Chile',desc:'Los documentos van del consulado a Pacaraima y de ahí por MRW a Caracas. Plazo: unos 15 días hábiles desde el pago (5 de trámite, 5 de envío a Pacaraima y 5 hasta Caracas).',lineas:[{c:'Registro consular y aranceles consulares',m:150,mon:'USD'},{c:'Habilitación',m:200,mon:'USD'},{c:'Envío Chile → Brasilia',m:50,mon:'USD'},{c:'Envío Brasilia → Pacaraima',m:30,mon:'USD'},{c:'Envío Pacaraima → Caracas por MRW',m:30,mon:'USD'},{c:'Envío adicional hasta Caracas',m:30,mon:'USD'}],precio:500,orden:1.5},
-  {id:'exportacion',nombre:'Exportación y baja en el Registro Civil (Chile)',lineas:[{c:'Agente de aduanas en Chile',m:250,mon:'USD'},{c:'Envío de documentos a la aduana',m:20000,mon:'CLP'},{c:'Envío de la frontera a Santiago',m:90,mon:'USD'},{c:'Gestión de la baja en el Registro Civil',m:90,mon:'USD'}],precio:null,orden:2}];
+  {id:'certificado',cuando:{via:'terr',reg:'equi'},nombre:'Certificado de uso, vía terrestre',lineas:[{c:'Registro consular y aranceles consulares',m:150,mon:'USD'},{c:'Habilitación',m:200,mon:'USD'},{c:'Envío Chile → Brasilia',m:50,mon:'USD'},{c:'Envío Brasilia → Pacaraima',m:30,mon:'USD'}],precio:500,orden:1},
+  {id:'certificado-mar',cuando:{via:'mar',reg:'equi',pais:['cl']},nombre:'Certificado de uso, vía marítima desde Chile',desc:'Los documentos van del consulado a Pacaraima y de ahí por MRW a Caracas. Plazo: unos 15 días hábiles desde el pago (5 de trámite, 5 de envío a Pacaraima y 5 hasta Caracas).',lineas:[{c:'Registro consular y aranceles consulares',m:150,mon:'USD'},{c:'Habilitación',m:200,mon:'USD'},{c:'Envío Chile → Brasilia',m:50,mon:'USD'},{c:'Envío Brasilia → Pacaraima',m:30,mon:'USD'},{c:'Envío Pacaraima → Caracas por MRW',m:30,mon:'USD'},{c:'Envío adicional hasta Caracas',m:30,mon:'USD'}],precio:500,orden:1.5},
+  {id:'exportacion',cuando:{pais:['cl']},nombre:'Exportación y baja en el Registro Civil (Chile)',lineas:[{c:'Agente de aduanas en Chile',m:250,mon:'USD'},{c:'Envío de documentos a la aduana',m:20000,mon:'CLP'},{c:'Envío de la frontera a Santiago',m:90,mon:'USD'},{c:'Gestión de la baja en el Registro Civil',m:90,mon:'USD'}],precio:null,orden:2},
+  /* Elise (24 oct. 2026). Sin gastos cargados todavía: el panel muestra el gasto como «—». */
+  {id:'caravana',cuando:{via:'terr',pais:['cl']},nombre:'Viaje en caravana con Kairos (vía terrestre desde Chile)',lineas:[],precio:300,orden:3},
+  {id:'agencia-se',cuando:{via:'terr'},nombre:'Agenciamiento aduanal en Santa Elena de Uairén',lineas:[],precio:1650,orden:4},
+  {id:'homologacion',nombre:'Homologación',lineas:[],precio:700,orden:5},
+  {id:'titulo',nombre:'Título y placas',lineas:[],precio:800,orden:6},
+  {id:'sencamer',cuando:{reg:'ord'},nombre:'SENCAMER (solo importación ordinaria)',lineas:[],precio:450,orden:7}];
 let tasaClp=+(pref.get('clp')||950);
 const enUsd=l=>(+l.m||0)/(l.mon==='CLP'?tasaClp:1);
-const costoDe=id=>S.costos.find(x=>x.id===id)||COSTOS_INI.find(x=>x.id===id);
+const costoDe=id=>{const a=COSTOS_INI.find(x=>x.id===id),b=S.costos.find(x=>x.id===id);return a||b?{...(a||{}),...(b||{})}:null;};
 function listaCostos(){const ids=[...new Set([...COSTOS_INI.map(x=>x.id),...S.costos.map(x=>x.id)])];return ids.map(costoDe).filter(Boolean).sort((a,b)=>(a.orden||99)-(b.orden||99));}
 /* Elise (24 oct. 2026): cada servicio es una fila compacta y desplegable (cerrada: gasto, cobro y % de ganancia).
    El botón de la derecha lo suma a la cotización de abajo. */
@@ -588,9 +603,9 @@ function vCostos(){
   return '<div class="head"><div><h2>Costos y precios</h2><p>Toca un servicio para ver y editar sus gastos. Con el botón de la derecha lo sumas a la cotización de abajo.</p></div><button class="btn" data-cnuevo>Nuevo servicio</button></div>'+
     '<div class="cod-new" style="grid-template-columns:minmax(0,260px)"><label>Dólar de referencia (pesos chilenos por 1 USD)<input type="number" min="1" step="1" id="c-tasa" value="'+tasaClp+'"></label></div>'+
     (cNuevo?modalServicio():'')+
-    lista.map(sv=>{const tot=cTot(sv), pr=cPrecio(sv), g=pr==null?null:pr-tot, on=cSel.includes(sv.id);
+    lista.map(sv=>{const tot=cTot(sv), pr=cPrecio(sv), sin=!sv.lineas.length, g=pr==null||sin?null:pr-tot, on=cSel.includes(sv.id);
       return '<details class="costo" data-csv="'+esc(sv.id)+'"'+(cAbiertos.has(sv.id)?' open':'')+'><summary class="c-sum"><span class="c-nom">'+esc(sv.nombre)+'</span>'+
-        '<span class="c-k"><small>Gasto</small><b>'+fmt(tot)+'</b></span><span class="c-k"><small>Cobramos</small><b>'+(pr==null?'—':fmt(pr))+'</b></span><span class="c-k"><small>Ganancia</small><b class="'+(g<0?'neg':'')+'">'+pct(g,pr)+'</b></span>'+
+        '<span class="c-k"><small>Gasto</small><b>'+(sin?'—':fmt(tot))+'</b></span><span class="c-k"><small>Cobramos</small><b>'+(pr==null?'—':fmt(pr))+'</b></span><span class="c-k"><small>Ganancia</small><b class="'+(g<0?'neg':'')+'">'+pct(g,pr)+'</b></span>'+
         '<button type="button" class="c-pick'+(on?' on':'')+'" data-cpick="'+esc(sv.id)+'" aria-pressed="'+on+'" aria-label="'+(on?'Quitar de':'Agregar a')+' la cotización">'+(on?'✓':'+')+'</button></summary>'+
         '<div class="c-body"><input aria-label="Nombre del servicio" data-cf="nombre" value="'+esc(sv.nombre)+'" style="font-weight:700;font-size:16px">'+
         '<textarea class="c-desc" data-cf="desc" aria-label="Características" placeholder="Características: qué incluye, plazos, requisitos">'+esc(sv.desc||'')+'</textarea>'+
@@ -611,6 +626,54 @@ function vCotiza(sel,fmt,pct){
 }
 function textoCotiza(){const sel=listaCostos().filter(sv=>cSel.includes(sv.id));
   return 'Cotización Kairos Logistics\n'+sel.map(sv=>'• '+sv.nombre+': '+(cPrecio(sv)==null?'a consultar':usd(cPrecio(sv)))).join('\n')+'\nTotal: '+usd(sel.reduce((a,sv)=>a+(cPrecio(sv)||0),0));}
+/* Cotización (Elise, 24 oct. 2026): cliente, vehículo y origen con menús, y los servicios de Costos y precios que aplican. */
+const CZ_PAISES=[['cl','Chile'],['ar','Argentina'],['br','Brasil'],['us','Estados Unidos'],['pa','Panamá'],['cn','China'],['ae','Dubái']];
+const CZ_VIAS={cl:['terr','mar'],ar:['terr'],br:['terr'],us:['mar'],pa:['mar'],cn:['mar'],ae:['mar']};
+const CZ_VIA_TXT={terr:'Terrestre (Santa Elena de Uairén)',mar:'Marítima (La Guaira)'}, CZ_REG_TXT={ord:'Importación ordinaria',equi:'Régimen de equipaje'};
+const CZ_TIPOS=['Sedán','SUV','Pick-up','Camioneta','Moto','Otro'];
+const czNuevo=()=>({cliente:'',whatsapp:'',pais:'cl',via:'terr',reg:'ord',tipo:'Sedán',modelo:'',anio:String(new Date().getFullYear()-2),servicios:[],nota:''});
+let cz=czNuevo();
+const czAplica=(sv,q)=>{const w=sv.cuando||{};return (!w.via||w.via===q.via)&&(!w.reg||w.reg===q.reg)&&(!w.pais||w.pais.includes(q.pais));};
+const czServ=q=>listaCostos().filter(sv=>czAplica(sv,q));
+const czElegidos=q=>czServ(q).filter(sv=>q.servicios.includes(sv.id));
+const czSel=(id,label,ops,val)=>'<label>'+label+'<select id="'+id+'">'+ops.map(([v,t])=>'<option value="'+esc(v)+'"'+(String(v)===String(val)?' selected':'')+'>'+esc(t)+'</option>').join('')+'</select></label>';
+function vCotizacion(){
+  const fmt=v=>usd(Math.round(v*100)/100), q=cz, y=new Date().getFullYear();
+  if(!CZ_VIAS[q.pais].includes(q.via)) q.via=CZ_VIAS[q.pais][0];
+  const serv=czServ(q), el=czElegidos(q), pr=el.reduce((a,sv)=>a+(cPrecio(sv)||0),0), gas=el.reduce((a,sv)=>a+cTot(sv),0), sinG=el.some(sv=>!sv.lineas.length);
+  const guard=[...S.cotizaciones].sort((a,b)=>(b.created_at||0)-(a.created_at||0));
+  return '<div class="head"><div><h2>Cotización</h2><p>Elige el cliente, el vehículo y de dónde lo trae. Abajo aparecen solo los servicios que aplican a esa vía y régimen; márcalos y el total se arma solo.</p></div><button class="btn ghost" data-cznueva>Nueva cotización</button></div>'+
+    '<section class="cotiza cz-form">'+
+      '<div class="cz-g"><label>Cliente<input id="cz-cliente" value="'+esc(q.cliente)+'" placeholder="Nombre y apellido"></label><label>WhatsApp<input id="cz-whatsapp" value="'+esc(q.whatsapp)+'" inputmode="tel" placeholder="+56 9 …"></label></div>'+
+      '<div class="cz-g">'+czSel('cz-tipo','Tipo de vehículo',CZ_TIPOS.map(t=>[t,t]),q.tipo)+'<label>Marca y modelo<input id="cz-modelo" value="'+esc(q.modelo)+'" placeholder="Ej.: Toyota Corolla"></label>'+czSel('cz-anio','Año',Array.from({length:16},(_,i)=>[y-i,String(y-i)]),q.anio)+'</div>'+
+      '<div class="cz-g">'+czSel('cz-pais','País de donde lo importa',CZ_PAISES,q.pais)+czSel('cz-via','Vía',CZ_VIAS[q.pais].map(v=>[v,CZ_VIA_TXT[v]]),q.via)+czSel('cz-reg','Régimen',Object.entries(CZ_REG_TXT),q.reg)+'</div>'+
+      '<div><div class="sub" style="margin-bottom:6px">Servicios</div>'+(serv.length?serv.map(sv=>'<label class="cz-sv"><input type="checkbox" data-czsv="'+esc(sv.id)+'"'+(q.servicios.includes(sv.id)?' checked':'')+'><span>'+esc(sv.nombre)+'</span><b>'+(cPrecio(sv)==null?'Sin precio':fmt(cPrecio(sv)))+'</b></label>').join(''):'<p class="sub">No hay servicios para esta combinación.</p>')+'</div>'+
+      '<label>Notas<textarea class="c-desc" id="cz-nota" placeholder="Detalles para el cliente">'+esc(q.nota)+'</textarea></label>'+
+      '<div class="c-fin"><div><small>Total a cobrar</small><b>'+fmt(pr)+'</b></div><div><small>Total de gasto</small><b>'+(sinG&&!gas?'—':fmt(gas))+'</b></div><div><small>Ganancia</small><b>'+(sinG?'—':fmt(pr-gas))+'</b></div><div><small>Servicios</small><b>'+el.length+'</b></div></div>'+
+      (sinG&&el.length?'<p class="sub">Algunos servicios no tienen gastos cargados en Costos y precios, así que la ganancia no se calcula.</p>':'')+
+      '<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" type="button" data-czsave>Guardar cotización</button><button class="btn ghost" type="button" data-czwa>Copiar para WhatsApp</button></div>'+
+    '</section>'+
+    '<h3 style="margin:20px 0 8px">Cotizaciones guardadas</h3>'+
+    (guard.length?guard.map(c=>'<div class="costo cz-item"><div class="c-sum" style="cursor:default"><span class="c-nom" style="font-weight:700">'+esc(c.cliente||'Sin nombre')+'<br><span class="sub" style="font-weight:400">'+esc([c.tipo,c.modelo,c.anio].filter(Boolean).join(' · '))+' · '+esc((CZ_PAISES.find(p=>p[0]===c.pais)||['',''])[1])+' · '+esc(CZ_VIA_TXT[c.via]||'')+'</span></span><span class="c-k"><small>Total</small><b>'+fmt(+c.total||0)+'</b></span><span class="c-k"><small>Fecha</small><b>'+esc(c.fecha||'')+'</b></span><span style="display:flex;gap:6px"><button class="btn sm ghost" data-czopen="'+esc(c.id)+'">Abrir</button><button class="btn sm ghost" data-czdel="'+esc(c.id)+'" aria-label="Borrar cotización">×</button></span></div></div>').join(''):'<p class="sub">Todavía no hay cotizaciones guardadas.</p>');
+}
+function textoCz(){const q=cz, el=czElegidos(q);
+  return 'Cotización Kairos Logistics\nCliente: '+(q.cliente||'—')+'\nVehículo: '+[q.tipo,q.modelo,q.anio].filter(Boolean).join(' ')+'\nDesde: '+(CZ_PAISES.find(p=>p[0]===q.pais)||['',''])[1]+' · '+CZ_VIA_TXT[q.via]+' · '+CZ_REG_TXT[q.reg]+'\n\n'+
+    el.map(sv=>'• '+sv.nombre+': '+(cPrecio(sv)==null?'a consultar':usd(cPrecio(sv)))).join('\n')+'\n\nTotal: '+usd(el.reduce((a,sv)=>a+(cPrecio(sv)||0),0))+(q.nota?'\n\n'+q.nota:'');}
+function bindCz(){
+  const f=$('.cz-form'); if(!f) return;
+  const leer=()=>{cz.cliente=$('#cz-cliente').value;cz.whatsapp=$('#cz-whatsapp').value;cz.modelo=$('#cz-modelo').value;cz.nota=$('#cz-nota').value;};
+  ['cliente','whatsapp','modelo','nota'].forEach(k=>$('#cz-'+k).oninput=leer);
+  ['tipo','anio','pais','via','reg'].forEach(k=>$('#cz-'+k).onchange=e=>{leer();cz[k]=e.target.value;render();});
+  f.querySelectorAll('[data-czsv]').forEach(c=>c.onchange=()=>{leer();const id=c.dataset.czsv;cz.servicios=c.checked?[...cz.servicios,id]:cz.servicios.filter(x=>x!==id);render();});
+  $('[data-czwa]').onclick=async()=>{leer();try{await navigator.clipboard.writeText(textoCz());toast('Cotización copiada');}catch(e){toast('No se pudo copiar');}};
+  $('[data-czsave]').onclick=async()=>{leer();if(!cz.cliente.trim()){toast('Escribe el nombre del cliente');$('#cz-cliente').focus();return;}
+    const el=czElegidos(cz), row={...cz,servicios:el.map(sv=>sv.id),detalle:el.map(sv=>({nombre:sv.nombre,precio:cPrecio(sv)})),total:el.reduce((a,sv)=>a+(cPrecio(sv)||0),0),fecha:new Date().toLocaleDateString('es-CL')};
+    if(await guardar('cotizaciones',row,'Cotización guardada')){cz.id=row.id;}};
+  document.querySelector('[data-cznueva]').onclick=()=>{cz=czNuevo();render();};
+  document.querySelectorAll('[data-czopen]').forEach(b=>b.onclick=()=>{const c=S.cotizaciones.find(x=>x.id===b.dataset.czopen);if(c){cz={...czNuevo(),...c,servicios:[...(c.servicios||[])]};render();scrollTo(0,0);}});
+  document.querySelectorAll('[data-czdel]').forEach(b=>b.onclick=async()=>{const c=S.cotizaciones.find(x=>x.id===b.dataset.czdel);if(!c||!confirm('¿Borrar la cotización de '+(c.cliente||'este cliente')+'?'))return;
+    try{await DB.del('cotizaciones',c.id);if(cz.id===c.id)cz=czNuevo();render();toast('Cotización borrada');}catch(e){toast('No se pudo borrar');}});
+}
 let cNuevo=null;
 function modalServicio(){
   const n=cNuevo;
@@ -629,6 +692,7 @@ async function guardarCosto(sv){await guardar('costos',{...sv,lineas:sv.lineas.m
 
 /* ===== Acciones ===== */
 function bind(){
+  bindCz();
   const ct=$('#c-tasa'); if(ct) ct.onchange=()=>{const v=+ct.value; if(v>0){tasaClp=v;pref.set('clp',String(v));} render();};
   document.querySelectorAll('details[data-csv]').forEach(d=>d.ontoggle=()=>{d.open?cAbiertos.add(d.dataset.csv):cAbiertos.delete(d.dataset.csv);});
   document.querySelectorAll('[data-cpick]').forEach(b=>b.onclick=e=>{e.preventDefault();e.stopPropagation();const id=b.dataset.cpick;cSel=cSel.includes(id)?cSel.filter(x=>x!==id):[...cSel,id];pref.set('cotiza',JSON.stringify(cSel));render();});
@@ -793,7 +857,7 @@ async function start(){
   shell();
 }
 (function boot(){
-  const h=(location.hash||'').slice(1); tab=['aliados','alianzas','contactos','cargas','referidos','costos','codigos'].includes(h)?h:(pref.get('tab')||'aliados');
+  const h=(location.hash||'').slice(1); tab=['aliados','alianzas','contactos','cargas','referidos','costos','cotizacion','codigos'].includes(h)?h:(pref.get('tab')||'aliados');
   if(MODO==='demo'){start();return;}
   const base='https://cdn.jsdelivr.net/npm/firebase@10.12.2/';
   const cargar=f=>new Promise((ok,mal)=>{const s=document.createElement('script');s.src=base+f;s.onload=ok;s.onerror=mal;document.head.appendChild(s);});
