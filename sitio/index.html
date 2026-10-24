@@ -556,7 +556,7 @@ footer a{color:var(--hero-muted)}
             <label>Rendimiento del vehículo<select id="v-kml"><option value="6">6 km por litro (camioneta grande)</option><option value="8">8 km por litro</option><option value="10" selected>10 km por litro</option><option value="12">12 km por litro</option><option value="14">14 km por litro</option><option value="16">16 km por litro (auto pequeño)</option></select></label>
             <label>Mientras se nacionaliza el vehículo<select id="v-espera"><option value="queda">Me quedo en Santa Elena (unos 10 días)</option><option value="bus">Vuelvo en bus a Puerto Ordaz</option></select></label>
           </div>
-          <label class="check"><input type="checkbox" id="v-caravana"> Quiero viajar en caravana con Kairos (valor aparte, a consultar)</label>
+          <label class="check"><input type="checkbox" id="v-caravana"> Quiero viajar en caravana con Kairos (300 USD desde Chile)</label>
           <p class="note">Con el acompañamiento logístico te damos la ruta recomendada y recomendaciones de hoteles en el camino.</p>
           <div class="plan-lock" id="v-plan-lock">
             <div class="tag">Plan de viaje</div>
@@ -1063,7 +1063,7 @@ footer a{color:var(--hero-muted)}
   const MAR_VE_AGENCIA=[['Agenciamiento aduanal',1000]];
   // Flete marítimo por vehículo hasta La Guaira. EE. UU., Dubái y China: valores de Elise (14 oct. 2026). Argentina y Brasil: estimados, por confirmar.
   const MAR_FLETE={us:{n:'Estados Unidos',f:2500},ae:{n:'Dubái',f:1000},cn:{n:'China',f:3000},ar:{n:'Argentina',f:2200,est:1},br:{n:'Brasil',f:2000,est:1}};
-  const VEH={equiPct:1, adv:20, motorExtra:20, iva:16, tasa:1, homolog:700, titulo:800, sencamer:450, ageTierra:1650, desinc:480} /* desinc: servicio opcional Kairos en Chile (Elise, 13 oct. 2026) */;
+  const VEH={equiPct:1, adv:20, motorExtra:20, iva:16, tasa:1, homolog:700, titulo:800, sencamer:450, ageTierra:1650, desinc:480, caravana:300} /* desinc: servicio opcional Kairos en Chile (Elise, 13 oct. 2026) */;
   // Ruta terrestre. Combustible en USD por litro: Chile 1,36 (GlobalPetrolPrices, ene. 2026); Argentina 2.052 ARS (YPF Mendoza, may. 2026) a 1.420 ARS por USD (Banco Nación, mar. 2026);
   // Brasil R$ 6,90 promedio de la ruta (ANP, jul. 2026: Cuiabá 6,72, Porto Velho 7,49, Manaos 7,05, Boa Vista 7,58) a 5,4 BRL por USD; Venezuela 0,50 (precio internacional PDVSA).
   const TIERRA={
@@ -1458,8 +1458,8 @@ footer a{color:var(--hero-muted)}
     // El total no incluye el valor del vehículo: el cliente ya lo tiene. El valor solo sirve de base para los impuestos.
     // Elise (12 oct. 2026): sin honorario de Kairos ni imprevistos en el desglose.
     const desinc=p==='cl'&&$('v-desinc').checked;
-    const sub=log+tax+ven+cer+(desinc?VEH.desinc:0);
-    return {r,reg,d,val,land,tax,base,total:sub,fleteVar:r==='mar'&&p!=='cl'&&!MAR_FLETE[p],rows:[[r==='mar'?(p==='cl'?'Gastos en Chile y flete':'Logística hasta Venezuela'):'Viaje por tierra hasta '+(land?land.zona:''),log,1],...logRows.map(x=>[x[0],x[1],2]),...taxRows,['Trámites en Venezuela',ven,1],...venRows.map(x=>[x[0],x[1],2]),...(cer?[['Certificado de uso tramitado por Kairos (régimen de equipaje)',cer,1]]:[]),...(cer&&r==='mar'&&p==='cl'?[['Plazo del certificado: llega a Caracas desde el pago','Unos 15 días hábiles',2]]:[]),...(r==='mar'?[['Traslado del puerto a tu ciudad','A consultar',2]]:[]),...(r==='terr'&&$('v-caravana').checked?[['Viaje en caravana con Kairos','A consultar',1]]:[]),...(desinc?[['Desincorporación y certificado de exportación en Chile (Kairos)',VEH.desinc,1],['Envío desde la frontera a Santiago, desincorporación en el Registro Civil y certificado de exportación (agencia de aduanas y Aduana de Chile)','Incluido',2]]:[])]};
+    const sub=log+tax+ven+cer+(desinc?VEH.desinc:0)+(r==='terr'&&p==='cl'&&$('v-caravana').checked?VEH.caravana:0);
+    return {r,reg,d,val,land,tax,base,total:sub,fleteVar:r==='mar'&&p!=='cl'&&!MAR_FLETE[p],rows:[[r==='mar'?(p==='cl'?'Gastos en Chile y flete':'Logística hasta Venezuela'):'Viaje por tierra hasta '+(land?land.zona:''),log,1],...logRows.map(x=>[x[0],x[1],2]),...taxRows,['Trámites en Venezuela',ven,1],...venRows.map(x=>[x[0],x[1],2]),...(cer?[['Certificado de uso tramitado por Kairos (régimen de equipaje)',cer,1]]:[]),...(cer&&r==='mar'&&p==='cl'?[['Plazo del certificado: llega a Caracas desde el pago','Unos 15 días hábiles',2]]:[]),...(r==='mar'?[['Traslado del puerto a tu ciudad','A consultar',2]]:[]),...(r==='terr'&&$('v-caravana').checked?[['Viaje en caravana con Kairos',p==='cl'?VEH.caravana:'A consultar',1]]:[]),...(desinc?[['Desincorporación y certificado de exportación en Chile (Kairos)',VEH.desinc,1],['Envío desde la frontera a Santiago, desincorporación en el Registro Civil y certificado de exportación (agencia de aduanas y Aduana de Chile)','Incluido',2]]:[])]};
   }
   function lines(target,rows,locked){
     const el=$(target); el.innerHTML='';
