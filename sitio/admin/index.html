@@ -358,7 +358,7 @@ const SEED=()=>{
 
 /* ===== Datos: este navegador o Supabase ===== */
 function uid(){try{return crypto.randomUUID()}catch(e){return 'id'+Date.now().toString(36)+Math.random().toString(36).slice(2)}}
-const TABLAS=['aliados','casos','contactos','cargas','referidos','descartados','codigos','costos','cotizaciones'];
+const TABLAS=['aliados','casos','contactos','cargas','referidos','descartados','codigos','costos','cotizaciones','ordenes'];
 const LS='kairos-admin-demo-2';
 const S={aliados:[],casos:[],contactos:[],cargas:[],referidos:[],descartados:[],codigos:[],costos:[]};
 let db=null, auth=null, MODO=FB.apiKey&&FB.projectId?'real':'demo';
@@ -375,6 +375,11 @@ const DB={
     const i=S[t].findIndex(x=>x.id===row.id); if(i>=0) S[t][i]=row; else S[t].push(row);
     if(MODO==='real'&&(t==='contactos'||t==='aliados')) await publicarPrecios();
     if(MODO==='demo') this.persist(); return row;
+  },
+  // Cambia solo algunos campos (las órdenes las crea el servidor y traen fechas que no hay que reescribir).
+  async patch(t,id,f){
+    if(MODO==='real') await db.collection(t).doc(id).update(f);
+    const r=S[t].find(x=>x.id===id); if(r) Object.assign(r,f); if(MODO==='demo') this.persist();
   },
   async del(t,id){
     if(MODO==='real'){await db.collection(t).doc(id).delete(); if(t==='contactos'||t==='aliados'){S[t]=S[t].filter(x=>x.id!==id); await publicarPrecios();}}
@@ -403,7 +408,7 @@ const pref={get(k){try{return localStorage.getItem('kairos-admin-'+k)}catch(e){r
 
 /* ===== Pantallas ===== */
 function shell(){
-  const T=[['aliados','Aliados por país'],['alianzas','Posibles alianzas'],['contactos','Contactos y negociación'],['cargas','Cargas'],['referidos','Referidos'],['costos','Costos y precios'],['cotizacion','Cotización'],['codigos','Códigos']];
+  const T=[['aliados','Aliados por país'],['alianzas','Posibles alianzas'],['contactos','Contactos y negociación'],['cargas','Cargas'],['referidos','Referidos'],['costos','Costos y precios'],['cotizacion','Cotización'],['pagos','Pagos'],['codigos','Códigos']];
   $('#app').innerHTML='<header class="top"><div class="wrap"><div class="brand"><b>KAIROS LOGISTICS</b><small>Administración</small></div><span class="mode">'+(MODO==='demo'?'Demostración':'Conectado')+'</span>'+(MODO==='real'?'<button class="btn ghost sm" id="salir" style="color:var(--brand-ink);border-color:var(--brand-ink)">Salir</button>':'')+
     '<nav class="tabs" role="tablist">'+T.map(([k,l])=>'<button role="tab" data-tab="'+k+'" aria-selected="'+(tab===k)+'">'+l+'</button>').join('')+'</nav></div></header><main><div class="wrap" id="view"></div></main>';
   document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;allyOpen=null;pref.set('tab',tab);try{history.replaceState(null,'','#'+tab)}catch(e){};shell();});
@@ -413,7 +418,7 @@ function shell(){
 function render(){
   const v=$('#view');
   const demo=MODO==='demo'?'<div class="demo-note">Modo demostración: los datos son de ejemplo y se guardan solo en este navegador. Cuando conectemos la base de datos, entrarás con tu correo y clave y todo quedará guardado en línea.</div>':'';
-  v.innerHTML=demo+({aliados:vAliados,alianzas:vAlianzas,contactos:vContactos,cargas:vCargas,referidos:vReferidos,costos:vCostos,cotizacion:vCotizacion,codigos:vCodigos}[tab])();
+  v.innerHTML=demo+({aliados:vAliados,alianzas:vAlianzas,contactos:vContactos,cargas:vCargas,referidos:vReferidos,costos:vCostos,cotizacion:vCotizacion,pagos:vPagos,codigos:vCodigos}[tab])();
   bind();
 }
 function paisChips(lista){
@@ -661,7 +666,7 @@ function textoCz(){const q=cz, el=czElegidos(q);
   return 'Cotización Kairos Logistics\nCliente: '+(q.cliente||'—')+'\nVehículo: '+[q.tipo,q.modelo,q.anio].filter(Boolean).join(' ')+'\nDesde: '+(CZ_PAISES.find(p=>p[0]===q.pais)||['',''])[1]+' · '+CZ_VIA_TXT[q.via]+' · '+CZ_REG_TXT[q.reg]+'\n\n'+
     el.map(sv=>'• '+sv.nombre+': '+(cPrecio(sv)==null?'a consultar':usd(cPrecio(sv)))).join('\n')+'\n\nTotal: '+usd(el.reduce((a,sv)=>a+(cPrecio(sv)||0),0))+(q.nota?'\n\n'+q.nota:'');}
 function bindCz(){
-  const f=$('.cz-form'); if(!f) return;
+  const f=$('.cz-form'); if(!f||!$('#cz-cliente')) return;
   const leer=()=>{cz.cliente=$('#cz-cliente').value;cz.whatsapp=$('#cz-whatsapp').value;cz.modelo=$('#cz-modelo').value;cz.nota=$('#cz-nota').value;};
   ['cliente','whatsapp','modelo','nota'].forEach(k=>$('#cz-'+k).oninput=leer);
   ['tipo','anio','pais','via','reg'].forEach(k=>$('#cz-'+k).onchange=e=>{leer();cz[k]=e.target.value;render();});
@@ -674,6 +679,48 @@ function bindCz(){
   document.querySelectorAll('[data-czopen]').forEach(b=>b.onclick=()=>{const c=S.cotizaciones.find(x=>x.id===b.dataset.czopen);if(c){cz={...czNuevo(),...c,servicios:[...(c.servicios||[])]};render();scrollTo(0,0);}});
   document.querySelectorAll('[data-czdel]').forEach(b=>b.onclick=async()=>{const c=S.cotizaciones.find(x=>x.id===b.dataset.czdel);if(!c||!confirm('¿Borrar la cotización de '+(c.cliente||'este cliente')+'?'))return;
     try{await DB.del('cotizaciones',c.id);if(cz.id===c.id)cz=czNuevo();render();toast('Cotización borrada');}catch(e){toast('No se pudo borrar');}});
+}
+/* Pagos (Elise, 24 oct. 2026): Pago Móvil en bolívares a tasa euro del BCV. Los datos y la tasa se publican en
+   publico/pagomovil (la web los lee). Las órdenes «por verificar» se aprueban aquí: se crea el código y la web del cliente lo muestra. */
+let PMC=null;
+async function cargarPMC(){if(PMC) return PMC; PMC={tasa_euro:'',fecha:'',banco:'',telefono:'',cedula:'',titular:''};
+  try{ if(MODO==='real'){const d=await db.collection('publico').doc('pagomovil').get(); if(d.exists) Object.assign(PMC,d.data());} else Object.assign(PMC,JSON.parse(pref.get('pagomovil')||'{}')); }catch(e){}
+  return PMC;}
+async function guardarPMC(){PMC.fecha=new Date().toLocaleDateString('es-VE');
+  try{ if(MODO==='real') await db.collection('publico').doc('pagomovil').set({...PMC,tasa_euro:+PMC.tasa_euro||0,actualizado:Date.now()}); else pref.set('pagomovil',JSON.stringify(PMC)); toast('Datos de Pago Móvil publicados'); render(); }
+  catch(e){toast('No se pudo guardar: '+(e.message||'revisa la conexión'));}}
+const PROD_TXT={asesoria:'Asesoría (40 USD)',calculo:'Cálculo completo (25 USD)',extra:'Otro vehículo (15 USD)',plan:'Plan de viaje (20 USD)'};
+const PROD_TIPO={asesoria:'asesoria',calculo:'calculo',extra:'calculo',plan:'plan'};
+const bsTxt=v=>'Bs '+(+v||0).toLocaleString('es-VE',{minimumFractionDigits:2,maximumFractionDigits:2});
+function vPagos(){
+  if(!PMC){cargarPMC().then(render); return '<p class="sub">Cargando…</p>';}
+  const c=PMC, ord=[...S.ordenes].sort((a,b)=>(b.created_at||0)-(a.created_at||0)), pend=ord.filter(o=>o.estado==='por verificar'), resto=ord.filter(o=>o.estado!=='por verificar').slice(0,30);
+  const fila=(o,acc)=>'<div class="costo cz-item"><div class="c-sum" style="cursor:default"><span class="c-nom">'+esc(o.nombre||'')+'<br><span class="sub" style="font-weight:400">'+esc(PROD_TXT[o.producto]||o.producto||'')+' · '+(o.metodo==='pagomovil'?'Pago Móvil':'NOWPayments')+' · '+esc(o.id)+(o.whatsapp?' · '+esc(o.whatsapp):'')+'</span></span>'+
+    '<span class="c-k"><small>'+(o.metodo==='pagomovil'?'Monto · Ref.':'Monto')+'</small><b>'+(o.metodo==='pagomovil'?bsTxt(o.monto_bs)+'</b><br><b>'+esc(o.referencia||''):esc(o.monto)+' USD')+'</b></span>'+
+    '<span class="c-k"><small>Estado</small><b>'+esc(o.estado||'')+(o.codigo?'<br>'+esc(o.codigo):'')+'</b></span>'+
+    (acc?'<span style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn sm" data-pmok="'+esc(o.id)+'">Aprobar</button><button class="btn sm ghost" data-pmno="'+esc(o.id)+'">Rechazar</button></span>':(o.codigo&&o.whatsapp?'<a class="btn sm ghost" target="_blank" rel="noopener" href="'+esc(waCodigo(o))+'">Enviar por WhatsApp</a>':'<span></span>'))+'</div></div>';
+  return '<div class="head"><div><h2>Pagos</h2><p>Pago Móvil para clientes en Venezuela. Actualiza la tasa euro del BCV cada día: la web calcula los bolívares con ella. Cuando veas el pago en tu banco, toca <b>Aprobar</b> y el cliente recibe su código en pantalla.</p></div></div>'+
+    '<section class="cotiza cz-form"><h3>Datos del Pago Móvil</h3>'+
+      '<div class="cz-g"><label>Tasa euro BCV (Bs por 1 €)<input id="pm-tasa" type="number" step="any" min="0" value="'+esc(c.tasa_euro)+'"></label><label>Banco<input id="pm-banco" value="'+esc(c.banco)+'" placeholder="Ej.: Banesco (0134)"></label></div>'+
+      '<div class="cz-g"><label>Teléfono<input id="pm-tel" value="'+esc(c.telefono)+'" inputmode="tel" placeholder="0414 123 4567"></label><label>Cédula o RIF<input id="pm-ced" value="'+esc(c.cedula)+'" placeholder="V-12345678"></label><label>Titular<input id="pm-tit" value="'+esc(c.titular)+'"></label></div>'+
+      '<p class="sub">'+(c.fecha?'Última actualización: '+esc(c.fecha)+'. ':'')+(+c.tasa_euro>0?'Ejemplo: la asesoría de 40 USD se cobra en '+bsTxt(40*c.tasa_euro)+'.':'Mientras no haya tasa y teléfono, la web no ofrece Pago Móvil.')+'</p>'+
+      '<div><button class="btn" type="button" data-pmsave>Guardar y publicar</button></div></section>'+
+    '<h3 style="margin:20px 0 8px">Por verificar'+(pend.length?' ('+pend.length+')':'')+'</h3>'+(pend.length?pend.map(o=>fila(o,1)).join(''):'<p class="sub">No hay pagos por verificar.</p>')+
+    '<h3 style="margin:20px 0 8px">Últimas órdenes</h3>'+(resto.length?resto.map(o=>fila(o,0)).join(''):'<p class="sub">Todavía no hay órdenes.</p>');
+}
+const waCodigo=o=>'https://wa.me/'+String(o.whatsapp||'').replace(/\D/g,'')+'?text='+encodeURIComponent('Hola '+(o.nombre||'').split(' ')[0]+', confirmamos tu pago. Tu código Kairos es '+o.codigo+'. Ábrelo aquí: https://kairoslogistics.net/?codigo='+o.codigo+'#vehiculo (queda ligado al primer vehículo que calcules).');
+function bindPagos(){
+  const sv=document.querySelector('[data-pmsave]'); if(!sv) return;
+  sv.onclick=()=>{Object.assign(PMC,{tasa_euro:$('#pm-tasa').value,banco:$('#pm-banco').value.trim(),telefono:$('#pm-tel').value.trim(),cedula:$('#pm-ced').value.trim(),titular:$('#pm-tit').value.trim()});
+    if(!(+PMC.tasa_euro>0)){toast('Escribe la tasa euro del BCV');$('#pm-tasa').focus();return;} guardarPMC();};
+  document.querySelectorAll('[data-pmok]').forEach(b=>b.onclick=async()=>{const o=S.ordenes.find(x=>x.id===b.dataset.pmok); if(!o||!confirm('¿Confirmas que recibiste '+bsTxt(o.monto_bs)+' con la referencia '+o.referencia+'?')) return;
+    b.disabled=true; const id=nuevoCodigo();
+    try{await DB.save('codigos',{id,tipo:PROD_TIPO[o.producto]||'calculo',max:1,usos:0,cliente:o.nombre+' · '+o.correo,orden:o.id,origen:'Pago Móvil'});
+      await DB.patch('ordenes',o.id,{estado:'pagada',codigo:id,verificada_at:Date.now()}); render(); toast('Aprobado: código '+id);
+      if(o.whatsapp) window.open(waCodigo({...o,codigo:id}),'_blank','noopener');}
+    catch(e){b.disabled=false;toast('No se pudo aprobar: '+(e.message||'revisa la conexión'));}});
+  document.querySelectorAll('[data-pmno]').forEach(b=>b.onclick=async()=>{const o=S.ordenes.find(x=>x.id===b.dataset.pmno); if(!o||!confirm('¿Rechazar el pago de '+o.nombre+'? La web le dirá que te escriba por WhatsApp.')) return;
+    try{await DB.patch('ordenes',o.id,{estado:'rechazada',verificada_at:Date.now()}); render(); toast('Pago rechazado');}catch(e){toast('No se pudo cambiar');}});
 }
 let cNuevo=null;
 function modalServicio(){
@@ -693,7 +740,7 @@ async function guardarCosto(sv){await guardar('costos',{...sv,lineas:sv.lineas.m
 
 /* ===== Acciones ===== */
 function bind(){
-  bindCz();
+  bindCz(); bindPagos();
   const ct=$('#c-tasa'); if(ct) ct.onchange=()=>{const v=+ct.value; if(v>0){tasaClp=v;pref.set('clp',String(v));} render();};
   document.querySelectorAll('details[data-csv]').forEach(d=>d.ontoggle=()=>{d.open?cAbiertos.add(d.dataset.csv):cAbiertos.delete(d.dataset.csv);});
   document.querySelectorAll('[data-cpick]').forEach(b=>b.onclick=e=>{e.preventDefault();e.stopPropagation();const id=b.dataset.cpick;cSel=cSel.includes(id)?cSel.filter(x=>x!==id):[...cSel,id];pref.set('cotiza',JSON.stringify(cSel));render();});
@@ -858,7 +905,7 @@ async function start(){
   shell();
 }
 (function boot(){
-  const h=(location.hash||'').slice(1); tab=['aliados','alianzas','contactos','cargas','referidos','costos','cotizacion','codigos'].includes(h)?h:(pref.get('tab')||'aliados');
+  const h=(location.hash||'').slice(1); tab=['aliados','alianzas','contactos','cargas','referidos','costos','cotizacion','pagos','codigos'].includes(h)?h:(pref.get('tab')||'aliados');
   if(MODO==='demo'){start();return;}
   const base='https://cdn.jsdelivr.net/npm/firebase@10.12.2/';
   const cargar=f=>new Promise((ok,mal)=>{const s=document.createElement('script');s.src=base+f;s.onload=ok;s.onerror=mal;document.head.appendChild(s);});

@@ -282,6 +282,11 @@ textarea{min-height:80px;resize:vertical}
 .pay-x{background:none;border:0;font-size:26px;line-height:1;cursor:pointer;color:var(--muted);padding:0 4px}
 .pay-card .btn{width:100%}
 .pay-card small{color:var(--muted);font-size:13px}
+.pay-met{border:1px solid var(--line);border-radius:10px;padding:8px 12px;display:grid;gap:4px;margin:0}
+.pay-met legend{font-size:14px;color:var(--muted);padding:0 4px}
+.pay-pm{display:grid;gap:10px;background:var(--soft);border-radius:10px;padding:12px}
+.pm-datos{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;margin:0;font-size:15px}
+.pm-datos dt{color:var(--muted)} .pm-datos dd{margin:0;font-family:var(--mono);overflow-wrap:anywhere}
 .pago-msg{border-radius:8px;padding:10px 12px;font-size:14px;margin:10px 0;background:var(--soft);color:var(--ink)}
 .pago-msg.ok{border-left:4px solid var(--ok)} .pago-msg.err{border-left:4px solid var(--warn)}
 .v-video iframe{width:100%;aspect-ratio:16/9;border:0;border-radius:8px}
@@ -1029,10 +1034,21 @@ footer a{color:var(--hero-muted)}
     <label>Repite tu correo<input id="pay-mail2" type="email" autocomplete="off" inputmode="email" required></label>
     <label>WhatsApp con código de país<input id="pay-wa" type="tel" autocomplete="tel" inputmode="tel" placeholder="+56 9 1234 5678" required></label>
     <label>País donde vives<select id="pay-pais"><option>Venezuela</option><option>Chile</option><option>Argentina</option><option>Brasil</option><option>Estados Unidos</option><option>Panamá</option><option>Otro</option></select></label>
+    <fieldset class="pay-met" id="pay-met" hidden><legend>¿Cómo quieres pagar?</legend>
+      <label class="check"><input type="radio" name="pay-met" id="pay-met-pm" value="pm" checked> Pago Móvil en bolívares</label>
+      <label class="check"><input type="radio" name="pay-met" id="pay-met-np" value="np"> Cripto o Binance (USDT)</label>
+    </fieldset>
+    <div class="pay-pm" id="pay-pm" hidden>
+      <div class="pay-price"><span id="pm-bs">—</span> Bs</div>
+      <p class="note" id="pm-tasa"></p>
+      <dl class="pm-datos" id="pm-datos"></dl>
+      <label>Número de referencia del Pago Móvil<input id="pm-ref" type="text" inputmode="numeric" autocomplete="off" placeholder="Ej.: 012345"></label>
+      <label>Teléfono desde el que pagaste<input id="pm-tel" type="tel" inputmode="tel" autocomplete="tel" placeholder="0414 123 4567"></label>
+    </div>
     <label class="check"><input type="checkbox" id="pay-ok"> Acepto que el código de acceso se enviará a mi correo</label>
     <div class="status err" id="pay-err" role="alert"></div>
     <button class="btn primary" type="submit" id="pay-btn">Pagar 40 USD</button>
-    <small>Puedes pagar con tarjeta en moneda local o con cripto (USDT, BTC y otras), incluso desde tu cuenta de Binance. Guardamos los datos de tu simulación para que el detalle corresponda a ella.</small>
+    <small>Puedes pagar con cripto (USDT, BTC y otras), incluso desde tu cuenta de Binance. Si vives en Venezuela, también por Pago Móvil en bolívares. Guardamos los datos de tu simulación para que el detalle corresponda a ella.</small>
   </form>
 </div>
 <div class="sheet-wrap" id="v-sheet-wrap" hidden role="dialog" aria-modal="true" aria-label="Resumen de costos">
@@ -1563,8 +1579,31 @@ footer a{color:var(--hero-muted)}
     payProd=prod; payDesde=btn; const P=PAGO[prod];
     $('pay-t').textContent=P.t; $('pay-inc').textContent=P.inc; $('pay-precio').textContent=P.p; $('pay-btn').textContent='Pagar '+P.p+' USD'; $('pay-err').textContent='';
     $('pay-pais').value=vVive()==='ve'?'Venezuela':(PAIS_RES[$('v-pais').value]||'Otro');
-    $('pay-wrap').hidden=false; $('pay-nom').focus();
+    $('pay-wrap').hidden=false; $('pay-nom').focus(); pintarMetodo(); cargarPM().then(pintarMetodo);
   }
+  /* Pago Móvil (Elise, 24 oct. 2026): solo para quien vive en Venezuela; monto en bolívares a la tasa euro del BCV
+     que Elise carga en el panel (publico/pagomovil). Si falta la tasa o los datos, solo queda el pago con cripto. */
+  let PM=null;
+  function cargarPM(){
+    if(PM) return Promise.resolve(PM);
+    return fetch('https://firestore.googleapis.com/v1/projects/'+FB_WEB.projectId+'/databases/(default)/documents/publico/pagomovil?key='+FB_WEB.apiKey)
+      .then(r=>r.ok?r.json():null).then(j=>{const f=(j&&j.fields)||{}, g=k=>f[k]?(f[k].stringValue??f[k].doubleValue??f[k].integerValue??''):'';
+        const t=+g('tasa_euro'); PM=t>0&&g('telefono')?{tasa:t,fecha:g('fecha'),banco:g('banco'),telefono:g('telefono'),cedula:g('cedula'),titular:g('titular')}:false; return PM;}).catch(()=>false);
+  }
+  const payMet=()=>!$('pay-met').hidden&&$('pay-met-pm').checked?'pm':'np';
+  function pintarMetodo(){
+    const ve=$('pay-pais').value==='Venezuela'&&PM;
+    $('pay-met').hidden=!ve; const pm=payMet()==='pm';
+    $('pay-pm').hidden=!pm; $('pay-precio').parentNode.hidden=pm;
+    const P=PAGO[payProd];
+    if(pm){const bsv=Math.round(P.p*PM.tasa*100)/100;
+      $('pm-bs').textContent=bs(bsv).replace(/^Bs\.?\s*/,''); $('pm-tasa').textContent=P.p+' USD a la tasa euro del BCV ('+fmtBcv(PM.tasa)+' Bs'+(PM.fecha?', '+PM.fecha:'')+'). Paga este monto exacto y escribe abajo la referencia.';
+      $('pm-datos').innerHTML=[['Banco',PM.banco],['Teléfono',PM.telefono],['Cédula o RIF',PM.cedula],['Titular',PM.titular]].filter(x=>x[1]).map(([k,v])=>'<dt>'+k+'</dt><dd>'+esc(v)+'</dd>').join('');
+      $('pay-btn').textContent='Ya pagué, enviar referencia';
+    } else $('pay-btn').textContent='Pagar '+P.p+' USD';
+  }
+  $('pay-pais').addEventListener('change',pintarMetodo);
+  document.querySelectorAll('[name="pay-met"]').forEach(r=>r.addEventListener('change',pintarMetodo));
   function cerrarPago(){ $('pay-wrap').hidden=true; if(payDesde) payDesde.focus(); }
   document.querySelectorAll('[data-pagar]').forEach(b=>b.addEventListener('click',()=>abrirPago(b.dataset.pagar,b)));
   $('pay-x').addEventListener('click',cerrarPago);
@@ -1579,6 +1618,7 @@ footer a{color:var(--hero-muted)}
     if(m1!==m2) return falla('Los dos correos no coinciden.','pay-mail2');
     if(!/^\+\d[\d\s-]{6,}$/.test(wa)) return falla('Escribe tu WhatsApp con el código de país, por ejemplo +56 9 1234 5678.','pay-wa');
     if(!$('pay-ok').checked) return falla('Marca la casilla para aceptar que el código llegará a tu correo.','pay-ok');
+    if(payMet()==='pm') return enviarPM(nom,m1,m2,wa,falla);
     err.textContent=''; const btn=$('pay-btn'); btn.disabled=true; btn.textContent='Abriendo el pago…';
     try{
       const r=await fetch('/api/crear-orden',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({producto:payProd,nombre:nom,correo:m1,correo2:m2,whatsapp:wa,pais:$('pay-pais').value,acepto:true,sim:datosSim()})});
@@ -1587,11 +1627,26 @@ footer a{color:var(--hero-muted)}
       guardarSim(); ss.set('kairos-orden',JSON.stringify({orden:j.orden,correo:m1})); location.href=j.url;
     }catch(x){ falla(x.message||'No pudimos abrir el pago. Inténtalo de nuevo o escríbenos por WhatsApp.'); btn.disabled=false; btn.textContent='Pagar '+PAGO[payProd].p+' USD'; }
   });
+  async function enviarPM(nom,m1,m2,wa,falla){
+    const ref=$('pm-ref').value.replace(/\s/g,'');
+    if(!/^\d{4,20}$/.test(ref)) return falla('Escribe el número de referencia del Pago Móvil (solo números).','pm-ref');
+    $('pay-err').textContent=''; const btn=$('pay-btn'); btn.disabled=true; btn.textContent='Enviando…';
+    try{
+      const r=await fetch('/api/pago-movil',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({producto:payProd,nombre:nom,correo:m1,correo2:m2,whatsapp:wa,pais:'Venezuela',acepto:true,referencia:ref,telefono_pago:$('pm-tel').value.trim(),sim:datosSim()})});
+      const j=await r.json().catch(()=>({}));
+      if(!r.ok||!j.orden) throw new Error(j.error||'');
+      guardarSim(); ss.set('kairos-orden',JSON.stringify({orden:j.orden,correo:m1,pm:1}));
+      $('pay-wrap').hidden=true; btn.disabled=false; pintarMetodo();
+      const msg=$('v-pago-msg'); msg.hidden=false; msg.className='pago-msg ok';
+      msg.textContent='¡Gracias! Recibimos tu referencia '+ref+'. Verificamos tu Pago Móvil y, apenas lo confirmemos, tu código aparece aquí y te avisamos por WhatsApp y correo. Puedes cerrar la página: al volver lo verás.';
+      msg.scrollIntoView({block:'center'}); esperarCodigo();
+    }catch(x){ falla(x.message||'No pudimos registrar tu pago. Escríbenos por WhatsApp.'); btn.disabled=false; pintarMetodo(); }
+  }
   // Después de pagar se pregunta cada 10 segundos por la orden (hasta 30 minutos). Cuando el pago se confirma,
   // el código aparece en pantalla y se abre solo; también le llega por correo.
   async function esperarCodigo(){
     let o=null; try{o=JSON.parse(ss.get('kairos-orden')||'null')}catch(e){} if(!o||!o.orden) return;
-    const msg=$('v-pago-msg'), fin=Date.now()+30*60e3;
+    const msg=$('v-pago-msg'), fin=Date.now()+(o.pm?12*3600e3:30*60e3), paso=o.pm?30e3:10e3;
     while(Date.now()<fin){
       try{
         const r=await fetch('/api/orden?orden='+encodeURIComponent(o.orden)+'&correo='+encodeURIComponent(o.correo)); const j=await r.json().catch(()=>({}));
@@ -1599,16 +1654,17 @@ footer a{color:var(--hero-muted)}
           msg.className='pago-msg ok'; msg.textContent='¡Pago confirmado! Tu código es '+j.codigo+'. Ya abrimos tu detalle; también te lo enviamos por correo. Guárdalo: queda ligado a este vehículo.';
           ss.set('kairos-orden',''); $('v-code').value=j.codigo; $('v-calc').click(); return;
         }
+        if(j.estado==='rechazada'){ ss.set('kairos-orden',''); msg.hidden=false; msg.className='pago-msg err'; msg.textContent='No pudimos confirmar tu Pago Móvil. Escríbenos por WhatsApp con tu referencia y lo revisamos.'; return; }
         if(j.estado==='incompleto'){ msg.className='pago-msg err'; msg.textContent='Tu pago llegó incompleto. Escríbenos por WhatsApp y lo resolvemos.'; return; }
       }catch(e){}
-      await new Promise(res=>setTimeout(res,10e3));
+      await new Promise(res=>setTimeout(res,paso));
     }
   }
   // Al volver de NOWPayments (?pago=ok o ?pago=cancelado) o desde el enlace del correo (?codigo=XXXXXXXX).
   function alVolver(){
     let q; try{q=new URLSearchParams(location.search)}catch(e){return}
     const pago=q.get('pago'), cod=(q.get('codigo')||'').trim().toUpperCase();
-    if(!pago&&!cod) return;
+    if(!pago&&!cod){ let o=null; try{o=JSON.parse(ss.get('kairos-orden')||'null')}catch(e){} if(o&&o.pm){ restaurarSim(); const m=$('v-pago-msg'); m.hidden=false; m.className='pago-msg ok'; m.textContent='Estamos verificando tu Pago Móvil. Apenas lo confirmemos, tu código aparece aquí.'; esperarCodigo(); } return; }
     restaurarSim();
     const msg=$('v-pago-msg');
     if(pago==='ok'){msg.hidden=false;msg.className='pago-msg ok';msg.textContent='¡Gracias! Cuando tu pago se confirme, te llega el código a tu correo (revisa también la carpeta de spam). Con cripto puede tardar unos minutos. Después escríbelo abajo, en «¿Ya tienes tu código?». Antes de usarlo, revisa que el país, el modelo y el año sean los de tu vehículo: el código queda ligado a ese vehículo y no se puede cambiar.';}

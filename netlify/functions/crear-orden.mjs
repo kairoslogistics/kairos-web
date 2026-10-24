@@ -1,26 +1,16 @@
 // La página manda los datos del cliente y de su simulación; aquí se guarda la orden y se crea la factura en NOWPayments.
 // A la página solo vuelve el enlace de pago.
 import { crear, cambiar } from '../lib/firestore.mjs';
-import { PRODUCTOS, PAISES, nuevaOrden, json, sitio, correoValido } from '../lib/comun.mjs';
+import { nuevaOrden, json, sitio, validarCliente } from '../lib/comun.mjs';
 
 const API = () => process.env.NOWPAYMENTS_SANDBOX === 'si' ? 'https://api-sandbox.nowpayments.io/v1/' : 'https://api.nowpayments.io/v1/';
-const texto = (v, max = 120) => String(v ?? '').trim().slice(0, max);
 
 export default async (req) => {
   if (req.method !== 'POST') return json({ error: 'Usa POST' }, 405);
   let d; try { d = await req.json(); } catch { return json({ error: 'Datos inválidos' }, 400); }
-  const p = PRODUCTOS[d.producto];
-  const nombre = texto(d.nombre), correo = texto(d.correo, 160).toLowerCase(), whatsapp = texto(d.whatsapp, 30), pais = texto(d.pais, 40);
-  if (!p) return json({ error: 'Elige qué quieres comprar.' }, 400);
-  if (nombre.split(/\s+/).length < 2) return json({ error: 'Escribe tu nombre y apellido.' }, 400);
-  if (!correoValido(correo)) return json({ error: 'Revisa tu correo.' }, 400);
-  if (correo !== texto(d.correo2, 160).toLowerCase()) return json({ error: 'Los dos correos no coinciden.' }, 400);
-  if (!/^\+\d[\d\s-]{6,}$/.test(whatsapp)) return json({ error: 'Escribe tu WhatsApp con el código de país, por ejemplo +56 9 1234 5678.' }, 400);
-  if (!PAISES.includes(pais)) return json({ error: 'Elige tu país de residencia.' }, 400);
-  if (d.acepto !== true) return json({ error: 'Debes aceptar que el código llegará a tu correo.' }, 400);
-  // Solo valores simples y cortos de la simulación.
-  const sim = Object.fromEntries(Object.entries(d.sim && typeof d.sim === 'object' ? d.sim : {}).slice(0, 40)
-    .filter(([, v]) => ['string', 'number', 'boolean'].includes(typeof v)).map(([k, v]) => [texto(k, 40), typeof v === 'string' ? texto(v, 300) : v]));
+  const v = validarCliente(d);
+  if (v.error) return json({ error: v.error }, 400);
+  const { p, nombre, correo, whatsapp, pais, sim } = v;
 
   const id = nuevaOrden();
   const orden = { id, estado: 'pendiente', producto: d.producto, monto: p.precio, nombre, correo, whatsapp, pais, sim, creada: new Date(), created_at: Date.now() };

@@ -35,3 +35,21 @@ export function firmaValida(cuerpo, firma, secreto) {
 export const json = (datos, estado = 200) => new Response(JSON.stringify(datos), { status: estado, headers: { 'Content-Type': 'application/json; charset=utf-8' } });
 export const esc = t => String(t ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 export const correoValido = c => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(c);
+
+// Datos del cliente que piden los dos pagos (NOWPayments y Pago Móvil). Devuelve { error } o los datos limpios.
+export const texto = (v, max = 120) => String(v ?? '').trim().slice(0, max);
+export function validarCliente(d) {
+  const p = PRODUCTOS[d.producto];
+  const nombre = texto(d.nombre), correo = texto(d.correo, 160).toLowerCase(), whatsapp = texto(d.whatsapp, 30), pais = texto(d.pais, 40);
+  if (!p) return { error: 'Elige qué quieres comprar.' };
+  if (nombre.split(/\s+/).length < 2) return { error: 'Escribe tu nombre y apellido.' };
+  if (!correoValido(correo)) return { error: 'Revisa tu correo.' };
+  if (correo !== texto(d.correo2, 160).toLowerCase()) return { error: 'Los dos correos no coinciden.' };
+  if (!/^\+\d[\d\s-]{6,}$/.test(whatsapp)) return { error: 'Escribe tu WhatsApp con el código de país, por ejemplo +56 9 1234 5678.' };
+  if (!PAISES.includes(pais)) return { error: 'Elige tu país de residencia.' };
+  if (d.acepto !== true) return { error: 'Debes aceptar que el código llegará a tu correo.' };
+  // Solo valores simples y cortos de la simulación.
+  const sim = Object.fromEntries(Object.entries(d.sim && typeof d.sim === 'object' ? d.sim : {}).slice(0, 40)
+    .filter(([, v]) => ['string', 'number', 'boolean'].includes(typeof v)).map(([k, v]) => [texto(k, 40), typeof v === 'string' ? texto(v, 300) : v]));
+  return { p, nombre, correo, whatsapp, pais, sim };
+}
