@@ -297,7 +297,6 @@ textarea{min-height:80px;resize:vertical}
 .hot-h b{color:var(--ink)} .hot-r{color:var(--accent-text,#7A4F05);font-weight:700}
 .hot a{color:var(--brand)}
 .pay-met{border:1px solid var(--line);border-radius:10px;padding:8px 12px;display:grid;gap:4px;margin:0}
-.pay-pp{display:grid;gap:8px;min-height:48px}.pay-pp .note{margin:0;text-align:center}
 .pay-met legend{font-size:14px;color:var(--muted);padding:0 4px}
 .pay-pm{display:grid;gap:10px;background:var(--soft);border-radius:10px;padding:12px}
 .pm-datos{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;margin:0;font-size:15px}
@@ -1064,7 +1063,7 @@ footer a{color:var(--hero-muted)}
     <fieldset class="pay-met" id="pay-met" hidden><legend>¿Cómo quieres pagar?</legend>
       <label class="check" id="pay-met-pm-l"><input type="radio" name="pay-met" id="pay-met-pm" value="pm" checked> Pago Móvil en bolívares</label>
       <label class="check" id="pay-met-mp-l" hidden><input type="radio" name="pay-met" id="pay-met-mp" value="mp"> Tarjeta de crédito o débito en Chile, o tu saldo Mercado Pago (pesos chilenos)</label>
-      <label class="check" id="pay-met-pp-l"><input type="radio" name="pay-met" id="pay-met-pp" value="pp"> Tarjeta de crédito o débito, o PayPal (USD)</label>
+      <label class="check" id="pay-met-hm-l" hidden><input type="radio" name="pay-met" id="pay-met-hm" value="hm"> Tarjeta o medios de pago de tu país (Hotmart)</label>
       <label class="check"><input type="radio" name="pay-met" id="pay-met-np" value="np"> Cripto o Binance (USDT)</label>
     </fieldset>
     <div class="pay-pm" id="pay-pm" hidden>
@@ -1077,8 +1076,7 @@ footer a{color:var(--hero-muted)}
     <label class="check"><input type="checkbox" id="pay-ok"> Acepto que el código de acceso se enviará a mi correo</label>
     <div class="status err" id="pay-err" role="alert"></div>
     <button class="btn primary" type="submit" id="pay-btn">Pagar 40 USD</button>
-    <div class="pay-pp" id="pay-pp" hidden><div id="pay-pp-btns"></div><p class="note" id="pay-pp-nota">Cargando PayPal…</p></div>
-    <small>Puedes pagar con tarjeta o PayPal, con cripto (USDT, BTC y otras) desde tu cuenta de Binance y, si vives en Venezuela, por Pago Móvil en bolívares. Guardamos los datos de tu simulación para que el detalle corresponda a ella.</small>
+    <small>Puedes pagar con tarjeta, con cripto (USDT, BTC y otras) desde tu cuenta de Binance y, si vives en Venezuela, por Pago Móvil en bolívares. Guardamos los datos de tu simulación para que el detalle corresponda a ella.</small>
   </form>
 </div>
 <div class="sheet-wrap" id="v-sheet-wrap" hidden role="dialog" aria-modal="true" aria-label="Resumen de costos">
@@ -1687,18 +1685,18 @@ d.querySelector('b').append(e.pausa?'Nacionalización en Santa Elena de Uairén'
       .then(r=>r.ok?r.json():null).then(j=>{const f=(j&&j.fields)||{}, g=k=>f[k]?(f[k].stringValue??f[k].doubleValue??f[k].integerValue??''):'';
         const t=+g('tasa_euro'); PM=t>0&&g('telefono')?{tasa:t,fecha:g('fecha'),banco:g('banco'),telefono:g('telefono'),cedula:g('cedula'),titular:g('titular')}:false; return PM;}).catch(()=>false);
   }
-  // PayPal (Elise, 25 oct. 2026): tarjeta o cuenta PayPal en USD. Solo se ofrece cuando sus claves están en Netlify (/api/metodos).
+  // Formas de pago con claves en Netlify (/api/metodos). PayPal se quitó (Jesús, 25 oct. 2026: no acepta sus bancos de Chile).
   let MET=null;
   const cargarMet=()=>MET?Promise.resolve(MET):fetch('/api/metodos').then(r=>r.ok?r.json():{}).catch(()=>({})).then(j=>MET=j);
   let metElegido=false;
-  const payMet=()=>{if($('pay-met').hidden) return $('pay-met-pp-l').hidden?'np':'pp'; const r=document.querySelector('[name="pay-met"]:checked'); return r?r.value:'np';};
+  const payMet=()=>{if($('pay-met').hidden) return 'np'; const r=document.querySelector('[name="pay-met"]:checked'); return r?r.value:'np';};
   function pintarMetodo(){
     // Jesús (25 oct. 2026): en Chile se cobra en pesos con Mercado Pago.
-    const ve=$('pay-pais').value==='Venezuela'&&!!PM, pp=!!(MET&&MET.paypal), mp=$('pay-pais').value==='Chile'&&!!(MET&&MET.mp);
-    $('pay-met-pm-l').hidden=!ve; $('pay-met-pp-l').hidden=!pp; $('pay-met-mp-l').hidden=!mp;
+    const ve=$('pay-pais').value==='Venezuela'&&!!PM, mp=$('pay-pais').value==='Chile'&&!!(MET&&MET.mp), hm=!['Venezuela','Chile'].includes($('pay-pais').value)&&!!(MET&&(MET.hotmart||[]).includes(payProd));
+    $('pay-met-pm-l').hidden=!ve; $('pay-met-mp-l').hidden=!mp; $('pay-met-hm-l').hidden=!hm;
     const cur=document.querySelector('[name="pay-met"]:checked');
-    if(!metElegido||!cur||cur.closest('label').hidden) $(ve?'pay-met-pm':mp?'pay-met-mp':pp?'pay-met-pp':'pay-met-np').checked=true;
-    $('pay-met').hidden=!ve&&!pp&&!mp; const pm=payMet()==='pm';
+    if(!metElegido||!cur||cur.closest('label').hidden) $(ve?'pay-met-pm':mp?'pay-met-mp':hm?'pay-met-hm':'pay-met-np').checked=true;
+    $('pay-met').hidden=!ve&&!mp&&!hm; const pm=payMet()==='pm';
     $('pay-pm').hidden=!pm; $('pay-precio').parentNode.hidden=pm;
     const P=PAGO[payProd];
     if(pm){const bsv=Math.round(P.p*PM.tasa*100)/100;
@@ -1707,7 +1705,6 @@ d.querySelector('b').append(e.pausa?'Nacionalización en Santa Elena de Uairén'
       $('pay-btn').textContent='Ya pagué, enviar referencia';
     } else if(payMet()==='mp') $('pay-btn').textContent='Pagar $'+(Math.round(P.p*MET.mp.tasa/100)*100).toLocaleString('es-CL')+' CLP con Mercado Pago';
     else $('pay-btn').textContent='Pagar '+P.p+' USD';
-    const conPP=payMet()==='pp'; $('pay-btn').hidden=conPP; $('pay-pp').hidden=!conPP; if(conPP) montarPayPal();
   }
   $('pay-pais').addEventListener('change',()=>{metElegido=false;pintarMetodo();});
   document.querySelectorAll('[name="pay-met"]').forEach(r=>r.addEventListener('change',()=>{metElegido=true;pintarMetodo();}));
@@ -1732,68 +1729,14 @@ d.querySelector('b').append(e.pausa?'Nacionalización en Santa Elena de Uairén'
     const err=$('pay-err'), falla=fallaPago, f=leerPago(); if(!f) return;
     const {nom,m1,m2,wa}=f;
     if(payMet()==='pm') return enviarPM(nom,m1,m2,wa,falla);
-    if(payMet()==='pp') return; // con PayPal se paga con sus botones
     err.textContent=''; const btn=$('pay-btn'); btn.disabled=true; btn.textContent='Abriendo el pago…';
     try{
-      const r=await fetch('/api/crear-orden',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({producto:payProd,nombre:nom,correo:m1,correo2:m2,whatsapp:wa,pais:$('pay-pais').value,acepto:true,metodo:payMet()==='pp'?'paypal':payMet()==='mp'?'mercadopago':'cripto',sim:datosSim()})});
+      const r=await fetch('/api/crear-orden',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({producto:payProd,nombre:nom,correo:m1,correo2:m2,whatsapp:wa,pais:$('pay-pais').value,acepto:true,metodo:payMet()==='mp'?'mercadopago':payMet()==='hm'?'hotmart':'cripto',sim:datosSim()})});
       const j=await r.json().catch(()=>({}));
       if(!r.ok||!j.url) throw new Error(j.error||'');
       guardarSim(); ss.set('kairos-orden',JSON.stringify({orden:j.orden,correo:m1})); location.href=j.url;
     }catch(x){ falla(x.message||'No pudimos abrir el pago. Inténtalo de nuevo o escríbenos por WhatsApp.'); btn.disabled=false; pintarMetodo(); }
   });
-  /* Botones de PayPal (SDK). El Client ID llega de /api/paypal-config; el monto lo pone el servidor en /api/create-order
-     y el cobro se hace en /api/capture-order. El SECRET nunca llega a la página. */
-  let ppSDK=null, ppMontado=false, ppOrden=null;
-  function cargarSDK(){
-    if(ppSDK) return ppSDK;
-    ppSDK=fetch('/api/paypal-config').then(r=>r.json().then(j=>{if(!r.ok||!j.clientId) throw new Error(j.error||''); return j.clientId;}))
-      .then(id=>new Promise((ok,mal)=>{const sc=document.createElement('script');
-        sc.src='https://www.paypal.com/sdk/js?client-id='+encodeURIComponent(id)+'&currency=USD&intent=capture&components=buttons';
-        sc.onload=()=>window.paypal?ok(window.paypal):mal(new Error('')); sc.onerror=()=>mal(new Error('')); document.head.appendChild(sc);}));
-    ppSDK.catch(()=>{ppSDK=null;});
-    return ppSDK;
-  }
-  function montarPayPal(){
-    if(ppMontado) return; ppMontado=true; const nota=$('pay-pp-nota');
-    nota.textContent='Cargando PayPal…';
-    cargarSDK().then(paypal=>paypal.Buttons({
-      style:{layout:'vertical',shape:'rect',label:'pay'},
-      onClick:(data,actions)=>{ $('pay-err').textContent=''; return leerPago()?actions.resolve():actions.reject(); },
-      createOrder:async()=>{
-        const f=leerPago(); if(!f) throw new Error('form');
-        const r=await fetch('/api/create-order',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({producto:payProd,nombre:f.nom,correo:f.m1,correo2:f.m2,whatsapp:f.wa,pais:$('pay-pais').value,acepto:true,sim:datosSim()})});
-        const j=await r.json().catch(()=>({}));
-        if(!r.ok||!j.id){ fallaPago(j.error||'No pudimos abrir PayPal. Inténtalo de nuevo o escríbenos por WhatsApp.'); throw new Error('create'); }
-        ppOrden={orden:j.orden,correo:f.m1}; guardarSim(); ss.set('kairos-orden',JSON.stringify(ppOrden));
-        return j.id;
-      },
-      onApprove:async(data,actions)=>{
-        nota.textContent='Confirmando tu pago…';
-        let j={}, r;
-        try{ r=await fetch('/api/capture-order',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({orderID:data.orderID,orden:ppOrden&&ppOrden.orden})}); j=await r.json().catch(()=>({})); }
-        catch(e){ nota.textContent=''; return fallaPago('No pudimos confirmar tu pago por un problema de conexión. Si se te cobró, escríbenos por WhatsApp con tu orden '+(ppOrden?ppOrden.orden:'')+'.'); }
-        nota.textContent='';
-        if(j.reintentar){ fallaPago(j.error); return actions.restart(); }
-        if(!r.ok||!j.estado) return fallaPago(j.error||'No pudimos confirmar tu pago. Inténtalo de nuevo o escríbenos por WhatsApp.');
-        $('pay-wrap').hidden=true;
-        const msg=$('v-pago-msg'); msg.hidden=false; msg.className='pago-msg ok';
-        const tx=j.transaccion?' ID de la transacción: '+j.transaccion+'.':'';
-        if(j.estado==='COMPLETED'&&j.codigo){
-          ss.set('kairos-orden','');
-          msg.textContent='¡Pago confirmado!'+tx+' Tu código es '+j.codigo+'. Ya abrimos tu detalle; también te lo enviamos por correo. Guárdalo: queda ligado a este vehículo.';
-          $('v-code').value=j.codigo; $('v-calc').click();
-        } else if(j.estado==='COMPLETED'){
-          msg.textContent='¡Pago confirmado!'+tx+' En unos segundos aparece aquí tu código; también te llega por correo.'; esperarCodigo();
-        } else {
-          msg.textContent='Recibimos tu pago y PayPal lo está revisando.'+tx+' Apenas se confirme te enviamos el código por correo. Si tienes dudas, escríbenos por WhatsApp con tu orden '+j.orden+'.';
-        }
-        msg.scrollIntoView({block:'center'});
-      },
-      onCancel:()=>{ fallaPago('Cancelaste el pago en PayPal. No se te cobró nada.'); },
-      onError:e=>{ if(!$('pay-err').textContent) fallaPago('Hubo un problema con PayPal. Inténtalo de nuevo o elige otra forma de pago.'); console.error(e); }
-    }).render('#pay-pp-btns')).then(()=>{ nota.textContent='Paga con tu cuenta PayPal o con tarjeta de crédito o débito, en USD.'; })
-    .catch(()=>{ ppMontado=false; nota.textContent=''; fallaPago('No pudimos cargar PayPal. Revisa tu conexión o elige otra forma de pago.'); });
-  }
   async function enviarPM(nom,m1,m2,wa,falla){
     const ref=$('pm-ref').value.replace(/\s/g,'');
     if(!/^\d{4,20}$/.test(ref)) return falla('Escribe el número de referencia del Pago Móvil (solo números).','pm-ref');

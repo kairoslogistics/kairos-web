@@ -1,4 +1,4 @@
-// Lo que pasa cuando una orden queda pagada, igual para NOWPayments y PayPal.
+// Lo que pasa cuando una orden queda pagada, igual para NOWPayments, Mercado Pago y Hotmart.
 import { leer, crear, cambiar } from './firestore.mjs';
 import { PRODUCTOS, DIAS_CODIGO, USOS_CODIGO, nuevoCodigo } from './comun.mjs';
 import { enviar, correoCodigo, correoAviso } from './correo.mjs';
