@@ -12,6 +12,7 @@ export default async (req) => {
   if (!codigo) return aviso('Falta tu código. Abre el enlace que te llegó por correo.');
   try {
     const c = await leer('codigos/' + codigo);
+    if (c && c.datos.anulado) return aviso('Este código fue anulado porque la compra se canceló o se reembolsó.');
     if (!c || c.datos.tipo !== 'asesoria') return aviso('Este código no es de una asesoría. Escríbenos por WhatsApp y te enviamos tu lista.');
     const o = c.datos.orden ? (await leer('ordenes/' + c.datos.orden))?.datos || {} : {};
     const sel = deSim(o.sim || c.datos.sim || {}, o.pais);
