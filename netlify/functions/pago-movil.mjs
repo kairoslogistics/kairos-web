@@ -1,9 +1,10 @@
-// Pago Móvil (Venezuela). El cliente paga en bolívares a la tasa euro del BCV que Elise carga en el panel
+// Pago Móvil (Venezuela). El cliente paga en bolívares a la tasa euro del BCV del día (lib/tasas.mjs; si la fuente falla, la que Elise carga en el panel)
 // (Elise, 24 oct. 2026) y manda aquí su número de referencia. La orden queda «por verificar» hasta que Elise
 // la aprueba en el panel; entonces la página, que sigue preguntando por la orden, muestra el código.
 import { crear, leer, cambiar } from '../lib/firestore.mjs';
 import { nuevaOrden, json, validarCliente, texto } from '../lib/comun.mjs';
 import { enviar, correoAviso } from '../lib/correo.mjs';
+import { obtenerTasas } from '../lib/tasas.mjs';
 
 export default async (req) => {
   if (req.method !== 'POST') return json({ error: 'Usa POST' }, 405);
@@ -14,7 +15,7 @@ export default async (req) => {
   if (!/^\d{4,20}$/.test(referencia)) return json({ error: 'Escribe el número de referencia del Pago Móvil (solo números).' }, 400);
   try {
     const cfg = (await leer('publico/pagomovil'))?.datos || {};
-    const tasa = +cfg.tasa_euro;
+    const tasa = (await obtenerTasas()).bcv_eur || +cfg.tasa_euro;
     if (!(tasa > 0) || !cfg.telefono) return json({ error: 'El Pago Móvil no está disponible ahora. Escríbenos por WhatsApp.' }, 503);
     const id = nuevaOrden();
     const orden = { id, metodo: 'pagomovil', estado: 'por verificar', producto: d.producto, monto: v.p.precio, tasa_euro: tasa,

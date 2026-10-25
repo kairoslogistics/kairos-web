@@ -594,7 +594,9 @@ const COSTOS_INI=[
   {id:'homologacion',nombre:'Homologación',lineas:[],precio:700,orden:5},
   {id:'titulo',nombre:'Título y placas',lineas:[],precio:800,orden:6},
   {id:'sencamer',cuando:{reg:'ord'},nombre:'SENCAMER (solo importación ordinaria)',lineas:[],precio:450,orden:7}];
-let tasaClp=+(pref.get('clp')||950);
+// Dólar del día (Jesús, 25 oct. 2026): viene de /api/tasas; si escribes otro en Cotizar, se usa el tuyo mientras no recargues.
+let tasaClp=+(pref.get('clp')||950), TASAS={}, tasaMano=false;
+fetch('/api/tasas').then(r=>r.ok?r.json():{}).catch(()=>({})).then(t=>{TASAS=t||{}; if(t.clp>0&&!tasaMano){tasaClp=Math.round(t.clp);} if($('#view')&&$('#view').innerHTML&&['costos','cotizacion','pagos'].includes(tab)) render();});
 const enUsd=l=>(+l.m||0)/(l.mon==='CLP'?tasaClp:1);
 const costoDe=id=>{const a=COSTOS_INI.find(x=>x.id===id),b=S.costos.find(x=>x.id===id);return a||b?{...(a||{}),...(b||{})}:null;};
 function listaCostos(){const ids=[...new Set([...COSTOS_INI.map(x=>x.id),...S.costos.map(x=>x.id)])];return ids.map(costoDe).filter(Boolean).sort((a,b)=>(a.orden||99)-(b.orden||99));}
@@ -608,7 +610,7 @@ function vCostos(){
   const fmt=v=>usd(Math.round(v*100)/100), pct=(g,pr)=>g==null||!pr?'—':Math.round(g/pr*100)+' %';
   const lista=listaCostos(), sel=lista.filter(sv=>cSel.includes(sv.id));
   return '<div class="head"><div><h2>Costos y precios</h2><p>Toca un servicio para ver y editar sus gastos. Con el botón de la derecha lo sumas a la cotización de abajo.</p></div><button class="btn" data-cnuevo>Nuevo servicio</button></div>'+
-    '<div class="cod-new" style="grid-template-columns:minmax(0,260px)"><label>Dólar de referencia (pesos chilenos por 1 USD)<input type="number" min="1" step="1" id="c-tasa" value="'+tasaClp+'"></label></div>'+
+    '<div class="cod-new" style="grid-template-columns:minmax(0,260px)"><label>Dólar del día (pesos chilenos por 1 USD)<input type="number" min="1" step="1" id="c-tasa" value="'+tasaClp+'"></label></div>'+
     (cNuevo?modalServicio():'')+
     lista.map(sv=>{const tot=cTot(sv), pr=cPrecio(sv), sin=!sv.lineas.length, g=pr==null||sin?null:pr-tot, on=cSel.includes(sv.id);
       return '<details class="costo" data-csv="'+esc(sv.id)+'"'+(cAbiertos.has(sv.id)?' open':'')+'><summary class="c-sum"><span class="c-nom">'+esc(sv.nombre)+'</span>'+
@@ -704,7 +706,7 @@ function vPagos(){
     '<section class="cotiza cz-form"><h3>Datos del Pago Móvil</h3>'+
       '<div class="cz-g"><label>Tasa euro BCV (Bs por 1 €)<input id="pm-tasa" type="number" step="any" min="0" value="'+esc(c.tasa_euro)+'"></label><label>Banco<input id="pm-banco" value="'+esc(c.banco)+'" placeholder="Ej.: Banesco (0134)"></label></div>'+
       '<div class="cz-g"><label>Teléfono<input id="pm-tel" value="'+esc(c.telefono)+'" inputmode="tel" placeholder="0414 123 4567"></label><label>Cédula o RIF<input id="pm-ced" value="'+esc(c.cedula)+'" placeholder="V-12345678"></label><label>Titular<input id="pm-tit" value="'+esc(c.titular)+'"></label></div>'+
-      '<p class="sub">'+(c.fecha?'Última actualización: '+esc(c.fecha)+'. ':'')+(+c.tasa_euro>0?'Ejemplo: la asesoría de 40 USD se cobra en '+bsTxt(40*c.tasa_euro)+'.':'Mientras no haya tasa y teléfono, la web no ofrece Pago Móvil.')+'</p>'+
+      '<p class="sub">'+(TASAS.bcv_eur>0?'La web ya cobra con la tasa euro del BCV de hoy: '+bsTxt(TASAS.bcv_eur)+' por 1 €. La que escribas aquí solo se usa si esa fuente falla. ':'')+(c.fecha?'Última actualización: '+esc(c.fecha)+'. ':'')+(+c.tasa_euro>0?'Ejemplo: la asesoría de 40 USD se cobra en '+bsTxt(40*c.tasa_euro)+'.':'Mientras no haya tasa y teléfono, la web no ofrece Pago Móvil.')+'</p>'+
       '<div><button class="btn" type="button" data-pmsave>Guardar y publicar</button></div></section>'+
     '<h3 style="margin:20px 0 8px">Por verificar'+(pend.length?' ('+pend.length+')':'')+'</h3>'+(pend.length?pend.map(o=>fila(o,1)).join(''):'<p class="sub">No hay pagos por verificar.</p>')+
     '<h3 style="margin:20px 0 8px">Últimas órdenes</h3>'+(resto.length?resto.map(o=>fila(o,0)).join(''):'<p class="sub">Todavía no hay órdenes.</p>');
@@ -742,7 +744,7 @@ async function guardarCosto(sv){await guardar('costos',{...sv,lineas:sv.lineas.m
 /* ===== Acciones ===== */
 function bind(){
   bindCz(); bindPagos();
-  const ct=$('#c-tasa'); if(ct) ct.onchange=()=>{const v=+ct.value; if(v>0){tasaClp=v;pref.set('clp',String(v));} render();};
+  const ct=$('#c-tasa'); if(ct) ct.onchange=()=>{const v=+ct.value; if(v>0){tasaClp=v;tasaMano=true;pref.set('clp',String(v));} render();};
   document.querySelectorAll('details[data-csv]').forEach(d=>d.ontoggle=()=>{d.open?cAbiertos.add(d.dataset.csv):cAbiertos.delete(d.dataset.csv);});
   document.querySelectorAll('[data-cpick]').forEach(b=>b.onclick=e=>{e.preventDefault();e.stopPropagation();const id=b.dataset.cpick;cSel=cSel.includes(id)?cSel.filter(x=>x!==id):[...cSel,id];pref.set('cotiza',JSON.stringify(cSel));render();});
   const czc=document.querySelector('[data-czcopy]'); if(czc) czc.onclick=async()=>{try{await navigator.clipboard.writeText(textoCotiza());toast('Cotización copiada');}catch(e){toast('No se pudo copiar');}};

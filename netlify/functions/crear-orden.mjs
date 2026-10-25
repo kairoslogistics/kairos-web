@@ -18,7 +18,7 @@ export default async (req) => {
   const orden = { id, estado: 'pendiente', producto: d.producto, monto: p.precio, nombre, correo, whatsapp, pais, sim, creada: new Date(), created_at: Date.now() };
   const mp = d.metodo === 'mercadopago';
   if (mp && !mpActivo()) return json({ error: 'El pago con Mercado Pago no está disponible ahora. Elige otra forma de pago.' }, 503);
-  if (mp) { orden.metodo = 'mercadopago'; orden.monto_clp = montoClp(p.precio); }
+  if (mp) { orden.metodo = 'mercadopago'; orden.monto_clp = await montoClp(p.precio); }
   const hm = d.metodo === 'hotmart';
   if (hm && !hotmartActivo(d.producto)) return json({ error: 'El pago con Hotmart no está disponible ahora. Elige otra forma de pago.' }, 503);
   if (hm) orden.metodo = 'hotmart';

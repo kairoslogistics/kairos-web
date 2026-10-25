@@ -1257,8 +1257,9 @@ footer a{color:var(--hero-muted)}
     if(p==='us') vSetPais('us');
     if(p==='cl'||p==='ar'||p==='br'){ vSetPais(p,'fuera'); if(p!=='br') $('m-pais').value=p; mCalc(); }
     $('home-miami-line').hidden=(p==='ve'||p==='us');
-    $('curso-local').textContent=p==='cl'?'(≈ '+(40*RATES.clpUsd).toLocaleString('es-CL')+' CLP)':p==='br'?'(≈ R$ '+Math.round(40*RATES.brlUsd)+')':'';
+    pintarLocal=()=>$('curso-local').textContent=p==='cl'?'(≈ '+(40*RATES.clpUsd).toLocaleString('es-CL')+' CLP)':p==='br'?'(≈ R$ '+Math.round(40*RATES.brlUsd)+')':''; pintarLocal();
   }
+  let pintarLocal=()=>{};
   document.querySelectorAll('.flag').forEach(b=>b.addEventListener('click',()=>{setPais(b.dataset.pais); if(typeof mbar==='function') mbar();}));
 
   /* ---------- Desde / Hacia en "¿Qué necesitas?" ---------- */
@@ -1365,8 +1366,8 @@ footer a{color:var(--hero-muted)}
   let abiertos={}; try{abiertos=JSON.parse(ss.get('kairos-cod')||'{}')||{}}catch(e){}
   const guardarAbiertos=()=>ss.set('kairos-cod',JSON.stringify(abiertos));
   let planOk=!!abiertos.plan;
-  // Tasa oficial del BCV de referencia: 875,65 Bs por dólar (9 oct. 2026, Finanzas Digital). El visitante puede cambiarla en su resumen.
-  const BCV_REF=875.65, BCV_FECHA='9 de octubre de 2026';
+  // Tasa oficial del BCV: la del día llega de /api/tasas (Jesús, 25 oct. 2026). 875,65 (9 oct. 2026) queda solo de respaldo. El visitante puede cambiarla en su resumen.
+  let BCV_REF=875.65, BCV_FECHA='9 de octubre de 2026', bcvMano=false;
   let bcv=BCV_REF;
   const bs=v=>'Bs '+v.toLocaleString('es-VE',{minimumFractionDigits:2,maximumFractionDigits:2});
   // Valor del vehículo con puntos de miles: 16.000.000
@@ -1582,7 +1583,7 @@ footer a{color:var(--hero-muted)}
 d.querySelector('b').append(e.pausa?'Nacionalización en Santa Elena de Uairén':e.de+' → '+e.a);d.querySelector('span').textContent=e.pausa?'El vehículo queda en la aduana durante todo el trámite. Los días de espera no están en el hospedaje. Antes de cruzar, llena el tanque en Brasil y lleva dos bidones de 20 litros para llegar hasta Puerto Ordaz.':e.ferry?'Ferry por el río Amazonas, con camarote':e.paises.map(k=>PAISN[k]).join(' y ')+(e.gnb?'. Revisión de la Guardia Nacional en Puerto Ordaz':'');d.querySelector('em').textContent=e.pausa?'según aduana':e.ferry?'3 días':e.km.toLocaleString('es-CL')+' km';el.appendChild(d);});
       const tot=document.createElement('div');tot.className='tr';tot.innerHTML='<div><b>Total por carretera</b><br><span></span></div><em></em>';tot.querySelector('em').textContent=c.land.totalKm.toLocaleString('es-CL')+' km';tot.querySelector('span').textContent=c.land.dias+' días de viaje'+(c.land.br==='stm'?', incluidos 3 días de ferry':'')+'. Las paradas son una guía: duerme donde te sientas seguro.';el.appendChild(tot);}
     $('v-nveh-l').hidden=true; $('v-desinc-l').hidden=!(p==='cl'&&r==='terr'); $('v-br-seg').hidden=!!vSalida().manaos; $('v-mar-note').hidden=!(r==='mar'&&p==='cl');
-    $('v-val-usd').textContent=p==='cl'?'Equivale a '+usd(c.val)+' (dólar de referencia a '+RATES.clpUsd+' pesos). Este valor solo se usa para calcular los impuestos; no se suma al costo.':'Este valor solo se usa para calcular los impuestos; no se suma al costo.';
+    $('v-val-usd').textContent=p==='cl'?'Equivale a '+usd(c.val)+' (dólar del día: '+RATES.clpUsd+' pesos). Este valor solo se usa para calcular los impuestos; no se suma al costo.':'Este valor solo se usa para calcular los impuestos; no se suma al costo.';
     $('v-reg-note').textContent=c.reg==='equi'?'Requisitos: haber vivido 1 año o más fuera de Venezuela, vehículo a tu nombre con 11 meses o más de registro y certificado de uso legalizado por el consulado. Un vehículo por persona y no puedes venderlo en 3 años. Pagas el 1 % del valor del vehículo.':'Para cualquier persona con RIF. Solo vehículos de hasta 5 años de uso: en '+ANIO_ACTUAL+', de '+ORD_MIN+' a '+ANIO_ACTUAL+' (recomendado '+ORD_REC+' en adelante). Pagas 20 % ad valorem, 16 % IVA y 1 % de tasa; los motores de más de 2.0 que no son pick-up pagan 20 % adicional.';
     $('v-title').textContent=TIPO[$('v-tipo').value]+' · '+($('v-modelo').value||'Vehículo')+' '+($('v-anio').value||'');
     $('v-route').textContent='Desde '+(c.land?vSalida().n+', ':'')+c.d.name+' · '+(r==='mar'?'marítima, contenedor compartido':'terrestre'+(c.land?(c.land.br==='stm'?' con ferry por Santarém':' por Porto Velho')+' hasta '+c.land.zona+' ('+c.land.dest+')':''))+' · '+(c.reg==='equi'?'régimen de equipaje':'régimen ordinario');
@@ -1677,13 +1678,13 @@ d.querySelector('b').append(e.pausa?'Nacionalización en Santa Elena de Uairén'
     $('pay-wrap').hidden=false; $('pay-nom').focus(); metElegido=false; pintarMetodo(); Promise.all([cargarPM(),cargarMet()]).then(pintarMetodo);
   }
   /* Pago Móvil (Elise, 24 oct. 2026): solo para quien vive en Venezuela; monto en bolívares a la tasa euro del BCV
-     que Elise carga en el panel (publico/pagomovil). Si falta la tasa o los datos, solo queda el pago con cripto. */
+     del día (/api/tasas; si falla, la que Elise carga en el panel, publico/pagomovil). Si falta la tasa o los datos, solo queda el pago con cripto. */
   let PM=null;
   function cargarPM(){
     if(PM) return Promise.resolve(PM);
     return fetch('https://firestore.googleapis.com/v1/projects/'+FB_WEB.projectId+'/databases/(default)/documents/publico/pagomovil?key='+FB_WEB.apiKey)
       .then(r=>r.ok?r.json():null).then(j=>{const f=(j&&j.fields)||{}, g=k=>f[k]?(f[k].stringValue??f[k].doubleValue??f[k].integerValue??''):'';
-        const t=+g('tasa_euro'); PM=t>0&&g('telefono')?{tasa:t,fecha:g('fecha'),banco:g('banco'),telefono:g('telefono'),cedula:g('cedula'),titular:g('titular')}:false; return PM;}).catch(()=>false);
+        return cargarTasas().then(T=>{const t=T.bcv_eur>0?T.bcv_eur:+g('tasa_euro'); PM=t>0&&g('telefono')?{tasa:t,fecha:T.bcv_eur>0?hoyTxt():g('fecha'),banco:g('banco'),telefono:g('telefono'),cedula:g('cedula'),titular:g('titular')}:false; return PM;});}).catch(()=>false);
   }
   // Formas de pago con claves en Netlify (/api/metodos). PayPal se quitó (Jesús, 25 oct. 2026: no acepta sus bancos de Chile).
   let MET=null;
@@ -1798,12 +1799,22 @@ d.querySelector('b').append(e.pausa?'Nacionalización en Santa Elena de Uairén'
       h+='<tr class="'+(l===2?'sub':'g')+'"><td>'+esc(k)+'</td><td class="n">'+(typeof v==='string'?esc(v):usd(v))+'</td><td class="n">'+(isTax?bs(v*bcv):'')+'</td></tr>';});
     h+='<tr class="tot"><td>Costo total para traerlo</td><td class="n">'+usd(c.total)+'</td><td class="n">'+bs(c.total*bcv)+'</td></tr></tbody></table></div>';
     if(c.land&&planOk) h+='<div class="sh-notes"><p><b>Itinerario:</b> '+c.land.itin.map(e=>esc(e.pausa?'Nacionalización en Santa Elena de Uairén (el vehículo queda en aduana)':e.d+': '+e.de+' → '+e.a+(e.ferry?' (ferry)':' ('+e.km.toLocaleString('es-CL')+' km)')+(e.ctl||[]).filter(k=>k.c!=='Puerto Ordaz').map(k=>', '+k.t.replace('Parada obligatoria: ','').toLowerCase()).join('')+(e.gnb?', revisión GNB':''))).join(' · ')+'</p></div>';
-    h+='<div class="sh-notes"><p>No incluye el valor del vehículo. Los impuestos se pagan en bolívares a la tasa oficial del BCV del día del pago; la tasa de referencia fue '+bs(BCV_REF)+' por dólar ('+BCV_FECHA+'). Impuestos según la experiencia de Kairos, por confirmar con el agente de aduanas. Tarifas de ejemplo de este prototipo.</p><p>Estimado de la web. Kairos lo confirma en la cotización formal. Kairos Logistics · WhatsApp +'+WA.ve+'</p></div>';
+    h+='<div class="sh-notes"><p>No incluye el valor del vehículo. Los impuestos se pagan en bolívares a la tasa oficial del BCV del día del pago; la tasa usada fue '+bs(bcv)+' por dólar ('+BCV_FECHA+'). Impuestos según la experiencia de Kairos, por confirmar con el agente de aduanas. Tarifas de ejemplo de este prototipo.</p><p>Estimado de la web. Kairos lo confirma en la cotización formal. Kairos Logistics · WhatsApp +'+WA.ve+'</p></div>';
     $('v-sheet').innerHTML=h;
   }
   const fmtBcv=v=>v.toLocaleString('es-VE',{minimumFractionDigits:2,maximumFractionDigits:2});
   $('v-bcv').value=fmtBcv(bcv);
-  $('v-bcv').addEventListener('change',e=>{const v=parseFloat(e.target.value.replace(/\./g,'').replace(',','.')); if(v>0){bcv=v;} e.target.value=fmtBcv(bcv); vCalc();});
+  $('v-bcv').addEventListener('change',e=>{const v=parseFloat(e.target.value.replace(/\./g,'').replace(',','.')); if(v>0){bcv=v; bcvMano=true;} e.target.value=fmtBcv(bcv); vCalc();});
+  /* Tasas del día (Jesús, 25 oct. 2026): dólar en pesos chilenos (Banco Central de Chile), real, y BCV dólar y euro.
+     Las trae /api/tasas; si falla, quedan las de respaldo de RATES y BCV_REF. */
+  let TASAS=null;
+  const cargarTasas=()=>TASAS?Promise.resolve(TASAS):fetch('/api/tasas').then(r=>r.ok?r.json():{}).catch(()=>({})).then(j=>TASAS=j||{});
+  const hoyTxt=()=>new Date().toLocaleDateString('es-VE',{day:'numeric',month:'long',year:'numeric'});
+  cargarTasas().then(t=>{
+    if(t.clp>0) RATES.clpUsd=Math.round(t.clp); if(t.brl>0) RATES.brlUsd=t.brl;
+    if(t.bcv_usd>0){ BCV_REF=t.bcv_usd; BCV_FECHA=hoyTxt(); if(!bcvMano){ bcv=BCV_REF; $('v-bcv').value=fmtBcv(bcv); } }
+    pintarLocal(); vCalc(); mCalc(); eCalc();
+  });
   $('v-sheet-btn').addEventListener('click',()=>{renderSheet(vCompute()); $('v-sheet-wrap').hidden=false; $('v-sheet-close').focus();});
   $('v-sheet-close').addEventListener('click',()=>{$('v-sheet-wrap').hidden=true; $('v-sheet-btn').focus();});
   $('v-print').addEventListener('click',()=>{document.body.classList.add('printing'); try{window.print();}catch(e){} setTimeout(()=>document.body.classList.remove('printing'),500);});
@@ -1863,7 +1874,7 @@ d.querySelector('b').append(e.pausa?'Nacionalización en Santa Elena de Uairén'
     $('e-route').textContent='Santiago → Venezuela · '+(aereo?'aéreo puerta a puerta':'caja marítima puerta a puerta');
     lines('e-lines',rows,false);
     $('e-total').textContent=clp(sub+ret);
-    $('e-usd').textContent='Aprox. '+usd((sub+ret)/RATES.clpUsd)+' (dólar de ejemplo a '+RATES.clpUsd+' CLP).';
+    $('e-usd').textContent='Aprox. '+usd((sub+ret)/RATES.clpUsd)+' (dólar del día: '+RATES.clpUsd+' CLP).';
   }
   $('ef').addEventListener('input',eCalc); $('ef').addEventListener('change',eCalc);
   // "Agenda tu retiro" solo aparece si marca el retiro a domicilio (Elise, 21 oct. 2026).

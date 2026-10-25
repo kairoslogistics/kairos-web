@@ -1,10 +1,11 @@
 // Mercado Pago Checkout Pro (Jesús, 25 oct. 2026): para clientes en Chile, en pesos chilenos. El dinero queda en la cuenta Mercado Pago.
-// Claves en Netlify: MP_ACCESS_TOKEN (credencial de producción de una aplicación en mercadopago.cl/developers) y MP_TASA_CLP (pesos por dólar, por defecto 950).
+// Claves en Netlify: MP_ACCESS_TOKEN (credencial de producción de una aplicación en mercadopago.cl/developers) El peso se calcula con el dólar del día (lib/tasas.mjs); MP_TASA_CLP solo es respaldo si la fuente falla (por defecto 950).
+import { obtenerTasas } from './tasas.mjs';
 const API = 'https://api.mercadopago.com';
 export const mpActivo = () => !!process.env.MP_ACCESS_TOKEN;
-export const tasaClp = () => +process.env.MP_TASA_CLP > 0 ? +process.env.MP_TASA_CLP : 950;
+export const tasaClp = async () => (await obtenerTasas()).clp || (+process.env.MP_TASA_CLP > 0 ? +process.env.MP_TASA_CLP : 950);
 // Precio en pesos, redondeado a la centena.
-export const montoClp = usd => Math.round(usd * tasaClp() / 100) * 100;
+export const montoClp = async usd => Math.round(usd * await tasaClp() / 100) * 100;
 
 async function api(ruta, cuerpo) {
   const r = await fetch(API + ruta, { method: cuerpo === undefined ? 'GET' : 'POST', body: cuerpo === undefined ? undefined : JSON.stringify(cuerpo),
