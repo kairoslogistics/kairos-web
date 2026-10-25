@@ -1035,7 +1035,8 @@ footer a{color:var(--hero-muted)}
     <label>WhatsApp con código de país<input id="pay-wa" type="tel" autocomplete="tel" inputmode="tel" placeholder="+56 9 1234 5678" required></label>
     <label>País donde vives<select id="pay-pais"><option>Venezuela</option><option>Chile</option><option>Argentina</option><option>Brasil</option><option>Estados Unidos</option><option>Panamá</option><option>Otro</option></select></label>
     <fieldset class="pay-met" id="pay-met" hidden><legend>¿Cómo quieres pagar?</legend>
-      <label class="check"><input type="radio" name="pay-met" id="pay-met-pm" value="pm" checked> Pago Móvil en bolívares</label>
+      <label class="check" id="pay-met-pm-l"><input type="radio" name="pay-met" id="pay-met-pm" value="pm" checked> Pago Móvil en bolívares</label>
+      <label class="check" id="pay-met-pp-l"><input type="radio" name="pay-met" id="pay-met-pp" value="pp"> Tarjeta de crédito o débito, o PayPal (USD)</label>
       <label class="check"><input type="radio" name="pay-met" id="pay-met-np" value="np"> Cripto o Binance (USDT)</label>
     </fieldset>
     <div class="pay-pm" id="pay-pm" hidden>
@@ -1048,7 +1049,7 @@ footer a{color:var(--hero-muted)}
     <label class="check"><input type="checkbox" id="pay-ok"> Acepto que el código de acceso se enviará a mi correo</label>
     <div class="status err" id="pay-err" role="alert"></div>
     <button class="btn primary" type="submit" id="pay-btn">Pagar 40 USD</button>
-    <small>Puedes pagar con cripto (USDT, BTC y otras), incluso desde tu cuenta de Binance. Si vives en Venezuela, también por Pago Móvil en bolívares. Guardamos los datos de tu simulación para que el detalle corresponda a ella.</small>
+    <small>Puedes pagar con tarjeta o PayPal, con cripto (USDT, BTC y otras) desde tu cuenta de Binance y, si vives en Venezuela, por Pago Móvil en bolívares. Guardamos los datos de tu simulación para que el detalle corresponda a ella.</small>
   </form>
 </div>
 <div class="sheet-wrap" id="v-sheet-wrap" hidden role="dialog" aria-modal="true" aria-label="Resumen de costos">
@@ -1579,7 +1580,7 @@ footer a{color:var(--hero-muted)}
     payProd=prod; payDesde=btn; const P=PAGO[prod];
     $('pay-t').textContent=P.t; $('pay-inc').textContent=P.inc; $('pay-precio').textContent=P.p; $('pay-btn').textContent='Pagar '+P.p+' USD'; $('pay-err').textContent='';
     $('pay-pais').value=vVive()==='ve'?'Venezuela':(PAIS_RES[$('v-pais').value]||'Otro');
-    $('pay-wrap').hidden=false; $('pay-nom').focus(); pintarMetodo(); cargarPM().then(pintarMetodo);
+    $('pay-wrap').hidden=false; $('pay-nom').focus(); metElegido=false; pintarMetodo(); Promise.all([cargarPM(),cargarMet()]).then(pintarMetodo);
   }
   /* Pago Móvil (Elise, 24 oct. 2026): solo para quien vive en Venezuela; monto en bolívares a la tasa euro del BCV
      que Elise carga en el panel (publico/pagomovil). Si falta la tasa o los datos, solo queda el pago con cripto. */
@@ -1590,10 +1591,17 @@ footer a{color:var(--hero-muted)}
       .then(r=>r.ok?r.json():null).then(j=>{const f=(j&&j.fields)||{}, g=k=>f[k]?(f[k].stringValue??f[k].doubleValue??f[k].integerValue??''):'';
         const t=+g('tasa_euro'); PM=t>0&&g('telefono')?{tasa:t,fecha:g('fecha'),banco:g('banco'),telefono:g('telefono'),cedula:g('cedula'),titular:g('titular')}:false; return PM;}).catch(()=>false);
   }
-  const payMet=()=>!$('pay-met').hidden&&$('pay-met-pm').checked?'pm':'np';
+  // PayPal (Elise, 25 oct. 2026): tarjeta o cuenta PayPal en USD. Solo se ofrece cuando sus claves están en Netlify (/api/metodos).
+  let MET=null;
+  const cargarMet=()=>MET?Promise.resolve(MET):fetch('/api/metodos').then(r=>r.ok?r.json():{}).catch(()=>({})).then(j=>MET=j);
+  let metElegido=false;
+  const payMet=()=>{if($('pay-met').hidden) return $('pay-met-pp-l').hidden?'np':'pp'; const r=document.querySelector('[name="pay-met"]:checked'); return r?r.value:'np';};
   function pintarMetodo(){
-    const ve=$('pay-pais').value==='Venezuela'&&PM;
-    $('pay-met').hidden=!ve; const pm=payMet()==='pm';
+    const ve=$('pay-pais').value==='Venezuela'&&!!PM, pp=!!(MET&&MET.paypal);
+    $('pay-met-pm-l').hidden=!ve; $('pay-met-pp-l').hidden=!pp;
+    const cur=document.querySelector('[name="pay-met"]:checked');
+    if(!metElegido||!cur||cur.closest('label').hidden) $(ve?'pay-met-pm':pp?'pay-met-pp':'pay-met-np').checked=true;
+    $('pay-met').hidden=!ve&&!pp; const pm=payMet()==='pm';
     $('pay-pm').hidden=!pm; $('pay-precio').parentNode.hidden=pm;
     const P=PAGO[payProd];
     if(pm){const bsv=Math.round(P.p*PM.tasa*100)/100;
@@ -1602,8 +1610,8 @@ footer a{color:var(--hero-muted)}
       $('pay-btn').textContent='Ya pagué, enviar referencia';
     } else $('pay-btn').textContent='Pagar '+P.p+' USD';
   }
-  $('pay-pais').addEventListener('change',pintarMetodo);
-  document.querySelectorAll('[name="pay-met"]').forEach(r=>r.addEventListener('change',pintarMetodo));
+  $('pay-pais').addEventListener('change',()=>{metElegido=false;pintarMetodo();});
+  document.querySelectorAll('[name="pay-met"]').forEach(r=>r.addEventListener('change',()=>{metElegido=true;pintarMetodo();}));
   function cerrarPago(){ $('pay-wrap').hidden=true; if(payDesde) payDesde.focus(); }
   document.querySelectorAll('[data-pagar]').forEach(b=>b.addEventListener('click',()=>abrirPago(b.dataset.pagar,b)));
   $('pay-x').addEventListener('click',cerrarPago);
@@ -1621,7 +1629,7 @@ footer a{color:var(--hero-muted)}
     if(payMet()==='pm') return enviarPM(nom,m1,m2,wa,falla);
     err.textContent=''; const btn=$('pay-btn'); btn.disabled=true; btn.textContent='Abriendo el pago…';
     try{
-      const r=await fetch('/api/crear-orden',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({producto:payProd,nombre:nom,correo:m1,correo2:m2,whatsapp:wa,pais:$('pay-pais').value,acepto:true,sim:datosSim()})});
+      const r=await fetch('/api/crear-orden',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({producto:payProd,nombre:nom,correo:m1,correo2:m2,whatsapp:wa,pais:$('pay-pais').value,acepto:true,metodo:payMet()==='pp'?'paypal':'cripto',sim:datosSim()})});
       const j=await r.json().catch(()=>({}));
       if(!r.ok||!j.url) throw new Error(j.error||'');
       guardarSim(); ss.set('kairos-orden',JSON.stringify({orden:j.orden,correo:m1})); location.href=j.url;
