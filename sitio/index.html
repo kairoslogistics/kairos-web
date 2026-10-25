@@ -918,9 +918,9 @@ footer a{color:var(--hero-muted)}
     </div>
     <div class="in-video" id="in-video"></div>
     <div class="box in-next" id="in-next" hidden>
-      <h3>Siguiente paso: el video completo (30 minutos)</h3>
+      <h3>Siguiente paso: la asesoría completa, con el video completo (unos 45 minutos)</h3>
       <p class="muted" id="in-next-txt">Todo el proceso de importación de tu vehículo a Venezuela, vía terrestre o vía marítima, explicado paso a paso.</p>
-      <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn primary" type="button" id="in-full">Quiero ver el video completo</button><a class="btn ghost" href="#curso" data-go="curso">Ver la asesoría</a></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn primary" type="button" id="in-full">Comprar la asesoría completa · 45 USD</button><a class="btn ghost" href="#curso" data-go="curso">Ver qué incluye</a></div>
       <div id="in-msg"></div>
     </div>
   </div>
@@ -2041,8 +2041,8 @@ d.querySelector('b').append(e.pausa?'Nacionalización en Santa Elena de Uairén'
     }
     const pk=KPICK('in-pais',IN_PAISES,k=>{ip=k; pintar(); try{history.replaceState(null,'','#intro-'+k)}catch(e){}});
     window.inPais=k=>{if(!IN_RUTA[k]) return; ip=k; pk.set(k); pintar();};
-    $('in-full').addEventListener('click',()=>{const n=IN_PAISES.find(x=>x[0]===ip)[1];
-      msgBox('in-msg','Hola Kairos, vi la introducción gratis y quiero ver el video completo de la importación de mi vehículo desde '+n+' a Venezuela ('+IN_RUTA[ip]+').');});
+    // Jesús (25 oct. 2026): al terminar el video gratis se compra la asesoría de 45 USD; el país del video queda como origen para los requisitos.
+    $('in-full').addEventListener('click',e=>{const o=$('v-pais'); if(o&&[...o.options].some(x=>x.value===ip)&&o.value!==ip){o.value=ip; applyVPais(); vCalc();} abrirPago('asesoria',e.currentTarget);});
     inPais(window.inIni||(IN_RUTA[ss.get('kairos-pais')]?ss.get('kairos-pais'):'cl'));
   })();
 

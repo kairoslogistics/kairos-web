@@ -42,7 +42,7 @@ export default async (req) => {
       }),
     });
     const f = await r.json().catch(() => ({}));
-    if (!r.ok || !f.invoice_url) { console.error('NOWPayments', r.status, JSON.stringify(f)); await cambiar('ordenes/' + id, { estado: 'error al crear pago' }); return json({ error: 'No pudimos abrir el pago. Inténtalo de nuevo o escríbenos por WhatsApp.' }, 502); }
+    if (!r.ok || !f.invoice_url) { console.error('NOWPayments', r.status, JSON.stringify(f)); await cambiar('ordenes/' + id, { estado: 'error al crear pago' }); return json({ error: /min|small|less/i.test(JSON.stringify(f)) ? 'El pago con cripto no acepta un monto tan bajo. Elige otra forma de pago o escríbenos por WhatsApp.' : 'No pudimos abrir el pago. Inténtalo de nuevo o escríbenos por WhatsApp.' }, 502); }
     await cambiar('ordenes/' + id, { factura_id: String(f.id || '') });
     return json({ url: f.invoice_url, orden: id });
   } catch (e) {
