@@ -1063,6 +1063,7 @@ footer a{color:var(--hero-muted)}
     <label>País donde vives<select id="pay-pais"><option>Venezuela</option><option>Chile</option><option>Argentina</option><option>Brasil</option><option>Estados Unidos</option><option>Panamá</option><option>Otro</option></select></label>
     <fieldset class="pay-met" id="pay-met" hidden><legend>¿Cómo quieres pagar?</legend>
       <label class="check" id="pay-met-pm-l"><input type="radio" name="pay-met" id="pay-met-pm" value="pm" checked> Pago Móvil en bolívares</label>
+      <label class="check" id="pay-met-mp-l" hidden><input type="radio" name="pay-met" id="pay-met-mp" value="mp"> Tarjeta de crédito o débito en Chile, o tu saldo Mercado Pago (pesos chilenos)</label>
       <label class="check" id="pay-met-pp-l"><input type="radio" name="pay-met" id="pay-met-pp" value="pp"> Tarjeta de crédito o débito, o PayPal (USD)</label>
       <label class="check"><input type="radio" name="pay-met" id="pay-met-np" value="np"> Cripto o Binance (USDT)</label>
     </fieldset>
@@ -1692,18 +1693,20 @@ d.querySelector('b').append(e.pausa?'Nacionalización en Santa Elena de Uairén'
   let metElegido=false;
   const payMet=()=>{if($('pay-met').hidden) return $('pay-met-pp-l').hidden?'np':'pp'; const r=document.querySelector('[name="pay-met"]:checked'); return r?r.value:'np';};
   function pintarMetodo(){
-    const ve=$('pay-pais').value==='Venezuela'&&!!PM, pp=!!(MET&&MET.paypal);
-    $('pay-met-pm-l').hidden=!ve; $('pay-met-pp-l').hidden=!pp;
+    // Jesús (25 oct. 2026): en Chile se cobra en pesos con Mercado Pago.
+    const ve=$('pay-pais').value==='Venezuela'&&!!PM, pp=!!(MET&&MET.paypal), mp=$('pay-pais').value==='Chile'&&!!(MET&&MET.mp);
+    $('pay-met-pm-l').hidden=!ve; $('pay-met-pp-l').hidden=!pp; $('pay-met-mp-l').hidden=!mp;
     const cur=document.querySelector('[name="pay-met"]:checked');
-    if(!metElegido||!cur||cur.closest('label').hidden) $(ve?'pay-met-pm':pp?'pay-met-pp':'pay-met-np').checked=true;
-    $('pay-met').hidden=!ve&&!pp; const pm=payMet()==='pm';
+    if(!metElegido||!cur||cur.closest('label').hidden) $(ve?'pay-met-pm':mp?'pay-met-mp':pp?'pay-met-pp':'pay-met-np').checked=true;
+    $('pay-met').hidden=!ve&&!pp&&!mp; const pm=payMet()==='pm';
     $('pay-pm').hidden=!pm; $('pay-precio').parentNode.hidden=pm;
     const P=PAGO[payProd];
     if(pm){const bsv=Math.round(P.p*PM.tasa*100)/100;
       $('pm-bs').textContent=bs(bsv).replace(/^Bs\.?\s*/,''); $('pm-tasa').textContent=P.p+' USD a la tasa euro del BCV ('+fmtBcv(PM.tasa)+' Bs'+(PM.fecha?', '+PM.fecha:'')+'). Paga este monto exacto y escribe abajo la referencia.';
       $('pm-datos').innerHTML=[['Banco',PM.banco],['Teléfono',PM.telefono],['Cédula o RIF',PM.cedula],['Titular',PM.titular]].filter(x=>x[1]).map(([k,v])=>'<dt>'+k+'</dt><dd>'+esc(v)+'</dd>').join('');
       $('pay-btn').textContent='Ya pagué, enviar referencia';
-    } else $('pay-btn').textContent='Pagar '+P.p+' USD';
+    } else if(payMet()==='mp') $('pay-btn').textContent='Pagar $'+(Math.round(P.p*MET.mp.tasa/100)*100).toLocaleString('es-CL')+' CLP con Mercado Pago';
+    else $('pay-btn').textContent='Pagar '+P.p+' USD';
     const conPP=payMet()==='pp'; $('pay-btn').hidden=conPP; $('pay-pp').hidden=!conPP; if(conPP) montarPayPal();
   }
   $('pay-pais').addEventListener('change',()=>{metElegido=false;pintarMetodo();});
@@ -1732,11 +1735,11 @@ d.querySelector('b').append(e.pausa?'Nacionalización en Santa Elena de Uairén'
     if(payMet()==='pp') return; // con PayPal se paga con sus botones
     err.textContent=''; const btn=$('pay-btn'); btn.disabled=true; btn.textContent='Abriendo el pago…';
     try{
-      const r=await fetch('/api/crear-orden',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({producto:payProd,nombre:nom,correo:m1,correo2:m2,whatsapp:wa,pais:$('pay-pais').value,acepto:true,metodo:payMet()==='pp'?'paypal':'cripto',sim:datosSim()})});
+      const r=await fetch('/api/crear-orden',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({producto:payProd,nombre:nom,correo:m1,correo2:m2,whatsapp:wa,pais:$('pay-pais').value,acepto:true,metodo:payMet()==='pp'?'paypal':payMet()==='mp'?'mercadopago':'cripto',sim:datosSim()})});
       const j=await r.json().catch(()=>({}));
       if(!r.ok||!j.url) throw new Error(j.error||'');
       guardarSim(); ss.set('kairos-orden',JSON.stringify({orden:j.orden,correo:m1})); location.href=j.url;
-    }catch(x){ falla(x.message||'No pudimos abrir el pago. Inténtalo de nuevo o escríbenos por WhatsApp.'); btn.disabled=false; btn.textContent='Pagar '+PAGO[payProd].p+' USD'; }
+    }catch(x){ falla(x.message||'No pudimos abrir el pago. Inténtalo de nuevo o escríbenos por WhatsApp.'); btn.disabled=false; pintarMetodo(); }
   });
   /* Botones de PayPal (SDK). El Client ID llega de /api/paypal-config; el monto lo pone el servidor en /api/create-order
      y el cobro se hace en /api/capture-order. El SECRET nunca llega a la página. */
