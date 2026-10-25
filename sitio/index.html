@@ -1662,7 +1662,7 @@ d.querySelector('b').append(e.pausa?'Nacionalización en Santa Elena de Uairén'
   }
   function datosSim(){
     const c=vCompute(), q=k=>{const e=$(k);return e.options?e.options[e.selectedIndex].text:e.value;};
-    const d={'Perfil':vVive()==='ve'?'Vive en Venezuela':'Vive fuera de Venezuela','Desde':(c.land?vSalida().n+', ':'')+c.d.name,'Ruta':c.r==='mar'?'Marítima':'Terrestre','Régimen':c.reg==='equi'?'Equipaje':'Ordinario',
+    const d={'pais_origen':$('v-pais').value,'Perfil':vVive()==='ve'?'Vive en Venezuela':'Vive fuera de Venezuela','Desde':(c.land?vSalida().n+', ':'')+c.d.name,'Ruta':c.r==='mar'?'Marítima':'Terrestre','Régimen':c.reg==='equi'?'Equipaje':'Ordinario',
       'Vehículo':TIPO[$('v-tipo').value]+' · '+($('v-modelo').value||'')+' '+($('v-anio').value||''),'Cilindrada':cilTxt(),'Valor':$('v-pais').value==='cl'?clp(vVal()):usd(c.val),'Total estimado':$('v-total').textContent};
     if(c.land) Object.assign(d,{'Llegada':q('v-dest'),'Adultos':$('v-pax').value,'Km por día':$('v-kmdia').value,'Por Brasil':c.land.br==='stm'?'Ferry Santarém':'Porto Velho'});
     return d;

@@ -119,6 +119,11 @@ main .wrap{padding-block:18px 60px;display:grid;gap:16px}
 .c-body>input{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:7px 8px;font:inherit}
 .cotiza{background:var(--surface);border:2px solid var(--line);border-radius:12px;padding:14px;display:grid;gap:8px;margin-top:16px}
 .cotiza h3{margin:0;font-size:17px}
+.rq-hoja{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:16px}.rq-hoja h4{margin:14px 0 6px;font-size:15px}.rq-hoja ul{list-style:none;margin:0;padding:0}
+.rq-hoja li{display:flex;gap:10px;padding:6px 0;border-bottom:1px solid var(--line)}.rq-hoja small{color:var(--muted,#5b6b6e)}.rq-b{flex:0 0 18px;height:18px;border:2px solid currentColor;border-radius:3px;margin-top:2px}
+.rq-ed{margin-top:16px}.rq-ed summary{cursor:pointer;padding:8px 0}.rq-sec{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}.rq-sec h4{margin:0 0 8px}
+.rq-it{display:grid;gap:6px;padding:8px 0;border-bottom:1px solid var(--line)}.rq-row{display:flex;gap:6px}.rq-row input{flex:1;min-width:0}.rq-it input{font:inherit;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--bg,#fff);color:inherit}
+.rq-n{font-size:13px}.rq-tags{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:13px;align-items:center}.rq-tags select{font:inherit;font-size:13px;padding:4px}.rq-save{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;position:sticky;bottom:0;background:var(--bg,#fff);padding:8px 0}
 .cz-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
 .cz-form label{display:grid;gap:4px;font-size:14px;color:var(--muted)}
 .cz-form input:not([type=checkbox]),.cz-form select{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:8px;width:100%;min-width:0;font:inherit}
@@ -408,7 +413,7 @@ const pref={get(k){try{return localStorage.getItem('kairos-admin-'+k)}catch(e){r
 
 /* ===== Pantallas ===== */
 function shell(){
-  const T=[['aliados','Aliados por país'],['alianzas','Posibles alianzas'],['contactos','Contactos y negociación'],['cargas','Cargas'],['referidos','Referidos'],['costos','Costos y precios'],['cotizacion','Cotización'],['pagos','Pagos'],['codigos','Códigos']];
+  const T=[['aliados','Aliados por país'],['alianzas','Posibles alianzas'],['contactos','Contactos y negociación'],['cargas','Cargas'],['referidos','Referidos'],['costos','Costos y precios'],['cotizacion','Cotización'],['pagos','Pagos'],['codigos','Códigos'],['requisitos','Requisitos']];
   $('#app').innerHTML='<header class="top"><div class="wrap"><div class="brand"><b>KAIROS LOGISTICS</b><small>Administración</small></div><span class="mode">'+(MODO==='demo'?'Demostración':'Conectado')+'</span>'+(MODO==='real'?'<button class="btn ghost sm" id="salir" style="color:var(--brand-ink);border-color:var(--brand-ink)">Salir</button>':'')+
     '<nav class="tabs" role="tablist">'+T.map(([k,l])=>'<button role="tab" data-tab="'+k+'" aria-selected="'+(tab===k)+'">'+l+'</button>').join('')+'</nav></div></header><main><div class="wrap" id="view"></div></main>';
   document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;allyOpen=null;pref.set('tab',tab);try{history.replaceState(null,'','#'+tab)}catch(e){};shell();});
@@ -418,7 +423,7 @@ function shell(){
 function render(){
   const v=$('#view');
   const demo=MODO==='demo'?'<div class="demo-note">Modo demostración: los datos son de ejemplo y se guardan solo en este navegador. Cuando conectemos la base de datos, entrarás con tu correo y clave y todo quedará guardado en línea.</div>':'';
-  v.innerHTML=demo+({aliados:vAliados,alianzas:vAlianzas,contactos:vContactos,cargas:vCargas,referidos:vReferidos,costos:vCostos,cotizacion:vCotizacion,pagos:vPagos,codigos:vCodigos}[tab])();
+  v.innerHTML=demo+({aliados:vAliados,alianzas:vAlianzas,contactos:vContactos,cargas:vCargas,referidos:vReferidos,costos:vCostos,cotizacion:vCotizacion,pagos:vPagos,codigos:vCodigos,requisitos:vRequisitos}[tab]||vAliados)();
   bind();
 }
 function paisChips(lista){
@@ -711,7 +716,7 @@ function vPagos(){
     '<h3 style="margin:20px 0 8px">Por verificar'+(pend.length?' ('+pend.length+')':'')+'</h3>'+(pend.length?pend.map(o=>fila(o,1)).join(''):'<p class="sub">No hay pagos por verificar.</p>')+
     '<h3 style="margin:20px 0 8px">Últimas órdenes</h3>'+(resto.length?resto.map(o=>fila(o,0)).join(''):'<p class="sub">Todavía no hay órdenes.</p>');
 }
-const waCodigo=o=>'https://wa.me/'+String(o.whatsapp||'').replace(/\D/g,'')+'?text='+encodeURIComponent('Hola '+(o.nombre||'').split(' ')[0]+', confirmamos tu pago. Tu código Kairos es '+o.codigo+'. Ábrelo aquí: https://kairoslogistics.net/?codigo='+o.codigo+'#vehiculo (queda ligado al primer vehículo que calcules).');
+const waCodigo=o=>'https://wa.me/'+String(o.whatsapp||'').replace(/\D/g,'')+'?text='+encodeURIComponent('Hola '+(o.nombre||'').split(' ')[0]+', confirmamos tu pago. Tu código Kairos es '+o.codigo+'. Ábrelo aquí: https://kairoslogistics.net/?codigo='+o.codigo+'#vehiculo (queda ligado al primer vehículo que calcules).'+(o.producto==='asesoria'?' Tu lista de requisitos para imprimir: https://kairoslogistics.net/api/requisitos?codigo='+o.codigo:''));
 function bindPagos(){
   const sv=document.querySelector('[data-pmsave]'); if(!sv) return;
   sv.onclick=()=>{Object.assign(PMC,{tasa_euro:$('#pm-tasa').value,banco:$('#pm-banco').value.trim(),telefono:$('#pm-tel').value.trim(),cedula:$('#pm-ced').value.trim(),titular:$('#pm-tit').value.trim()});
@@ -724,6 +729,73 @@ function bindPagos(){
     catch(e){b.disabled=false;toast('No se pudo aprobar: '+(e.message||'revisa la conexión'));}});
   document.querySelectorAll('[data-pmno]').forEach(b=>b.onclick=async()=>{const o=S.ordenes.find(x=>x.id===b.dataset.pmno); if(!o||!confirm('¿Rechazar el pago de '+o.nombre+'? La web le dirá que te escriba por WhatsApp.')) return;
     try{await DB.patch('ordenes',o.id,{estado:'rechazada',verificada_at:Date.now()}); render(); toast('Pago rechazado');}catch(e){toast('No se pudo cambiar');}});
+}
+
+/* ===== Requisitos (Elise, 25 oct. 2026) =====
+   Lista de documentos por país de origen, vía y régimen. Se envía por correo a quien compra la asesoría (netlify/lib/requisitos.mjs)
+   y el cliente la imprime para marcar cada documento. Se guarda en Firestore requisitos/lista; la base está en requisitos-base.json. */
+const RQ_P={cl:'Chile',ar:'Argentina',br:'Brasil',pa:'Panamá',us:'Estados Unidos'}, RQ_V={tierra:'Por tierra',mar:'Por barco'}, RQ_R={equi:'Régimen de equipaje',ord:'Régimen ordinario'};
+const rqSoloMar=p=>p==='pa'||p==='us';
+let REQ=null, reqCambios=false, reqSel={p:'cl',v:'tierra',r:'equi'};
+try{Object.assign(reqSel,JSON.parse(pref.get('req-sel')||'{}'))}catch(e){}
+async function cargarReq(){
+  try{ if(MODO==='real'){const d=await db.collection('requisitos').doc('lista').get(); const l=d.exists&&JSON.parse(d.data().json||'null'); if(l&&l.secciones) return REQ=l;}
+    else {const l=JSON.parse(pref.get('requisitos')||'null'); if(l&&l.secciones) return REQ=l;} }catch(e){}
+  try{ REQ=await (await fetch('requisitos-base.json',{cache:'no-store'})).json(); }catch(e){ REQ={secciones:[]}; toast('No se pudo cargar la lista base'); }
+  return REQ;
+}
+function rqFiltrar(l,{p,v,r}){
+  if(rqSoloMar(p)) v='mar';
+  const pasa=(x,cp)=>(!cp||!x.p||!x.p.length||x.p.includes(p))&&(!x.v||!v||x.v===v)&&(!x.r||!r||x.r===r);
+  return (l.secciones||[]).filter(sc=>pasa(sc,false)).map(sc=>({titulo:sc.titulo,items:(sc.items||[]).filter(x=>pasa(x,true))})).filter(sc=>sc.items.length);
+}
+const rqTitulo=({p,v,r})=>'Requisitos · desde '+RQ_P[p]+' · '+RQ_V[rqSoloMar(p)?'mar':v].toLowerCase()+' · '+RQ_R[r].toLowerCase();
+function rqHoja(secs,sel){
+  return '<!doctype html><html lang="es"><head><meta charset="utf-8"><title>'+esc(rqTitulo(sel))+'</title><style>body{font-family:Arial,sans-serif;color:#14262a;max-width:760px;margin:0 auto;padding:20px 16px;font-size:14px;line-height:1.4}'+
+    '.m{font-weight:bold;letter-spacing:2px;color:#0E3B43;border-bottom:3px solid #E0A526;padding-bottom:8px}.m span{color:#B9860F}h1{font-size:19px;color:#0E3B43}h2{font-size:15px;color:#0E3B43;border-bottom:1px solid #d7e0e1;padding-bottom:3px;margin-top:20px}'+
+    'table{width:100%;border-collapse:collapse}td{vertical-align:top;padding:6px 4px;border-bottom:1px solid #eef2f2}td.c{width:28px}.b{display:inline-block;width:18px;height:18px;border:2px solid #0E3B43;border-radius:3px}.n{color:#4d6266;font-size:12px}.pie{font-size:11px;color:#4d6266;margin-top:20px}</style></head><body>'+
+    '<div class="m">KAIROS <span>LOGISTICS</span></div><h1>'+esc(rqTitulo(sel))+'</h1><p class="n">Marca con una X cada documento cuando lo tengas listo.</p>'+
+    secs.map(sc=>'<h2>'+esc(sc.titulo)+'</h2><table>'+sc.items.map(x=>'<tr><td class="c"><span class="b"></span></td><td><b>'+esc(x.t)+'</b>'+(x.n?'<div class="n">'+esc(x.n)+'</div>':'')+'</td></tr>').join('')+'</table>').join('')+
+    '<p class="pie">Lista orientativa según la experiencia de Kairos Logistics. Los requisitos pueden cambiar: confírmalos con tu asesor antes de salir. Si te falta un documento, te ayudamos a conseguirlo.</p></body></html>';
+}
+const rqSel=()=>{const s={...reqSel}; if(rqSoloMar(s.p)) s.v='mar'; return s;};
+const rqVista=sel=>'<h3>'+esc(rqTitulo(sel))+'</h3>'+rqFiltrar(REQ,sel).map(sc=>'<h4>'+esc(sc.titulo)+'</h4><ul>'+sc.items.map(x=>'<li><span class="rq-b"></span><span><b>'+esc(x.t)+'</b>'+(x.n?'<br><small>'+esc(x.n)+'</small>':'')+'</span></li>').join('')+'</ul>').join('');
+function vRequisitos(){
+  if(!REQ){cargarReq().then(()=>{if(tab==='requisitos') render();}); return '<p class="sub">Cargando…</p>';}
+  const sel=rqSel();
+  const opt=(o,v)=>Object.entries(o).map(([k,t])=>'<option value="'+k+'"'+(k===v?' selected':'')+'>'+esc(t)+'</option>').join('');
+  const edItem=(si,ii,x)=>'<div class="rq-it"><div class="rq-row"><input data-rqt="'+si+'.'+ii+'" value="'+esc(x.t)+'" aria-label="Requisito"><button class="btn sm ghost" type="button" data-rqdel="'+si+'.'+ii+'" aria-label="Borrar">Borrar</button></div>'+
+    '<input class="rq-n" data-rqn="'+si+'.'+ii+'" value="'+esc(x.n||'')+'" placeholder="Nota para el cliente (opcional)" aria-label="Nota">'+
+    '<div class="rq-tags">'+Object.entries(RQ_P).map(([k,t])=>'<label><input type="checkbox" data-rqp="'+si+'.'+ii+'" value="'+k+'"'+(!x.p||!x.p.length||x.p.includes(k)?' checked':'')+'> '+esc(t)+'</label>').join('')+
+    '<select data-rqv="'+si+'.'+ii+'" aria-label="Vía"><option value="">Tierra y barco</option>'+opt(RQ_V,x.v||'')+'</select><select data-rqr="'+si+'.'+ii+'" aria-label="Régimen"><option value="">Los dos regímenes</option>'+opt(RQ_R,x.r||'')+'</select></div></div>';
+  return '<div class="head"><div><h2>Requisitos</h2><p>Lista de documentos que reciben por correo quienes compran la asesoría, según su país, la vía y el régimen. La imprimen y marcan cada documento cuando lo tienen.</p></div></div>'+
+    '<section class="cotiza cz-form"><h3>Ver una lista</h3><div class="cz-g"><label>País de origen<select id="rq-p">'+opt(RQ_P,sel.p)+'</select></label>'+
+      '<label>Vía<select id="rq-v"'+(rqSoloMar(sel.p)?' disabled':'')+'>'+opt(RQ_V,sel.v)+'</select></label><label>Régimen<select id="rq-r">'+opt(RQ_R,sel.r)+'</select></label></div>'+
+      (rqSoloMar(sel.p)?'<p class="sub">Desde '+RQ_P[sel.p]+' solo hay envío por barco.</p>':'')+'<div><button class="btn" type="button" data-rqprint>Imprimir esta lista</button></div></section>'+
+    '<section class="rq-hoja">'+rqVista(sel)+'</section>'+
+    '<details class="rq-ed"'+(reqCambios?' open':'')+'><summary><b>Editar la lista</b> <span class="sub">(agrega, cambia o borra requisitos)</span></summary>'+
+      '<p class="sub">Marca en qué países aplica cada requisito, y si es solo para tierra o barco, o solo para un régimen. Los cambios se ven arriba; tócale <b>Guardar</b> para que lleguen a los correos.</p>'+
+      (REQ.secciones||[]).map((sc,si)=>'<div class="rq-sec"><h4>'+esc(sc.titulo)+(sc.v?' · '+RQ_V[sc.v]:'')+(sc.r?' · '+RQ_R[sc.r]:'')+'</h4>'+(sc.items||[]).map((x,ii)=>edItem(si,ii,x)).join('')+'<button class="btn sm ghost" type="button" data-rqadd="'+si+'">+ Agregar requisito</button></div>').join('')+
+      '<div class="rq-save"><button class="btn" type="button" data-rqsave'+(reqCambios?'':' disabled')+'>Guardar</button><button class="btn ghost" type="button" data-rqbase>Volver a la lista base</button></div></details>';
+}
+function bindReq(){
+  if(tab!=='requisitos'||!REQ) return;
+  const it=k=>{const [a,b]=k.split('.').map(Number);return REQ.secciones[a].items[b];}, cambio=(todo)=>{reqCambios=true; if(todo) return render(); const h=document.querySelector('.rq-hoja'); if(h) h.innerHTML=rqVista(rqSel()); const b=document.querySelector('[data-rqsave]'); if(b) b.disabled=false;};
+  ['p','v','r'].forEach(k=>{const e=$('#rq-'+k); if(e) e.onchange=()=>{reqSel[k]=e.value;pref.set('req-sel',JSON.stringify(reqSel));render();};});
+  const pr=document.querySelector('[data-rqprint]'); if(pr) pr.onclick=()=>{const sel=rqSel(); const w=window.open('','_blank'); if(!w){toast('Permite las ventanas emergentes para imprimir');return;} w.document.write(rqHoja(rqFiltrar(REQ,sel),sel)); w.document.close(); w.focus(); setTimeout(()=>w.print(),300);};
+  document.querySelectorAll('[data-rqt]').forEach(e=>e.onchange=()=>{const v=e.value.trim(); if(!v){toast('Escribe el requisito o tócale Borrar');return;} it(e.dataset.rqt).t=v;cambio();});
+  document.querySelectorAll('[data-rqn]').forEach(e=>e.onchange=()=>{const x=it(e.dataset.rqn),v=e.value.trim(); if(v) x.n=v; else delete x.n; cambio();});
+  document.querySelectorAll('[data-rqp]').forEach(e=>e.onchange=()=>{const k=e.dataset.rqp,x=it(k),ps=[...document.querySelectorAll('[data-rqp="'+k+'"]:checked')].map(c=>c.value);
+    if(!ps.length){toast('Marca al menos un país');e.checked=true;return;} if(ps.length===5) delete x.p; else x.p=ps; cambio();});
+  document.querySelectorAll('[data-rqv]').forEach(e=>e.onchange=()=>{const x=it(e.dataset.rqv); if(e.value) x.v=e.value; else delete x.v; cambio();});
+  document.querySelectorAll('[data-rqr]').forEach(e=>e.onchange=()=>{const x=it(e.dataset.rqr); if(e.value) x.r=e.value; else delete x.r; cambio();});
+  document.querySelectorAll('[data-rqdel]').forEach(b=>b.onclick=()=>{const [a,c]=b.dataset.rqdel.split('.').map(Number); if(!confirm('¿Borrar «'+REQ.secciones[a].items[c].t+'»?')) return; REQ.secciones[a].items.splice(c,1); cambio(1);});
+  document.querySelectorAll('[data-rqadd]').forEach(b=>b.onclick=()=>{const t=prompt('Nuevo requisito:'); if(!t||!t.trim()) return; REQ.secciones[+b.dataset.rqadd].items.push({t:t.trim()}); cambio(1);});
+  const sv=document.querySelector('[data-rqsave]'); if(sv) sv.onclick=async()=>{sv.disabled=true;
+    try{ const json=JSON.stringify(REQ); if(MODO==='real') await db.collection('requisitos').doc('lista').set({json,actualizado:Date.now()}); else pref.set('requisitos',json); reqCambios=false; toast('Lista guardada'); render(); }
+    catch(e){sv.disabled=false;toast('No se pudo guardar: '+(e.message||'revisa la conexión'));}};
+  const bs=document.querySelector('[data-rqbase]'); if(bs) bs.onclick=async()=>{if(!confirm('¿Volver a la lista base? Se pierden tus cambios cuando guardes.')) return;
+    try{REQ=await (await fetch('requisitos-base.json',{cache:'no-store'})).json(); reqCambios=true; render();}catch(e){toast('No se pudo cargar la lista base');}};
 }
 let cNuevo=null;
 function modalServicio(){
@@ -743,7 +815,7 @@ async function guardarCosto(sv){await guardar('costos',{...sv,lineas:sv.lineas.m
 
 /* ===== Acciones ===== */
 function bind(){
-  bindCz(); bindPagos();
+  bindCz(); bindPagos(); bindReq();
   const ct=$('#c-tasa'); if(ct) ct.onchange=()=>{const v=+ct.value; if(v>0){tasaClp=v;tasaMano=true;pref.set('clp',String(v));} render();};
   document.querySelectorAll('details[data-csv]').forEach(d=>d.ontoggle=()=>{d.open?cAbiertos.add(d.dataset.csv):cAbiertos.delete(d.dataset.csv);});
   document.querySelectorAll('[data-cpick]').forEach(b=>b.onclick=e=>{e.preventDefault();e.stopPropagation();const id=b.dataset.cpick;cSel=cSel.includes(id)?cSel.filter(x=>x!==id):[...cSel,id];pref.set('cotiza',JSON.stringify(cSel));render();});

@@ -2,6 +2,8 @@
 import { leer, crear, cambiar } from './firestore.mjs';
 import { PRODUCTOS, DIAS_CODIGO, USOS_CODIGO, nuevoCodigo } from './comun.mjs';
 import { enviar, correoCodigo, correoAviso } from './correo.mjs';
+import { cargarLista, deSim, filtrar, hojaHtml, listaCorreo, listaTexto, tituloHoja } from './requisitos.mjs';
+import { sitio } from './comun.mjs';
 
 // Marca la orden pagada con un código nuevo, solo si nadie la cambió desde que la leímos; si otro aviso ganó, ese ya creó el código.
 export async function marcarPagada(ruta, doc, extra) {
@@ -21,11 +23,26 @@ export async function completar(ruta, origen = 'NOWPayments') {
       vence: new Date(Date.now() + DIAS_CODIGO * 864e5), created_at: Date.now(), origen });
   }
   // Cada correo se "reserva" en la orden antes de enviarlo, para que dos avisos al mismo tiempo no lo manden dos veces.
-  for (const [campo, armar] of [['correo_cliente', () => correoCodigo({ ...o, dias: DIAS_CODIGO })], ['correo_aviso', () => correoAviso(o, 'Nuevo pago confirmado')]]) {
+  for (const [campo, armar] of [['correo_cliente', () => correoCliente(o)], ['correo_aviso', () => correoAviso(o, 'Nuevo pago confirmado')]]) {
     if (o[campo]) continue;
     if (!await cambiar(ruta, { [campo]: new Date() }, doc.actualizado)) { doc = await leer(ruta); o = doc.datos; if (o[campo]) continue; if (!await cambiar(ruta, { [campo]: new Date() }, doc.actualizado)) continue; }
-    try { await enviar(armar()); } catch (e) { await cambiar(ruta, { [campo]: null }); throw e; }
+    try { await enviar(await armar()); } catch (e) { await cambiar(ruta, { [campo]: null }); throw e; }
     doc = await leer(ruta); o = doc.datos;
   }
 }
 
+
+// Con la asesoría va también la lista de requisitos de su caso (Elise, 25 oct. 2026): en el correo y como hoja para imprimir.
+export async function correoCliente(o) {
+  const m = correoCodigo({ ...o, dias: DIAS_CODIGO });
+  if (o.producto !== 'asesoria') return m;
+  const sel = deSim(o.sim, o.pais), secs = filtrar(await cargarLista(), sel);
+  const url = sitio() + '/api/requisitos?codigo=' + encodeURIComponent(o.codigo);
+  const fin = '</td></tr>\n<tr><td style="padding-top:24px;font-size:13px';
+  m.html = m.html.replace(fin, `<p style="margin-top:26px;font-size:18px;font-weight:bold">${tituloHoja(sel)}</p>
+<p>Esta es tu lista para ir reuniendo tus documentos. Imprímela y marca cada uno cuando lo tengas.</p>
+<p style="text-align:center;margin:18px 0"><a href="${url}" style="background:#E0A526;color:#0E3B43;text-decoration:none;font-weight:bold;padding:12px 22px;border-radius:8px;display:inline-block">Abrir e imprimir mi lista</a></p>${listaCorreo(secs)}` + fin);
+  m.text += '\n\n' + tituloHoja(sel) + '\nImprime tu lista: ' + url + '\n\n' + listaTexto(secs);
+  m.attachments = [{ filename: 'requisitos-kairos.html', content: hojaHtml(secs, sel, { nombre: o.nombre }), contentType: 'text/html; charset=utf-8' }];
+  return m;
+}
