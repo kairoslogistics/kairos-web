@@ -555,7 +555,7 @@ function vReferidos(){
 
 /* Códigos para la web (Elise, 22 oct. 2026): la página pública ya no trae códigos escritos. Cada código se crea aquí, se manda al cliente
    cuando paga y el servidor lo marca al usarse. La web solo puede leer un código que ya conoce y sumarle un uso (ver firestore.rules). */
-const COD_TIPOS=[['asesoria','Asesoría 40 USD: desglose y plan de viaje'],['calculo','Cálculo completo 25 USD: desglose'],['plan','Plan de viaje 20 USD']];
+const COD_TIPOS=[['asesoria','Asesoría 45 USD: desglose e itinerario'],['calculo','Otro vehículo 15 USD: desglose'],['plan','Itinerario de viaje 30 USD']];
 // Un vehículo extra (15 USD) es un código de tipo «calculo» con un vehículo.
 const codTipo=k=>(COD_TIPOS.find(x=>x[0]===k)||[,k])[1];
 function nuevoCodigo(){const A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',b=new Uint32Array(6);crypto.getRandomValues(b);let c;do{c='KAI-'+[...b].map(n=>A[n%32]).join('');crypto.getRandomValues(b);}while(S.codigos.some(x=>x.id===c));return c;}
@@ -692,7 +692,7 @@ async function cargarPMC(){if(PMC) return PMC; PMC={tasa_euro:'',fecha:'',banco:
 async function guardarPMC(){PMC.fecha=new Date().toLocaleDateString('es-VE');
   try{ if(MODO==='real') await db.collection('publico').doc('pagomovil').set({...PMC,tasa_euro:+PMC.tasa_euro||0,actualizado:Date.now()}); else pref.set('pagomovil',JSON.stringify(PMC)); toast('Datos de Pago Móvil publicados'); render(); }
   catch(e){toast('No se pudo guardar: '+(e.message||'revisa la conexión'));}}
-const PROD_TXT={asesoria:'Asesoría (40 USD)',calculo:'Cálculo completo (25 USD)',extra:'Otro vehículo (15 USD)',plan:'Plan de viaje (20 USD)'};
+const PROD_TXT={asesoria:'Asesoría (45 USD)',calculo:'Cálculo completo (ya no se vende)',extra:'Otro vehículo (15 USD)',plan:'Itinerario de viaje (30 USD)'};
 const PROD_TIPO={asesoria:'asesoria',calculo:'calculo',extra:'calculo',plan:'plan'};
 const bsTxt=v=>'Bs '+(+v||0).toLocaleString('es-VE',{minimumFractionDigits:2,maximumFractionDigits:2});
 function vPagos(){
@@ -706,7 +706,7 @@ function vPagos(){
     '<section class="cotiza cz-form"><h3>Datos del Pago Móvil</h3>'+
       '<div class="cz-g"><label>Tasa euro BCV (Bs por 1 €)<input id="pm-tasa" type="number" step="any" min="0" value="'+esc(c.tasa_euro)+'"></label><label>Banco<input id="pm-banco" value="'+esc(c.banco)+'" placeholder="Ej.: Banesco (0134)"></label></div>'+
       '<div class="cz-g"><label>Teléfono<input id="pm-tel" value="'+esc(c.telefono)+'" inputmode="tel" placeholder="0414 123 4567"></label><label>Cédula o RIF<input id="pm-ced" value="'+esc(c.cedula)+'" placeholder="V-12345678"></label><label>Titular<input id="pm-tit" value="'+esc(c.titular)+'"></label></div>'+
-      '<p class="sub">'+(TASAS.bcv_eur>0?'La web ya cobra con la tasa euro del BCV de hoy: '+bsTxt(TASAS.bcv_eur)+' por 1 €. La que escribas aquí solo se usa si esa fuente falla. ':'')+(c.fecha?'Última actualización: '+esc(c.fecha)+'. ':'')+(+c.tasa_euro>0?'Ejemplo: la asesoría de 40 USD se cobra en '+bsTxt(40*c.tasa_euro)+'.':'Mientras no haya tasa y teléfono, la web no ofrece Pago Móvil.')+'</p>'+
+      '<p class="sub">'+(TASAS.bcv_eur>0?'La web ya cobra con la tasa euro del BCV de hoy: '+bsTxt(TASAS.bcv_eur)+' por 1 €. La que escribas aquí solo se usa si esa fuente falla. ':'')+(c.fecha?'Última actualización: '+esc(c.fecha)+'. ':'')+(+c.tasa_euro>0?'Ejemplo: la asesoría de 45 USD se cobra en '+bsTxt(45*c.tasa_euro)+'.':'Mientras no haya tasa y teléfono, la web no ofrece Pago Móvil.')+'</p>'+
       '<div><button class="btn" type="button" data-pmsave>Guardar y publicar</button></div></section>'+
     '<h3 style="margin:20px 0 8px">Por verificar'+(pend.length?' ('+pend.length+')':'')+'</h3>'+(pend.length?pend.map(o=>fila(o,1)).join(''):'<p class="sub">No hay pagos por verificar.</p>')+
     '<h3 style="margin:20px 0 8px">Últimas órdenes</h3>'+(resto.length?resto.map(o=>fila(o,0)).join(''):'<p class="sub">Todavía no hay órdenes.</p>');

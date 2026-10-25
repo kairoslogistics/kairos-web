@@ -1,11 +1,10 @@
 import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
 
-// Precios en USD (Elise, 22 oct. 2026). El precio lo pone el servidor, nunca la página.
+// Precios en USD (Elise, 25 oct. 2026: solo asesoría 45, otro vehículo 15 e itinerario 30). El precio lo pone el servidor, nunca la página.
 export const PRODUCTOS = {
-  asesoria: { precio: 40, nombre: 'Asesoría para importar tu vehículo', incluye: 'el detalle de cada gasto, tu resumen en una hoja, el video completo y tu plan de viaje' },
-  calculo: { precio: 25, nombre: 'Cálculo completo de importación', incluye: 'el detalle de cada gasto y tu resumen en una hoja. Si contratas el servicio con Kairos, te descontamos estos 25 USD' },
-  extra: { precio: 15, nombre: 'Detalle de otro vehículo', incluye: 'el detalle de cada gasto y tu resumen en una hoja para un vehículo más', tipo: 'calculo' },
-  plan: { precio: 20, nombre: 'Plan de viaje día por día', incluye: 'tu itinerario, el mapa con las paradas y la ruta en Google Maps por tramos' },
+  asesoria: { precio: 45, nombre: 'Asesoría completa para importar tu vehículo a Venezuela', incluye: 'el detalle de cada gasto, tu resumen en una hoja, el video completo y tu itinerario de viaje día por día' },
+  extra: { precio: 15, nombre: 'Cálculo de otro vehículo', incluye: 'el detalle de cada gasto y tu resumen en una hoja para un vehículo más', tipo: 'calculo' },
+  plan: { precio: 30, nombre: 'Itinerario de viaje día por día', incluye: 'tu itinerario, el mapa con las paradas y la ruta en Google Maps por tramos' },
 };
 export const PAISES = ['Venezuela', 'Chile', 'Argentina', 'Brasil', 'Estados Unidos', 'Panamá', 'Otro'];
 // Cuánto dura el código. Cada código sirve para un vehículo; cada vehículo extra se paga aparte, 15 USD (Elise, 23 oct. 2026).
