@@ -30,10 +30,23 @@ export async function crearPedido({ id, monto, descripcion, volver, cancelar }) 
   return { id: j.id, url };
 }
 
-// Cobra el pedido que el cliente aprobó. Devuelve { pagado, monto, moneda, captura, estado }.
+// Pedido para los botones de PayPal en la página (SDK): sin redirección; la página recibe el id y PayPal abre su ventana.
+export async function crearPedidoBotones({ id, monto, descripcion }) {
+  const { r, j } = await api('/v2/checkout/orders', {
+    intent: 'CAPTURE',
+    purchase_units: [{ reference_id: id, custom_id: id, description: descripcion.slice(0, 120), amount: { currency_code: 'USD', value: Number(monto).toFixed(2) } }],
+    payment_source: { paypal: { experience_context: { brand_name: 'Kairos Logistics', locale: 'es-XC', shipping_preference: 'NO_SHIPPING', user_action: 'PAY_NOW' } } },
+  });
+  if (!r.ok || !j.id) throw new Error('PayPal crear ' + r.status + ' ' + (j.name || '') + ' ' + (j.debug_id || ''));
+  return { id: j.id };
+}
+
+// Cobra el pedido que el cliente aprobó. Devuelve { pagado, monto, moneda, captura, estado, problema }.
+// problema: el código de PayPal cuando no se pudo cobrar (por ejemplo INSTRUMENT_DECLINED si rechazaron la tarjeta).
 export async function capturar(pedido) {
   let { r, j } = await api('/v2/checkout/orders/' + encodeURIComponent(pedido) + '/capture', {});
   if (!r.ok && (j.details || []).some(d => d.issue === 'ORDER_ALREADY_CAPTURED')) ({ r, j } = await api('/v2/checkout/orders/' + encodeURIComponent(pedido)));
   const cap = j.purchase_units?.[0]?.payments?.captures?.[0];
-  return { pagado: j.status === 'COMPLETED' && cap?.status === 'COMPLETED', monto: Number(cap?.amount?.value), moneda: cap?.amount?.currency_code, captura: cap?.id || '', estado: cap?.status || j.status || String(r.status) };
+  return { pagado: j.status === 'COMPLETED' && cap?.status === 'COMPLETED', monto: Number(cap?.amount?.value), moneda: cap?.amount?.currency_code, captura: cap?.id || '', estado: cap?.status || j.status || String(r.status),
+    problema: r.ok ? '' : (j.details?.[0]?.issue || j.name || String(r.status)) };
 }
