@@ -1063,7 +1063,7 @@ footer a{color:var(--hero-muted)}
     <fieldset class="pay-met" id="pay-met" hidden><legend>¿Cómo quieres pagar?</legend>
       <label class="check" id="pay-met-pm-l"><input type="radio" name="pay-met" id="pay-met-pm" value="pm" checked> Pago Móvil en bolívares</label>
       <label class="check" id="pay-met-mp-l" hidden><input type="radio" name="pay-met" id="pay-met-mp" value="mp"> Tarjeta de crédito o débito en Chile, o tu saldo Mercado Pago (pesos chilenos)</label>
-      <label class="check" id="pay-met-hm-l" hidden><input type="radio" name="pay-met" id="pay-met-hm" value="hm"> Tarjeta o medios de pago de tu país (Hotmart)</label>
+      <label class="check" id="pay-met-hm-l" hidden><input type="radio" name="pay-met" id="pay-met-hm" value="hm"> Tarjeta o medios de pago de tu país (Hotmart, en tu moneda)</label>
       <label class="check"><input type="radio" name="pay-met" id="pay-met-np" value="np"> Cripto o Binance (USDT)</label>
     </fieldset>
     <div class="pay-pm" id="pay-pm" hidden>
@@ -1692,10 +1692,10 @@ d.querySelector('b').append(e.pausa?'Nacionalización en Santa Elena de Uairén'
   const payMet=()=>{if($('pay-met').hidden) return 'np'; const r=document.querySelector('[name="pay-met"]:checked'); return r?r.value:'np';};
   function pintarMetodo(){
     // Jesús (25 oct. 2026): en Chile se cobra en pesos con Mercado Pago.
-    const ve=$('pay-pais').value==='Venezuela'&&!!PM, mp=$('pay-pais').value==='Chile'&&!!(MET&&MET.mp), hm=!['Venezuela','Chile'].includes($('pay-pais').value)&&!!(MET&&(MET.hotmart||[]).includes(payProd));
+    const ve=$('pay-pais').value==='Venezuela'&&!!PM, mp=$('pay-pais').value==='Chile'&&!!(MET&&MET.mp), hm=!!(MET&&(MET.hotmart||[]).includes(payProd)); // Jesús (25 oct. 2026): Hotmart en todos los países, también Chile.
     $('pay-met-pm-l').hidden=!ve; $('pay-met-mp-l').hidden=!mp; $('pay-met-hm-l').hidden=!hm;
     const cur=document.querySelector('[name="pay-met"]:checked');
-    if(!metElegido||!cur||cur.closest('label').hidden) $(ve?'pay-met-pm':mp?'pay-met-mp':hm?'pay-met-hm':'pay-met-np').checked=true;
+    if(!metElegido||!cur||cur.closest('label').hidden) $(ve?'pay-met-pm':hm?'pay-met-hm':mp?'pay-met-mp':'pay-met-np').checked=true;
     $('pay-met').hidden=!ve&&!mp&&!hm; const pm=payMet()==='pm';
     $('pay-pm').hidden=!pm; $('pay-precio').parentNode.hidden=pm;
     const P=PAGO[payProd];
