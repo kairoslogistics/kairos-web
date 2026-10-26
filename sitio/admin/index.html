@@ -804,6 +804,30 @@ function rqHoja(secs,sel){
     secs.map(sc=>'<h2>'+esc(sc.titulo)+'</h2><table>'+sc.items.map(x=>'<tr><td class="c">'+(sc.vinetas?'•':'<span class="b"></span>')+'</td><td><b>'+esc(x.t)+'</b>'+(x.n?'<div class="n">'+esc(x.n)+'</div>':'')+'</td></tr>').join('')+'</table>').join('')+
     '<p class="pie">Lista orientativa según la experiencia de Kairos Logistics. Los requisitos pueden cambiar: confírmalos con tu asesor antes de salir. Si te falta un documento, te ayudamos a conseguirlo.</p></body></html>';
 }
+/* PDF de requisitos (Jesús, 26 oct. 2026): para mandarlo desde el correo corporativo. Casillas para marcar; las recomendaciones van con viñetas. */
+let rqNombre='';
+async function rqPdf(){
+  const sel=rqSel(), secs=rqFiltrar(REQ,sel), JsPDF=await cargarJsPdf(), d=new JsPDF({unit:'mm',format:'a4'});
+  const W=210, M=18, AZ=[14,59,67], OR=[224,165,38], GR=[77,98,102], TX=[20,38,42], hoy=new Date().toLocaleDateString('es-CL',{day:'numeric',month:'long',year:'numeric'});
+  d.setFillColor(...AZ); d.rect(0,0,W,30,'F'); d.setFillColor(...OR); d.rect(0,30,W,1.5,'F');
+  d.setTextColor(255,255,255); d.setFont('helvetica','bold'); d.setFontSize(18); d.text('KAIROS',M,15); d.setTextColor(...OR); d.text('LOGISTICS',M+d.getTextWidth('KAIROS '),15);
+  d.setTextColor(255,255,255); d.setFont('helvetica','normal'); d.setFontSize(10); d.text('Requisitos para importar tu vehículo a Venezuela',M,22); d.text(hoy,W-M,15,{align:'right'});
+  let y=42; const salto=h=>{if(y+h>278){d.addPage();y=20;}};
+  d.setTextColor(...AZ); d.setFont('helvetica','bold'); d.setFontSize(14); const tt=d.splitTextToSize(rqTitulo(sel),W-2*M); d.text(tt,M,y); y+=6*tt.length+1;
+  d.setFont('helvetica','normal'); d.setFontSize(10); d.setTextColor(...GR); d.text((rqNombre.trim()?'Para '+rqNombre.trim()+' · ':'')+'Marca cada documento cuando lo tengas listo.',M,y); y+=8;
+  secs.forEach(sc=>{salto(16); d.setFont('helvetica','bold'); d.setFontSize(12); d.setTextColor(...AZ); d.text(sc.titulo,M,y); y+=2; d.setDrawColor(215,224,225); d.setLineWidth(0.3); d.line(M,y,W-M,y); y+=6;
+    sc.items.forEach(x=>{d.setFontSize(11); const t=d.splitTextToSize(x.t,W-2*M-9); d.setFontSize(9.5); const n=x.n?d.splitTextToSize(x.n,W-2*M-9):[]; const h=5*t.length+4.2*n.length+3; salto(h);
+      if(sc.vinetas){d.setFillColor(...OR); d.circle(M+1.8,y-1.3,0.9,'F');} else {d.setDrawColor(...AZ); d.setLineWidth(0.4); d.rect(M,y-3.6,4.2,4.2);}
+      d.setFont('helvetica','bold'); d.setFontSize(11); d.setTextColor(...TX); d.text(t,M+9,y); let yy=y+5*t.length;
+      if(n.length){d.setFont('helvetica','normal'); d.setFontSize(9.5); d.setTextColor(...GR); d.text(n,M+9,yy-0.8); yy+=4.2*n.length;}
+      y=yy+3;});
+    y+=3;});
+  for(let i=1;i<=d.getNumberOfPages();i++){d.setPage(i); d.setFont('helvetica','normal'); d.setFontSize(8.5); d.setTextColor(...GR);
+    d.text('Lista orientativa según la experiencia de Kairos Logistics. Los requisitos pueden cambiar: confírmalos con tu asesor antes de salir.',W/2,283,{align:'center'});
+    d.text('Kairos Logistics · WhatsApp +58 422 701 0497 · kairoslogistics.net',W/2,287.5,{align:'center'});}
+  const sl=t=>t.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/gi,'-').replace(/^-|-$/g,'').toLowerCase();
+  d.save('requisitos-kairos-'+sl(RQ_P[sel.p]||'')+(rqNombre.trim()?'-'+sl(rqNombre):'')+'.pdf');
+}
 const rqSel=()=>{const s={...reqSel}; if(rqSoloMar(s.p)) s.v='mar'; return s;};
 const rqVista=sel=>'<h3>'+esc(rqTitulo(sel))+'</h3>'+rqFiltrar(REQ,sel).map(sc=>'<h4>'+esc(sc.titulo)+'</h4><ul>'+sc.items.map(x=>'<li>'+(sc.vinetas?'<span>•</span>':'<span class="rq-b"></span>')+'<span><b>'+esc(x.t)+'</b>'+(x.n?'<br><small>'+esc(x.n)+'</small>':'')+'</span></li>').join('')+'</ul>').join('');
 function vRequisitos(){
@@ -817,7 +841,7 @@ function vRequisitos(){
   return '<div class="head"><div><h2>Requisitos</h2><p>Lista de documentos que reciben por correo quienes compran la asesoría, según su país, la vía y el régimen. La imprimen y marcan cada documento cuando lo tienen.</p></div></div>'+
     '<section class="cotiza cz-form"><h3>Ver una lista</h3><div class="cz-g"><label>País de origen<select id="rq-p">'+opt(RQ_P,sel.p)+'</select></label>'+
       '<label>Vía<select id="rq-v"'+(rqSoloMar(sel.p)?' disabled':'')+'>'+opt(RQ_V,sel.v)+'</select></label><label>Régimen<select id="rq-r">'+opt(RQ_R,sel.r)+'</select></label></div>'+
-      (rqSoloMar(sel.p)?'<p class="sub">Desde '+RQ_P[sel.p]+' solo hay envío por barco.</p>':'')+'<div><button class="btn" type="button" data-rqprint>Imprimir esta lista</button></div></section>'+
+      (rqSoloMar(sel.p)?'<p class="sub">Desde '+RQ_P[sel.p]+' solo hay envío por barco.</p>':'')+'<label>Para (opcional, sale en el PDF)<input id="rq-nombre" placeholder="Nombre del cliente" value="'+esc(rqNombre)+'"></label><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" type="button" data-rqpdf>Descargar PDF</button><button class="btn ghost" type="button" data-rqprint>Imprimir esta lista</button></div></section>'+
     '<section class="rq-hoja">'+rqVista(sel)+'</section>'+
     '<details class="rq-ed"'+(reqCambios?' open':'')+'><summary><b>Editar la lista</b> <span class="sub">(agrega, cambia o borra requisitos)</span></summary>'+
       '<p class="sub">Marca en qué países aplica cada requisito, y si es solo para tierra o barco, o solo para un régimen. Los cambios se ven arriba; tócale <b>Guardar</b> para que lleguen a los correos.</p>'+
@@ -828,6 +852,8 @@ function bindReq(){
   if(tab!=='requisitos'||!REQ) return;
   const it=k=>{const [a,b]=k.split('.').map(Number);return REQ.secciones[a].items[b];}, cambio=(todo)=>{reqCambios=true; if(todo) return render(); const h=document.querySelector('.rq-hoja'); if(h) h.innerHTML=rqVista(rqSel()); const b=document.querySelector('[data-rqsave]'); if(b) b.disabled=false;};
   ['p','v','r'].forEach(k=>{const e=$('#rq-'+k); if(e) e.onchange=()=>{reqSel[k]=e.value;pref.set('req-sel',JSON.stringify(reqSel));render();};});
+  const rn=document.querySelector('#rq-nombre'); if(rn) rn.oninput=()=>{rqNombre=rn.value;};
+  const pd=document.querySelector('[data-rqpdf]'); if(pd) pd.onclick=async()=>{pd.disabled=true;try{await rqPdf();}catch(e){toast('No se pudo crear el PDF: revisa la conexión');}pd.disabled=false;};
   const pr=document.querySelector('[data-rqprint]'); if(pr) pr.onclick=()=>{const sel=rqSel(); const w=window.open('','_blank'); if(!w){toast('Permite las ventanas emergentes para imprimir');return;} w.document.write(rqHoja(rqFiltrar(REQ,sel),sel)); w.document.close(); w.focus(); setTimeout(()=>w.print(),300);};
   document.querySelectorAll('[data-rqt]').forEach(e=>e.onchange=()=>{const v=e.value.trim(); if(!v){toast('Escribe el requisito o tócale Borrar');return;} it(e.dataset.rqt).t=v;cambio();});
   document.querySelectorAll('[data-rqn]').forEach(e=>e.onchange=()=>{const x=it(e.dataset.rqn),v=e.value.trim(); if(v) x.n=v; else delete x.n; cambio();});

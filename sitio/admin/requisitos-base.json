@@ -1,5 +1,5 @@
 {
-  "nota": "Lista base de requisitos (Elise, 25 oct. 2026). El panel la guarda editada en Firestore requisitos/lista. p = países de origen (vacío: todos), v = tierra o mar (vacío: las dos), r = equi u ord (vacío: los dos). Ajustada por Elise el 25 oct. 2026 (sin vigencia en cédula y pasaporte, sin documentos de residencia, ficha técnica, fotos, GNB, copias ni la sección al llegar a Venezuela). Recomendaciones para el viaje (vinetas: sin casillas) agregadas el 26 oct. 2026, por revisar con Elise.",
+  "nota": "Lista base de requisitos (Elise, 25 oct. 2026). El panel la guarda editada en Firestore requisitos/lista. p = países de origen (vacío: todos), v = tierra o mar (vacío: las dos), r = equi u ord (vacío: los dos). Ajustada por Elise el 25 oct. 2026 (sin vigencia en cédula y pasaporte, sin documentos de residencia, ficha técnica, fotos, GNB, copias ni la sección al llegar a Venezuela). Recomendaciones para el viaje (vinetas: sin casillas) agregadas el 26 oct. 2026, por revisar con Elise. Ajustes de Jesús el 26 oct. 2026: sin certificado de la PDI ni de multas; padrón, anotaciones y factura apostillados; kit de seguridad.",
   "secciones": [
     {
       "id": "personales",
@@ -15,14 +15,6 @@
         {
           "t": "RIF personal vigente (SENIAT)",
           "n": "Lo pide la aduana y el agente de aduanas. Si está vencido, actualízalo en línea en seniat.gob.ve."
-        },
-        {
-          "t": "Certificado de viajes (movimiento migratorio) de la PDI",
-          "n": "Prueba que viviste al menos 1 año fuera de Venezuela.",
-          "p": [
-            "cl"
-          ],
-          "r": "equi"
         },
         {
           "t": "Certificado de movimientos migratorios de la Dirección Nacional de Migraciones",
@@ -68,20 +60,14 @@
       "titulo": "Documentos del vehículo (país de origen)",
       "items": [
         {
-          "t": "Padrón (certificado de inscripción) del Registro Civil a tu nombre",
+          "t": "Padrón (certificado de inscripción) del Registro Civil a tu nombre, apostillado",
           "p": [
             "cl"
           ]
         },
         {
-          "t": "Certificado de Anotaciones Vigentes del Registro Civil",
+          "t": "Certificado de Anotaciones Vigentes del Registro Civil, apostillado",
           "n": "Prueba que el vehículo no tiene ninguna prohibición, prenda ni embargo. Sácalo en registrocivil.cl lo más cerca posible de la salida.",
-          "p": [
-            "cl"
-          ]
-        },
-        {
-          "t": "Certificado de multas de tránsito no pagadas, sin deudas",
           "p": [
             "cl"
           ]
@@ -170,7 +156,7 @@
           ]
         },
         {
-          "t": "Factura original de compra o contrato de compraventa autenticado"
+          "t": "Factura original de compra o contrato de compraventa, apostillado"
         }
       ]
     },
@@ -355,7 +341,7 @@
           "t": "Maneja de día y descansa bien: los hoteles del itinerario son recomendaciones, duerme donde te sientas seguro."
         },
         {
-          "t": "Revisa antes de salir los cauchos, el de repuesto, el aceite y los frenos."
+          "t": "Revisa antes de salir los cauchos, el de repuesto, el aceite y los frenos. Lleva también el kit de seguridad (extintor y triángulo) vigente: en Argentina lo revisan en algunas alcabalas."
         },
         {
           "t": "Descarga en Google Maps los mapas sin conexión de tu ruta: hay tramos sin señal, sobre todo en Brasil."
