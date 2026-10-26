@@ -422,6 +422,7 @@ footer a{color:var(--hero-muted)}
 .gal-lb p{color:#fff;margin:10px 0 0;text-align:center}
 .gal-x{position:absolute;top:10px;right:14px;font-size:2rem;line-height:1;color:#fff;background:none;border:0;cursor:pointer}
 .traslado{display:grid;gap:12px}
+.v-plan-fin{margin-top:24px;display:grid;gap:16px}
 .tras-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
 @media (max-width:820px){.tras-grid{grid-template-columns:minmax(0,1fr)}}
 .tras-op{border:1px solid var(--line);border-radius:10px;padding:12px;display:grid;gap:4px;align-content:start}
@@ -580,21 +581,6 @@ footer a{color:var(--hero-muted)}
           <p class="note" id="v-km-total"></p>
           <label class="check"><input type="checkbox" id="v-caravana"> Quiero viajar en caravana con Kairos (300 USD desde Chile)</label>
           <p class="note">Con el acompañamiento logístico te damos la ruta recomendada y recomendaciones de hoteles en el camino.</p>
-          <div class="plan-lock" id="v-plan-lock">
-            <div class="tag">Plan de viaje</div>
-            <b>Itinerario de viaje día por día · 30 USD</b>
-            <p class="note">Tu itinerario con dónde dormir cada noche, el mapa con las paradas y la ruta en Google Maps por tramos. Ya viene incluido en la asesoría completa de 45 USD. Si tienes tu código de asesoría o del itinerario, escríbelo aquí.</p>
-            <div class="access-row"><input id="v-plan-code" type="text" placeholder="KAI-XXXXXX" autocomplete="off" aria-label="Código del plan de viaje"><button class="btn dark" type="button" id="v-plan-open">Abrir mi plan</button></div>
-            <div class="status" id="v-plan-status" role="status"></div>
-            <button class="btn primary" type="button" id="v-plan-buy" data-pagar="plan">Comprar mi itinerario (30 USD)</button>
-            <div id="v-plan-msg"></div>
-          </div>
-          <div id="v-plan" hidden>
-          <div class="route-map"><div class="tag">Mapa de tu ruta</div><svg id="v-map" viewBox="0 0 300 470" role="img" aria-label="Mapa de la ruta terrestre hasta Venezuela"></svg>
-            <div class="map-legend"><span><i class="lg-cl"></i>Chile</span><span><i class="lg-ar"></i>Argentina</span><span><i class="lg-br"></i>Brasil</span><span><i class="lg-ve"></i>Venezuela</span><span><i class="lg-ferry"></i>Ferry</span></div>
-            <div class="tag">Ver la ruta en Google Maps, por tramos</div><div id="v-gmaps" class="gm-links"></div></div>
-          <div class="route-list" id="v-tramos"></div>
-          </div>
         </fieldset>
         <fieldset>
           <legend>Régimen aduanero</legend>
@@ -646,6 +632,24 @@ footer a{color:var(--hero-muted)}
         </div>
         <div id="v-msg"></div>
       </aside>
+    </div>
+    <!-- Elise (26 oct. 2026): el plan de viaje por tierra va al final, para no confundirlo con el código del simulador. -->
+    <div class="v-plan-fin" id="v-plan-box" hidden>
+          <div class="plan-lock" id="v-plan-lock">
+            <div class="tag">Plan de viaje</div>
+            <b>Itinerario de viaje día por día · 30 USD</b>
+            <p class="note">Tu itinerario con dónde dormir cada noche, el mapa con las paradas y la ruta en Google Maps por tramos. Ya viene incluido en la asesoría completa de 45 USD. Si tienes tu código de asesoría o del itinerario, escríbelo aquí.</p>
+            <div class="access-row"><input id="v-plan-code" type="text" placeholder="KAI-XXXXXX" autocomplete="off" aria-label="Código del plan de viaje"><button class="btn dark" type="button" id="v-plan-open">Abrir mi plan</button></div>
+            <div class="status" id="v-plan-status" role="status"></div>
+            <button class="btn primary" type="button" id="v-plan-buy" data-pagar="plan">Comprar mi itinerario de viaje</button>
+            <div id="v-plan-msg"></div>
+          </div>
+          <div id="v-plan" hidden>
+          <div class="route-map"><div class="tag">Mapa de tu ruta</div><svg id="v-map" viewBox="0 0 300 470" role="img" aria-label="Mapa de la ruta terrestre hasta Venezuela"></svg>
+            <div class="map-legend"><span><i class="lg-cl"></i>Chile</span><span><i class="lg-ar"></i>Argentina</span><span><i class="lg-br"></i>Brasil</span><span><i class="lg-ve"></i>Venezuela</span><span><i class="lg-ferry"></i>Ferry</span></div>
+            <div class="tag">Ver la ruta en Google Maps, por tramos</div><div id="v-gmaps" class="gm-links"></div></div>
+          <div class="route-list" id="v-tramos"></div>
+          </div>
     </div>
   </div>
 </section>
@@ -1562,7 +1566,7 @@ footer a{color:var(--hero-muted)}
   function vCalc(full){
     const c=vCompute(), r=c.r;
     const p=$('v-pais').value;
-    $('v-terr-note').hidden=r!=='terr'; $('v-land').hidden=r!=='terr';
+    $('v-terr-note').hidden=r!=='terr'; $('v-land').hidden=r!=='terr'; $('v-plan-box').hidden=r!=='terr';
     $('v-plan').hidden=!planOk; $('v-plan-lock').hidden=planOk;
     // Sin código solo se ve el total de kilómetros; el mapa, los tramos y el viaje día por día son del plan (Elise, 25 oct. 2026).
     if(c.land) $('v-km-total').textContent='Recorrido total: unos '+c.land.totalKm.toLocaleString('es-CL')+' km por carretera hasta '+c.land.dest+', en unos '+c.land.dias+' días de viaje.';
