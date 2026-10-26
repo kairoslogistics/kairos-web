@@ -1355,11 +1355,17 @@ footer a{color:var(--hero-muted)}
     return {tipo,rest:max-usos-1,max};
   }
   // Lo que el cliente vio al usar el código, para que Kairos lo revise en el panel (pestaña Códigos).
+  // Jesús (26 oct. 2026): se guarda el desglose de las dos vías (marítima y terrestre) cuando el país tiene las dos, para verlas en el panel.
   function simParaCodigo(tipo){
-    const c=vCompute(), d=datosSim(), f={};
+    const d=datosSim(), f={}, actual=vRoute(), lista=(c)=>({arrayValue:{values:[...c.rows.map(([k,v,l])=>(l===2?'· ':'')+k+': '+(typeof v==='string'?v:usd(v))),'Costo total: '+usd(c.total),'Impuestos en bolívares (tasa '+bs(bcv)+'): '+bs(c.tax*bcv)].map(t=>({stringValue:t}))}});
     Object.entries(d).forEach(([k,v])=>f[k]={stringValue:String(v)});
-    if(tipo!=='plan') f['Desglose']={arrayValue:{values:[...c.rows.map(([k,v,l])=>(l===2?'· ':'')+k+': '+(typeof v==='string'?v:usd(v))),'Costo total: '+usd(c.total),'Impuestos en bolívares (tasa '+bs(bcv)+'): '+bs(c.tax*bcv)].map(t=>({stringValue:t}))}};
-    if(tipo!=='calculo'&&c.land&&c.land.itin) f['Plan de viaje']={arrayValue:{values:c.land.itin.map(e=>({stringValue:e.pausa?'Nacionalización en Santa Elena de Uairén':e.d+': '+e.de+' → '+e.a+(e.ferry?' (ferry)':' ('+e.km+' km)')}))}};
+    const rutas=[actual,actual==='mar'?'terr':'mar'].filter(r=>!$(r==='mar'?'v-mar':'v-terr').disabled);
+    rutas.forEach(r=>{
+      $(r==='mar'?'v-mar':'v-terr').checked=true; const c=vCompute();
+      if(tipo!=='plan') f['Desglose vía '+(r==='mar'?'marítima':'terrestre')+(rutas.length>1&&r===actual?' (la que eligió)':'')]=lista(c);
+      if(tipo!=='calculo'&&c.land&&c.land.itin) f['Plan de viaje']={arrayValue:{values:c.land.itin.map(e=>({stringValue:e.pausa?'Nacionalización en Santa Elena de Uairén':e.d+': '+e.de+' → '+e.a+(e.ferry?' (ferry)':' ('+e.km+' km)')}))}};
+    });
+    $(actual==='mar'?'v-mar':'v-terr').checked=true;
     return {mapValue:{fields:f}};
   }
   const COD_ERR={no:'Ese código no existe. Revisa que esté escrito igual que en tu mensaje de compra.',usado:'Este código ya se usó con otro vehículo. El detalle de cada vehículo extra cuesta 15 USD.',vencido:'Este código ya venció. Escríbenos por WhatsApp y te ayudamos.',red:'No pudimos revisar el código. Revisa tu conexión e inténtalo de nuevo.'};
