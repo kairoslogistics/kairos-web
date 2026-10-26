@@ -247,6 +247,7 @@ input,select,textarea{font:inherit;font-size:16px;color:var(--ink);background:va
 textarea{min-height:80px;resize:vertical}
 .check{display:flex;gap:8px;align-items:flex-start;font-size:14px;color:var(--ink)}
 .check input{width:auto;margin-top:4px}
+.check.v-sub{margin:6px 0 0 26px}
 .seg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .seg label{position:relative}
 .seg input{position:absolute;opacity:0;pointer-events:none}
@@ -579,7 +580,7 @@ footer a{color:var(--hero-muted)}
           </div>
           <p class="note" id="v-km-total"></p>
           <label class="check"><input type="checkbox" id="v-caravana"> Quiero viajar en caravana con Kairos (300 USD desde Chile)</label>
-          <p class="note">Con el acompañamiento logístico te damos la ruta recomendada y recomendaciones de hoteles en el camino.</p>
+          <p class="note">Viajas con otras personas, compartes gastos y vas con personal de Kairos que ya hizo este viaje muchas veces y conoce cada detalle del camino.</p>
         </fieldset>
         <fieldset>
           <legend>Régimen aduanero</legend>
@@ -600,7 +601,10 @@ footer a{color:var(--hero-muted)}
             <label><span id="v-val-l">Valor del vehículo (pesos chilenos)</span><input id="v-val" type="text" value="7.600.000" inputmode="numeric" autocomplete="off"></label>
             <label id="v-nveh-l" hidden>Vehículos que comparten el contenedor<select id="v-nveh"><option>2</option><option selected>3</option><option>4</option></select></label>
           </div>
-          <label id="v-desinc-l">Trámites en Chile con Kairos (opcional), para que el vehículo quede en regla en Chile<select id="v-desinc"><option value="">No, los hago yo</option><option value="full">Certificado de exportación ante la Aduana de Chile y baja en el Registro Civil: 600 USD</option><option value="exp">Solo el certificado de exportación: 400 USD</option></select></label>
+          <!-- Jesús (26 oct. 2026): casillas sin precio; si no se marcan, el desglose muestra el valor sin sumarlo. -->
+          <label class="check" id="v-cer-l"><input type="checkbox" id="v-cer"> Quiero que Kairos tramite el certificado de uso emitido por la embajada o el consulado</label>
+          <div id="v-desinc-l"><label class="check"><input type="checkbox" id="v-exp"> Quiero que Kairos tramite el certificado de exportación ante la Aduana de Chile</label>
+          <label class="check v-sub"><input type="checkbox" id="v-baja"> y la baja del vehículo ante el Registro Civil</label></div>
           <p class="note" id="v-val-usd"></p>
         </fieldset>
         <p class="note" id="v-tax-note">Impuestos según la experiencia de Kairos, por confirmar con el agente de aduanas. Régimen de equipaje: 1 % del valor del vehículo. Régimen ordinario: 20 % ad valorem, 16 % IVA y 1 % de tasa aduanera, más 20 % adicional para motores de más de 2.0 (salvo pick-up). Fletes por contenedor, valor variable. Los demás trámites en Venezuela los ves uno por uno en el desglose con tu código.</p>
@@ -1550,13 +1554,13 @@ footer a{color:var(--hero-muted)}
     venRows.push(['Homologación',VEH.homolog],['Título y placas',VEH.titulo]);
     if(reg==='ord') venRows.push(['SENCAMER',VEH.sencamer]); // Elise: el régimen de equipaje no lleva SENCAMER.
     // Elise (22 oct. 2026): el certificado de uso solo aparece en el desglose con código, y solo en régimen de equipaje. 550 USD tramitado por Kairos, cualquier país (25 oct. 2026; antes 500 y 350).
-    const cer=reg==='equi'?RATES.cer:0;
+    const cerOk=reg==='equi'&&$('v-cer').checked, cer=cerOk?RATES.cer:0;
     const ven=venRows.reduce((a,x)=>a+x[1],0);
     // El total no incluye el valor del vehículo: el cliente ya lo tiene. El valor solo sirve de base para los impuestos.
     // Elise (12 oct. 2026): sin honorario de Kairos ni imprevistos en el desglose.
-    const dz=p==='cl'&&r==='terr'?$('v-desinc').value:'', desinc=dz==='full'?VEH.desinc:dz==='exp'?VEH.desincExp:0;
+    const enCl=p==='cl'&&r==='terr', expOk=enCl&&$('v-exp').checked, bajaOk=expOk&&$('v-baja').checked, desinc=bajaOk?VEH.desinc:expOk?VEH.desincExp:0, noSum=v=>usd(v)+' (no sumado al total)';
     const sub=log+tax+ven+cer+desinc+(r==='terr'&&p==='cl'&&$('v-caravana').checked?VEH.caravana:0);
-    return {r,reg,d,val,land,tax,base,total:sub,fleteVar:r==='mar'&&p!=='cl'&&!MAR_FLETE[p],rows:[[r==='mar'?(p==='cl'?'Gastos en Chile y flete':'Logística hasta Venezuela'):'Viaje por tierra hasta '+(land?land.zona:''),log,1],...logRows.map(x=>[x[0],x[1],2]),...taxRows,['Trámites en Venezuela',ven,1],...venRows.map(x=>[x[0],x[1],2]),...(cer?[['Certificado de uso tramitado por Kairos (régimen de equipaje)',cer,1]]:[]),...(cer&&r==='mar'&&p==='cl'?[['Plazo del certificado: llega a Caracas desde el pago','Unos 15 días hábiles',2]]:[]),...(r==='mar'?[['Traslado del puerto a tu ciudad','A consultar',2]]:[]),...(r==='terr'&&$('v-caravana').checked?[['Viaje en caravana con Kairos',p==='cl'?VEH.caravana:'A consultar',1]]:[]),...(dz==='full'?[['Certificado de exportación y baja en el Registro Civil en Chile (Kairos)',desinc,1],['Certificado de exportación ante la Aduana de Chile y baja en el Registro Civil, para que el vehículo quede en regla en Chile','Incluido',2]]:dz==='exp'?[['Certificado de exportación en Chile (Kairos)',desinc,1],['Certificado de exportación ante la Aduana de Chile','Incluido',2]]:[])]};
+    return {r,reg,d,val,land,tax,base,total:sub,fleteVar:r==='mar'&&p!=='cl'&&!MAR_FLETE[p],rows:[[r==='mar'?(p==='cl'?'Gastos en Chile y flete':'Logística hasta Venezuela'):'Viaje por tierra hasta '+(land?land.zona:''),log,1],...logRows.map(x=>[x[0],x[1],2]),...taxRows,['Trámites en Venezuela',ven,1],...venRows.map(x=>[x[0],x[1],2]),...(reg==='equi'?[['Certificado de uso emitido por la embajada o el consulado (Kairos)',cerOk?cer:noSum(RATES.cer),1]]:[]),...(cerOk&&r==='mar'&&p==='cl'?[['Plazo del certificado: llega a Caracas desde el pago','Unos 15 días hábiles',2]]:[]),...(r==='mar'?[['Traslado del puerto a tu ciudad','A consultar',2]]:[]),...(r==='terr'&&$('v-caravana').checked?[['Viaje en caravana con Kairos',p==='cl'?VEH.caravana:'A consultar',1]]:[]),...(enCl?[['Certificado de exportación ante la Aduana de Chile (Kairos)',expOk?VEH.desincExp:noSum(VEH.desincExp),1],['Baja del vehículo ante el Registro Civil (Kairos)',bajaOk?VEH.desinc-VEH.desincExp:noSum(VEH.desinc-VEH.desincExp)+(expOk?'':', va con el certificado de exportación'),1]]:[])]};
   }
   function lines(target,rows,locked){
     const el=$(target); el.innerHTML='';
@@ -1592,7 +1596,7 @@ footer a{color:var(--hero-muted)}
         }
 d.querySelector('b').append(e.pausa?'Nacionalización en Santa Elena de Uairén':e.de+' → '+e.a);d.querySelector('span').textContent=e.pausa?'El vehículo queda en la aduana durante todo el trámite. Los días de espera no están en el hospedaje. Antes de cruzar, llena el tanque en Brasil y lleva dos bidones de 20 litros para llegar hasta Puerto Ordaz.':e.ferry?'Ferry por el río Amazonas, con camarote':e.paises.map(k=>PAISN[k]).join(' y ')+(e.gnb?'. Revisión de la Guardia Nacional en Puerto Ordaz':'');d.querySelector('em').textContent=e.pausa?'según aduana':e.ferry?'3 días':e.km.toLocaleString('es-CL')+' km';el.appendChild(d);});
       const tot=document.createElement('div');tot.className='tr';tot.innerHTML='<div><b>Total por carretera</b><br><span></span></div><em></em>';tot.querySelector('em').textContent=c.land.totalKm.toLocaleString('es-CL')+' km';tot.querySelector('span').textContent=c.land.dias+' días de viaje'+(c.land.br==='stm'?', incluidos 3 días de ferry':'')+'. Las paradas son una guía: duerme donde te sientas seguro.';el.appendChild(tot);}
-    $('v-nveh-l').hidden=true; $('v-desinc-l').hidden=!(p==='cl'&&r==='terr'); $('v-br-seg').hidden=!!vSalida().manaos; $('v-mar-note').hidden=!(r==='mar'&&p==='cl');
+    $('v-nveh-l').hidden=true; $('v-desinc-l').hidden=!(p==='cl'&&r==='terr'); $('v-cer-l').hidden=c.reg!=='equi'; $('v-baja').disabled=!$('v-exp').checked; if(!$('v-exp').checked) $('v-baja').checked=false; $('v-br-seg').hidden=!!vSalida().manaos; $('v-mar-note').hidden=!(r==='mar'&&p==='cl');
     $('v-val-usd').textContent=p==='cl'?'Equivale a '+usd(c.val)+' (dólar del día: '+RATES.clpUsd+' pesos). Este valor solo se usa para calcular los impuestos; no se suma al costo.':'Este valor solo se usa para calcular los impuestos; no se suma al costo.';
     $('v-reg-note').textContent=c.reg==='equi'?'Requisitos: haber vivido 1 año o más fuera de Venezuela, vehículo a tu nombre con 11 meses o más de registro y certificado de uso legalizado por el consulado. Un vehículo por persona y no puedes venderlo en 3 años. Pagas el 1 % del valor del vehículo.':'Para cualquier persona con RIF. Solo vehículos de hasta 5 años de uso: en '+ANIO_ACTUAL+', de '+ORD_MIN+' a '+ANIO_ACTUAL+' (recomendado '+ORD_REC+' en adelante). Pagas 20 % ad valorem, 16 % IVA y 1 % de tasa; los motores de más de 2.0 que no son pick-up pagan 20 % adicional.';
     $('v-title').textContent=TIPO[$('v-tipo').value]+' · '+($('v-modelo').value||'Vehículo')+' '+($('v-anio').value||'');
@@ -1633,13 +1637,28 @@ d.querySelector('b').append(e.pausa?'Nacionalización en Santa Elena de Uairén'
     if(r.err==='tipo'&&r.tipo==='plan'&&!$('v-terr').disabled){ $('v-terr').checked=true; vCalc(); $('v-plan-code').value=code; st.textContent=''; $('v-plan-open').click(); $('v-plan-lock').scrollIntoView({block:'center'}); return; }
     if(r.err){st.textContent=r.err==='tipo'?'Ese código es del plan de viaje. Escríbelo en el recuadro «Plan de viaje».':COD_ERR[r.err];st.className='status err';return;}
     unlockKey=vKey(); unlockCode=code; abiertos.desglose={code,key:unlockKey};
-    if(r.tipo==='asesoria'){abiertos.plan=code; planOk=true; abiertos.video=code;}
+    if(r.tipo==='asesoria'){abiertos.video=code; const it=await abrirItin(code); if(!it.error){abiertos.plan=code; planOk=true;} else if(it.motivo!=='red'){ $('v-plan-status').textContent=it.error; $('v-plan-status').className='status err'; }}
     guardarAbiertos();
     vCalc(); st.textContent='Listo. Ya ves cada gasto y puedes descargar tu resumen. Puedes cambiar la ruta o el régimen. Para otro vehículo, cada detalle extra cuesta 15 USD.'; st.className='status ok';
   });
+  /* Itinerario privado (Elise, 26 oct. 2026): /api/itinerario revisa que el código esté vigente (60 días) y lo cuenta por dispositivo
+     (máximo 3). Devuelve lo que el cliente eligió en el simulador para armar el mismo itinerario en otro teléfono. */
+  const dispId=()=>{let d=ss.get('kairos-disp'); if(!d||d.length<8){const b=new Uint32Array(4);crypto.getRandomValues(b);d=[...b].map(n=>n.toString(36)).join('').slice(0,24);ss.set('kairos-disp',d);} return d;};
+  const equipo=()=>{const u=navigator.userAgent||''; const so=/iPhone|iPad/.test(u)?'iPhone':/Android/.test(u)?'Android':/Mac/.test(u)?'Mac':/Windows/.test(u)?'Windows':'Otro';
+    const nav=/Edg\//.test(u)?'Edge':/CriOS|Chrome\//.test(u)?'Chrome':/FxiOS|Firefox\//.test(u)?'Firefox':/Safari\//.test(u)?'Safari':'navegador'; return so+' · '+nav;};
+  async function abrirItin(code){
+    try{const r=await fetch('/api/itinerario',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({codigo:code,dispositivo:dispId(),equipo:equipo()})});
+      const j=await r.json().catch(()=>({})); return r.ok?j:{error:j.error||COD_ERR.red,motivo:j.motivo||'red'};}
+    catch(e){return {error:COD_ERR.red,motivo:'red'};}
+  }
+  let itinEnlace=false;
   $('v-plan-open').addEventListener('click',async()=>{
     const code=$('v-plan-code').value.trim().toUpperCase(), st=$('v-plan-status'), btn=$('v-plan-open');
     btn.disabled=true; st.textContent='Revisando tu código…'; st.className='status';
+    const it=await abrirItin(code);
+    if(it.error){btn.disabled=false; st.textContent=it.error; st.className='status err'; return;}
+    if(it.campos&&(itinEnlace||!ss.get('kairos-sim'))){try{restaurarSim(JSON.parse(it.campos));}catch(e){} if(!$('v-terr').disabled) $('v-terr').checked=true; vCalc();}
+    itinEnlace=false;
     const r=await canjear(code,'plan'); btn.disabled=false;
     if(r.err){st.textContent=r.err==='tipo'?'Ese código es del cálculo, no del plan de viaje. Escríbelo en «¿Ya tienes tu código?».':COD_ERR[r.err];st.className='status err';return;}
     abiertos.plan=code; planOk=true; guardarAbiertos(); st.textContent=''; vCalc();
@@ -1662,16 +1681,17 @@ d.querySelector('b').append(e.pausa?'Nacionalización en Santa Elena de Uairén'
       :'<p class="note">Tu video completo estará aquí muy pronto. Te avisaremos por correo cuando esté listo.</p>';
   }
   // Datos del simulador: se guardan antes de ir a pagar y se recuperan al volver o al abrir el enlace del correo.
-  const SIM_CAMPOS=['v-vive-ve','v-vive-fuera','v-pais','v-mar','v-terr','v-ciudad','v-br-pv','v-br-stm','v-dest','v-pax','v-kmdia','v-kml','v-espera','v-caravana','v-equi','v-ord','v-tipo','v-cil','v-modelo','v-anio','v-val','v-desinc'];
-  function guardarSim(){const o={};SIM_CAMPOS.forEach(k=>{const e=$(k);if(e) o[k]=e.type==='radio'||e.type==='checkbox'?e.checked:e.value;});ss.set('kairos-sim',JSON.stringify(o));}
-  function restaurarSim(){
-    let o=null; try{o=JSON.parse(ss.get('kairos-sim')||'null')}catch(e){} if(!o) return;
+  const SIM_CAMPOS=['v-vive-ve','v-vive-fuera','v-pais','v-mar','v-terr','v-ciudad','v-br-pv','v-br-stm','v-dest','v-pax','v-kmdia','v-kml','v-espera','v-caravana','v-equi','v-ord','v-tipo','v-cil','v-modelo','v-anio','v-val','v-cer','v-exp','v-baja'];
+  function guardarSim(){ss.set('kairos-sim',JSON.stringify(camposSim()));}
+  const camposSim=()=>{const o={};SIM_CAMPOS.forEach(k=>{const e=$(k);if(e) o[k]=e.type==='radio'||e.type==='checkbox'?e.checked:e.value;});return o;};
+  function restaurarSim(dado){
+    let o=dado||null; if(!o){try{o=JSON.parse(ss.get('kairos-sim')||'null')}catch(e){}} if(!o||typeof o!=='object') return;
     const poner=k=>{const e=$(k);if(!e||!(k in o)) return; if(e.type==='radio'||e.type==='checkbox') e.checked=o[k]; else e.value=o[k];};
     poner('v-vive-ve'); poner('v-vive-fuera'); applyVive(); poner('v-pais'); applyVPais(); SIM_CAMPOS.forEach(poner); vCalc();
   }
   function datosSim(){
     const c=vCompute(), q=k=>{const e=$(k);return e.options?e.options[e.selectedIndex].text:e.value;};
-    const d={'pais_origen':$('v-pais').value,'Perfil':vVive()==='ve'?'Vive en Venezuela':'Vive fuera de Venezuela','Desde':(c.land?vSalida().n+', ':'')+c.d.name,'Ruta':c.r==='mar'?'Marítima':'Terrestre','Régimen':c.reg==='equi'?'Equipaje':'Ordinario',
+    const d={'pais_origen':$('v-pais').value,'campos':JSON.stringify(camposSim()),'Perfil':vVive()==='ve'?'Vive en Venezuela':'Vive fuera de Venezuela','Desde':(c.land?vSalida().n+', ':'')+c.d.name,'Ruta':c.r==='mar'?'Marítima':'Terrestre','Régimen':c.reg==='equi'?'Equipaje':'Ordinario',
       'Vehículo':TIPO[$('v-tipo').value]+' · '+($('v-modelo').value||'')+' '+($('v-anio').value||''),'Cilindrada':cilTxt(),'Valor':$('v-pais').value==='cl'?clp(vVal()):usd(c.val),'Total estimado':$('v-total').textContent};
     if(c.land) Object.assign(d,{'Llegada':q('v-dest'),'Adultos':$('v-pax').value,'Km por día':$('v-kmdia').value,'Por Brasil':c.land.br==='stm'?'Ferry Santarém':'Porto Velho'});
     return d;
@@ -1781,7 +1801,8 @@ d.querySelector('b').append(e.pausa?'Nacionalización en Santa Elena de Uairén'
   // Al volver de NOWPayments (?pago=ok o ?pago=cancelado) o desde el enlace del correo (?codigo=XXXXXXXX).
   function alVolver(){
     let q; try{q=new URLSearchParams(location.search)}catch(e){return}
-    const pago=q.get('pago'), cod=(q.get('codigo')||'').trim().toUpperCase();
+    const pago=q.get('pago'), cod=(q.get('codigo')||'').trim().toUpperCase(), itn=(q.get('itinerario')||'').trim().toUpperCase();
+    if(itn){ restaurarSim(); try{history.replaceState(null,'',location.pathname+'#vehiculo')}catch(e){} if(!$('v-terr').disabled){$('v-terr').checked=true;} vCalc(); itinEnlace=true; $('v-plan-code').value=itn; $('v-plan-open').click(); setTimeout(()=>$('v-plan-box').scrollIntoView({block:'start'}),60); return; }
     if(!pago&&!cod){ let o=null; try{o=JSON.parse(ss.get('kairos-orden')||'null')}catch(e){} if(o&&o.pm){ restaurarSim(); const m=$('v-pago-msg'); m.hidden=false; m.className='pago-msg ok'; m.textContent='Estamos verificando tu Pago Móvil. Apenas lo confirmemos, tu código aparece aquí.'; esperarCodigo(); } return; }
     restaurarSim();
     const msg=$('v-pago-msg');
@@ -2070,6 +2091,8 @@ d.querySelector('b').append(e.pausa?'Nacionalización en Santa Elena de Uairén'
   /* ---------- Curso ---------- */
 
   setPais(ss.get('kairos-pais')||'cl',!ss.get('kairos-pais'));
+  // Si este navegador ya tenía el itinerario abierto, se vuelve a revisar: vencido, anulado o sin cupo de dispositivos, se cierra.
+  if(abiertos.plan&&!/[?&]itinerario=/.test(location.search)) abrirItin(abiertos.plan).then(it=>{if(it.error&&it.motivo!=='red'){delete abiertos.plan; planOk=false; guardarAbiertos(); $('v-plan-status').textContent=it.error; $('v-plan-status').className='status err'; vCalc();}});
   alVolver();
   vCalc(); mCalc(); eCalc();
   show(location.hash.slice(1)||'inicio',false); mbar();

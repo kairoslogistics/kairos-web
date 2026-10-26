@@ -1,6 +1,6 @@
 // Lo que pasa cuando una orden queda pagada, igual para NOWPayments, Mercado Pago y Hotmart.
 import { leer, crear, cambiar } from './firestore.mjs';
-import { PRODUCTOS, DIAS_CODIGO, USOS_CODIGO, nuevoCodigo } from './comun.mjs';
+import { PRODUCTOS, USOS_CODIGO, nuevoCodigo, diasDe, MAX_DISPOSITIVOS } from './comun.mjs';
 import { enviar, correoCodigo, correoAviso } from './correo.mjs';
 import { cargarLista, deSim, filtrar, hojaHtml, listaCorreo, listaTexto, tituloHoja } from './requisitos.mjs';
 import { sitio } from './comun.mjs';
@@ -20,7 +20,7 @@ export async function completar(ruta, origen = 'NOWPayments') {
   const cod = 'codigos/' + o.codigo;
   if (!await leer(cod)) {
     await crear(cod, { tipo: PRODUCTOS[o.producto]?.tipo || o.producto, max: USOS_CODIGO, usos: 0, cliente: o.nombre + ' · ' + o.correo, orden: o.id,
-      vence: new Date(Date.now() + DIAS_CODIGO * 864e5), created_at: Date.now(), origen });
+      vence: new Date(Date.now() + diasDe(o.producto) * 864e5), created_at: Date.now(), origen });
   }
   // Cada correo se "reserva" en la orden antes de enviarlo, para que dos avisos al mismo tiempo no lo manden dos veces.
   for (const [campo, armar] of [['correo_cliente', () => correoCliente(o)], ['correo_aviso', () => correoAviso(o, 'Nuevo pago confirmado')]]) {
@@ -34,9 +34,10 @@ export async function completar(ruta, origen = 'NOWPayments') {
 
 // Con la asesoría va también la lista de requisitos de su caso (Elise, 25 oct. 2026): en el correo y como hoja para imprimir.
 export async function correoCliente(o) {
-  const m = correoCodigo({ ...o, dias: DIAS_CODIGO });
-  if (o.producto !== 'asesoria') return m;
-  const sel = deSim(o.sim, o.pais), secs = filtrar(await cargarLista(), sel);
+  const m = correoCodigo({ ...o, dias: diasDe(o.producto), dispositivos: MAX_DISPOSITIVOS });
+  if (o.producto !== 'asesoria' && o.producto !== 'plan') return m;
+  const sel = deSim(o.sim, o.pais); if (o.producto === 'plan') sel.v = 'tierra';
+  const secs = filtrar(await cargarLista(), sel);
   const url = sitio() + '/api/requisitos?codigo=' + encodeURIComponent(o.codigo);
   const fin = '</td></tr>\n<tr><td style="padding-top:24px;font-size:13px';
   m.html = m.html.replace(fin, `<p style="margin-top:26px;font-size:18px;font-weight:bold">${tituloHoja(sel)}</p>

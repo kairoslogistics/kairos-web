@@ -13,10 +13,11 @@ export default async (req) => {
   try {
     const c = await leer('codigos/' + codigo);
     if (c && c.datos.anulado) return aviso('Este código fue anulado porque la compra se canceló o se reembolsó.');
-    if (!c || c.datos.tipo !== 'asesoria') return aviso('Este código no es de una asesoría. Escríbenos por WhatsApp y te enviamos tu lista.');
+    if (!c || !['asesoria', 'plan'].includes(c.datos.tipo)) return aviso('Este código no es de una asesoría ni de un itinerario. Escríbenos por WhatsApp y te enviamos tu lista.');
     const o = c.datos.orden ? (await leer('ordenes/' + c.datos.orden))?.datos || {} : {};
     const sel = deSim(o.sim || c.datos.sim || {}, o.pais);
     for (const [k, ok] of [['p', PAISES_REQ], ['v', VIAS], ['r', REGS]]) { const x = q.get(k); if (x !== null) sel[k] = ok[x] ? x : ''; }
+    if (c.datos.tipo === 'plan') sel.v = 'tierra';
     if (soloMar(sel.p)) sel.v = 'mar';
     const url = x => '?' + new URLSearchParams({ codigo, ...sel, ...x }).toString();
     const grupo = (k, ops) => ops.map(([v, t]) => sel[k] === v ? `<b>${esc(t)}</b>` : `<a href="${esc(url({ [k]: v }))}">${esc(t)}</a>`).join(' ');

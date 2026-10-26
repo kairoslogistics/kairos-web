@@ -1,5 +1,5 @@
 {
-  "nota": "Lista base de requisitos (Elise, 25 oct. 2026). El panel la guarda editada en Firestore requisitos/lista. p = países de origen (vacío: todos), v = tierra o mar (vacío: las dos), r = equi u ord (vacío: los dos). Ajustada por Elise el 25 oct. 2026 (sin vigencia en cédula y pasaporte, sin documentos de residencia, ficha técnica, fotos, GNB, copias ni la sección al llegar a Venezuela).",
+  "nota": "Lista base de requisitos (Elise, 25 oct. 2026). El panel la guarda editada en Firestore requisitos/lista. p = países de origen (vacío: todos), v = tierra o mar (vacío: las dos), r = equi u ord (vacío: los dos). Ajustada por Elise el 25 oct. 2026 (sin vigencia en cédula y pasaporte, sin documentos de residencia, ficha técnica, fotos, GNB, copias ni la sección al llegar a Venezuela). Recomendaciones para el viaje (vinetas: sin casillas) agregadas el 26 oct. 2026, por revisar con Elise.",
   "secciones": [
     {
       "id": "personales",
@@ -341,6 +341,35 @@
         }
       ],
       "v": "mar"
+    },
+    {
+      "id": "recomendaciones",
+      "titulo": "Recomendaciones para el viaje",
+      "vinetas": true,
+      "v": "tierra",
+      "items": [
+        {
+          "t": "Antes de entrar a Venezuela, llena el tanque en Brasil y lleva dos bidones de 20 litros de respaldo para llegar hasta Puerto Ordaz."
+        },
+        {
+          "t": "Maneja de día y descansa bien: los hoteles del itinerario son recomendaciones, duerme donde te sientas seguro."
+        },
+        {
+          "t": "Revisa antes de salir los cauchos, el de repuesto, el aceite y los frenos."
+        },
+        {
+          "t": "Descarga en Google Maps los mapas sin conexión de tu ruta: hay tramos sin señal, sobre todo en Brasil."
+        },
+        {
+          "t": "Lleva efectivo en dólares y algo en moneda de cada país para peajes, combustible y comida."
+        },
+        {
+          "t": "Ten tus documentos originales a mano en cada frontera y en cada parada obligatoria."
+        },
+        {
+          "t": "Si vas por Santarém, reserva el ferry con tiempo."
+        }
+      ]
     }
   ]
 }

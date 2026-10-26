@@ -9,6 +9,9 @@ export const PRODUCTOS = {
 export const PAISES = ['Venezuela', 'Chile', 'Argentina', 'Brasil', 'Estados Unidos', 'Panamá', 'Otro'];
 // Cuánto dura el código. Cada código sirve para un vehículo; cada vehículo extra se paga aparte, 15 USD (Elise, 23 oct. 2026).
 export const DIAS_CODIGO = +(process.env.CODIGO_DIAS || 30);
+// El itinerario (solo o dentro de la asesoría) dura 60 días y se abre en hasta 3 dispositivos (Elise, 26 oct. 2026).
+export const DIAS_ITINERARIO = 60, MAX_DISPOSITIVOS = 3;
+export const diasDe = producto => (producto === 'plan' || producto === 'asesoria' ? DIAS_ITINERARIO : DIAS_CODIGO);
 export const USOS_CODIGO = 1;
 export const WHATSAPP = '+58 422 701 0497';
 export const sitio = () => (process.env.SITE_URL || 'https://kairoslogistics.net').replace(/\/+$/, '');
@@ -49,6 +52,6 @@ export function validarCliente(d) {
   if (d.acepto !== true) return { error: 'Debes aceptar que el código llegará a tu correo.' };
   // Solo valores simples y cortos de la simulación.
   const sim = Object.fromEntries(Object.entries(d.sim && typeof d.sim === 'object' ? d.sim : {}).slice(0, 40)
-    .filter(([, v]) => ['string', 'number', 'boolean'].includes(typeof v)).map(([k, v]) => [texto(k, 40), typeof v === 'string' ? texto(v, 300) : v]));
+    .filter(([, v]) => ['string', 'number', 'boolean'].includes(typeof v)).map(([k, v]) => [texto(k, 40), typeof v === 'string' ? texto(v, k === 'campos' ? 2000 : 300) : v]));
   return { p, nombre, correo, whatsapp, pais, sim };
 }
