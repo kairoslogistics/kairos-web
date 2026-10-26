@@ -1351,7 +1351,7 @@ footer a{color:var(--hero-muted)}
     const f=(await r.json()).fields||{}, tipo=(f.tipo||{}).stringValue||'', usos=numF(f.usos), max=numF(f.max)||1;
     const sirve=para==='plan'?(tipo==='plan'||tipo==='asesoria'):(tipo==='asesoria'||tipo==='calculo');
     if(!sirve) return {err:'tipo',tipo};
-    const vence=(f.vence||{}).timestampValue; if(vence&&new Date(vence)<new Date()) return {err:'vencido'};
+    const vence=(f.vence||{}).timestampValue||(f.vence||{}).stringValue; if(vence&&new Date(vence)<new Date()) return {err:'vencido'};
     // Cada código sirve para un vehículo (Elise, 23 oct. 2026). Queda ligado al primero que abre y ese mismo se puede volver a abrir.
     const clave=tipo==='plan'?'plan':vKey(), veh=(f.vehiculo||{}).stringValue||'';
     if(veh&&(veh===clave||para==='plan')) return {tipo,rest:0,max,reuso:true};

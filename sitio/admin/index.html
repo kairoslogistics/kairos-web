@@ -368,11 +368,15 @@ const TABLAS=['aliados','casos','contactos','cargas','referidos','descartados','
 const LS='kairos-admin-demo-2';
 const S={aliados:[],casos:[],contactos:[],cargas:[],referidos:[],descartados:[],codigos:[],costos:[]};
 let db=null, auth=null, MODO=FB.apiKey&&FB.projectId?'real':'demo';
-const limpio=o=>JSON.parse(JSON.stringify(o));
+// Las fechas (vence) se guardan como fecha de Firestore, no como texto: las reglas de «codigos» comparan vence con la hora
+// y con texto rechazaban el uso del código, que la web mostraba como «ya se usó» (Jesús, 26 oct. 2026).
+const limpio=o=>{const d=JSON.parse(JSON.stringify(o)); for(const [k,v] of Object.entries(o)) if(v instanceof Date||(v&&typeof v.toDate==='function')) d[k]=v; return d;};
 const DB={
   async load(){
     if(MODO==='demo'){let d=null;try{d=JSON.parse(localStorage.getItem(LS)||'null')}catch(e){} Object.assign(S,d||SEED()); TABLAS.forEach(t=>{S[t]=S[t]||[];}); return;}
     for(const t of TABLAS){const q=await db.collection(t).get(); S[t]=q.docs.map(d=>({...d.data(),id:d.id})).sort((a,b)=>(a.created_at||0)-(b.created_at||0));}
+    // Arregla los códigos creados antes con la fecha de vencimiento como texto.
+    for(const c of S.codigos) if(typeof c.vence==='string'&&!isNaN(new Date(c.vence))){try{const f=new Date(c.vence); await db.collection('codigos').doc(c.id).update({vence:f}); c.vence=f;}catch(e){console.error('vence',c.id,e);}}
   },
   persist(){try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}},
   async save(t,row){
