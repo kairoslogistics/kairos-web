@@ -25,16 +25,17 @@ const marco = cuerpo => `<!doctype html><html lang="es"><body style="margin:0;ba
 export function correoCodigo(o) {
   const p = PRODUCTOS[o.producto], cod = encodeURIComponent(o.codigo);
   const plan = o.producto === 'plan', conItin = plan || o.producto === 'asesoria';
-  const enlace = sitio() + (plan ? '/?itinerario=' : '/?codigo=') + cod + '#vehiculo', itin = sitio() + '/?itinerario=' + cod + '#vehiculo';
+  const enlace = sitio() + (plan ? '/?itinerario=' : '/?codigo=') + cod + '#vehiculo', itin = sitio() + '/?itinerario=' + cod + '#vehiculo', gastos = sitio() + '/gastos/?codigo=' + cod;
   // Itinerario (Elise, 26 oct. 2026): página privada que se abre en el teléfono, en hasta 3 dispositivos, por 60 días.
   const notaItin = conItin ? `Tu itinerario se abre con este código en hasta ${o.dispositivos || 3} teléfonos o computadores.` : '';
   const boton = (url, t, claro) => `<p style="text-align:center;margin:14px 0"><a href="${esc(url)}" style="background:${claro ? '#ffffff' : '#E0A526'};color:#0E3B43;text-decoration:none;font-weight:bold;padding:12px 22px;border-radius:8px;display:inline-block">${t}</a></p>`;
   return {
     to: o.correo, subject: (plan ? 'Tu itinerario de viaje' : 'Tu código de acceso') + ' – Kairos Logistics',
-    text: `Hola ${o.nombre}:\n\nRecibimos tu pago. Tu código de acceso es: ${o.codigo}\n\n${plan ? 'Abre tu itinerario' : 'Úsalo'} aquí: ${enlace}\n${conItin && !plan ? 'Tu itinerario: ' + itin + '\n' : ''}\nIncluye ${p.incluye}. Sirve por ${o.dias} días.${notaItin ? ' ' + notaItin : ''}\n\nOrden: ${o.id}\nMonto pagado: ${o.monto} USD\n\n¿Dudas? WhatsApp ${WHATSAPP}\n\nKairos Logistics`,
+    text: `Hola ${o.nombre}:\n\nRecibimos tu pago. Tu código de acceso es: ${o.codigo}\n\n${plan ? 'Abre tu itinerario' : 'Úsalo'} aquí: ${enlace}\n${conItin && !plan ? 'Tu itinerario: ' + itin + '\n' : ''}${conItin ? 'Registra tus gastos del viaje: ' + gastos + '\n' : ''}\nIncluye ${p.incluye}. Sirve por ${o.dias} días.${notaItin ? ' ' + notaItin : ''}\n\nOrden: ${o.id}\nMonto pagado: ${o.monto} USD\n\n¿Dudas? WhatsApp ${WHATSAPP}\n\nKairos Logistics`,
     html: marco(`<p>Hola ${esc(o.nombre)}:</p><p>Recibimos tu pago de <b>${esc(p.nombre)}</b>. Este es tu código de acceso:</p>
 <p style="font-family:'Courier New',monospace;font-size:30px;font-weight:bold;letter-spacing:6px;color:#0E3B43;background:#E0A526;padding:14px 18px;border-radius:8px;text-align:center;margin:18px 0">${esc(o.codigo)}</p>
 ${plan ? boton(enlace, 'Abrir mi itinerario', true) : boton(enlace, 'Ver mi detalle', true) + (conItin ? boton(itin, 'Abrir mi itinerario', true) : '')}
+${conItin ? boton(gastos, 'Registrar mis gastos del viaje', true) + '<p style="font-size:14px">Anota en el camino lo que gastas en combustible, comida, hospedaje y peajes. Funciona sin señal y te suma todo en dólares.</p>' : ''}
 <p>Incluye ${esc(p.incluye)}. Tu código sirve por ${o.dias} días.${notaItin ? ' ' + esc(notaItin) : ''}</p>
 <p style="font-size:14px;color:#c9d8da">Orden: ${esc(o.id)}<br>Monto pagado: ${esc(o.monto)} USD</p>`),
   };

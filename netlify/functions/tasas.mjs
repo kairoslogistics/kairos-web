@@ -1,4 +1,4 @@
-// Tasas del día para la página: peso chileno, real y bolívar (BCV dólar y euro). Ver lib/tasas.mjs.
+// Tasas del día para la página: peso chileno, peso argentino, real y bolívar (BCV dólar y euro). Ver lib/tasas.mjs.
 import { obtenerTasas } from '../lib/tasas.mjs';
 
 export default async () => {

@@ -663,6 +663,7 @@ footer a{color:var(--hero-muted)}
           <label class="km-it">¿Cuántos kilómetros quieres manejar por día?<select id="v-kmdia-it"><option value="500">500 km (muy tranquilo)</option><option value="600">600 km (tranquilo)</option><option value="700">700 km</option><option value="800">800 km</option><option value="900">900 km</option><option value="1000">1.000 km (lo recomendado: unos 8 días hasta la frontera)</option><option value="1100">1.100 km (rápido)</option></select></label>
           <div class="route-list" id="v-tramos"></div>
           <div class="v-recs" id="v-recs"></div>
+          <div class="cta-box" id="v-gastos-box"><b>Registra tus gastos en el camino</b><p class="note">Anota combustible, comida, hospedaje y peajes en la moneda de cada país. Te suma todo en dólares, día por día, y funciona sin señal. Agrégalo a la pantalla de inicio de tu teléfono.</p><a class="btn primary" id="v-gastos" href="/gastos/">Abrir mi registro de gastos</a></div>
           </div>
     </div>
   </div>
@@ -1584,7 +1585,7 @@ footer a{color:var(--hero-muted)}
     const c=vCompute(), r=c.r;
     const p=$('v-pais').value;
     $('v-terr-note').hidden=r!=='terr'; $('v-land').hidden=r!=='terr'; $('v-plan-box').hidden=r!=='terr';
-    $('v-plan').hidden=!planOk; $('v-plan-lock').hidden=planOk; $('v-cta-plan').hidden=r!=='terr'||planOk; $('v-kmdia-it').value=$('v-kmdia').value;
+    $('v-plan').hidden=!planOk; $('v-plan-lock').hidden=planOk; $('v-cta-plan').hidden=r!=='terr'||planOk; $('v-kmdia-it').value=$('v-kmdia').value; if(planOk&&abiertos.plan) $('v-gastos').href='/gastos/?codigo='+encodeURIComponent(abiertos.plan);
     // Sin código solo se ve el total de kilómetros; el mapa, los tramos y el viaje día por día son del plan (Elise, 25 oct. 2026).
     if(c.land) $('v-km-total').textContent='Recorrido total: unos '+c.land.totalKm.toLocaleString('es-CL')+' km por carretera hasta '+c.land.dest+', en unos '+c.land.dias+' días de viaje.';
     if(c.land&&planOk){drawMap(p,c.land.br,c.land.dest);const el=$('v-tramos'); el.innerHTML='';

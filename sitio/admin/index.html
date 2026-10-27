@@ -119,6 +119,7 @@ main .wrap{padding-block:18px 60px;display:grid;gap:16px}
 .c-body>input{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:7px 8px;font:inherit}
 .cotiza{background:var(--surface);border:2px solid var(--line);border-radius:12px;padding:14px;display:grid;gap:8px;margin-top:16px}
 .cotiza h3{margin:0;font-size:17px}
+.g-tab{width:100%;border-collapse:collapse;font-size:13px}.g-tab th,.g-tab td{text-align:left;padding:5px 6px;border-bottom:1px solid var(--line);white-space:nowrap}
 .rq-hoja{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:16px}.rq-hoja h4{margin:14px 0 6px;font-size:15px}.rq-hoja ul{list-style:none;margin:0;padding:0}
 .rq-hoja li{display:flex;gap:10px;padding:6px 0;border-bottom:1px solid var(--line)}.rq-hoja small{color:var(--muted,#5b6b6e)}.rq-b{flex:0 0 18px;height:18px;border:2px solid currentColor;border-radius:3px;margin-top:2px}
 .rq-ed{margin-top:16px}.rq-ed summary{cursor:pointer;padding:8px 0}.rq-sec{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}.rq-sec h4{margin:0 0 8px}
@@ -364,7 +365,7 @@ const SEED=()=>{
 
 /* ===== Datos: este navegador o Supabase ===== */
 function uid(){try{return crypto.randomUUID()}catch(e){return 'id'+Date.now().toString(36)+Math.random().toString(36).slice(2)}}
-const TABLAS=['aliados','casos','contactos','cargas','referidos','descartados','codigos','costos','cotizaciones','ordenes'];
+const TABLAS=['aliados','casos','contactos','cargas','referidos','descartados','codigos','costos','cotizaciones','ordenes','gastos'];
 const LS='kairos-admin-demo-2';
 const S={aliados:[],casos:[],contactos:[],cargas:[],referidos:[],descartados:[],codigos:[],costos:[]};
 let db=null, auth=null, MODO=FB.apiKey&&FB.projectId?'real':'demo';
@@ -418,7 +419,7 @@ const pref={get(k){try{return localStorage.getItem('kairos-admin-'+k)}catch(e){r
 
 /* ===== Pantallas ===== */
 function shell(){
-  const T=[['aliados','Aliados por país'],['alianzas','Posibles alianzas'],['contactos','Contactos y negociación'],['cargas','Cargas'],['referidos','Referidos'],['costos','Costos y precios'],['cotizacion','Cotización'],['pagos','Pagos'],['codigos','Códigos'],['requisitos','Requisitos']];
+  const T=[['aliados','Aliados por país'],['alianzas','Posibles alianzas'],['contactos','Contactos y negociación'],['cargas','Cargas'],['referidos','Referidos'],['costos','Costos y precios'],['cotizacion','Cotización'],['pagos','Pagos'],['codigos','Códigos'],['gastos','Gastos de viaje'],['requisitos','Requisitos']];
   $('#app').innerHTML='<header class="top"><div class="wrap"><div class="brand"><b>KAIROS LOGISTICS</b><small>Administración</small></div><span class="mode">'+(MODO==='demo'?'Demostración':'Conectado')+'</span>'+(MODO==='real'?'<button class="btn ghost sm" id="salir" style="color:var(--brand-ink);border-color:var(--brand-ink)">Salir</button>':'')+
     '<nav class="tabs" role="tablist">'+T.map(([k,l])=>'<button role="tab" data-tab="'+k+'" aria-selected="'+(tab===k)+'">'+l+'</button>').join('')+'</nav></div></header><main><div class="wrap" id="view"></div></main>';
   document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;allyOpen=null;pref.set('tab',tab);try{history.replaceState(null,'','#'+tab)}catch(e){};shell();});
@@ -428,7 +429,7 @@ function shell(){
 function render(){
   const v=$('#view');
   const demo=MODO==='demo'?'<div class="demo-note">Modo demostración: los datos son de ejemplo y se guardan solo en este navegador. Cuando conectemos la base de datos, entrarás con tu correo y clave y todo quedará guardado en línea.</div>':'';
-  v.innerHTML=demo+({aliados:vAliados,alianzas:vAlianzas,contactos:vContactos,cargas:vCargas,referidos:vReferidos,costos:vCostos,cotizacion:vCotizacion,pagos:vPagos,codigos:vCodigos,requisitos:vRequisitos}[tab]||vAliados)();
+  v.innerHTML=demo+({aliados:vAliados,alianzas:vAlianzas,contactos:vContactos,cargas:vCargas,referidos:vReferidos,costos:vCostos,cotizacion:vCotizacion,pagos:vPagos,codigos:vCodigos,gastos:vGastos,requisitos:vRequisitos}[tab]||vAliados)();
   bind();
 }
 function paisChips(lista){
@@ -589,6 +590,24 @@ function verDisp(c){
     (n?'<button class="btn sm ghost" type="button" data-codlib="'+esc(c.id)+'">Liberar dispositivos</button>':'')+
     (c.anulado?'':'<button class="btn sm ghost" type="button" data-codmas="'+esc(c.id)+'">Dar más días</button>')+'</div>'+
     (n?'<div class="meta">'+L.map((d,i)=>'<span>'+(i+1)+'. '+esc(d.equipo||'Dispositivo')+' · '+(+d.veces||1)+' '+((+d.veces||1)===1?'vez':'veces')+' · último '+new Date(+d.ultima).toLocaleString('es-CL')+'</span>').join('')+'</div>':'');
+}
+/* Gastos de viaje (Jesús, 27 oct. 2026): lo que anotan los clientes en /gastos/ durante el viaje por tierra (colección gastos,
+   un documento por código). Sirve para comparar lo real con lo que calcula el simulador. */
+const G_CATS={combustible:'Combustible',alimentacion:'Alimentación',hospedaje:'Hospedaje',peaje:'Peajes',otro:'Otros'}, G_PAIS={cl:'Chile',ar:'Argentina',br:'Brasil',ve:'Venezuela',otro:'Otro'};
+function vGastos(){
+  const dia=ms=>new Date(+ms).toLocaleDateString('es-CL'), viajes=[...(S.gastos||[])].map(g=>({...g,L:(g.items||[]).filter(x=>!x.borrado)})).filter(g=>g.L.length).sort((a,b)=>(+b.actualizado||0)-(+a.actualizado||0));
+  const sum=(L,f)=>L.filter(f).reduce((a,x)=>a+(+x.usd||0),0);
+  const tabla=(L,claves,campo)=>Object.entries(claves).map(([k,n])=>[n,sum(L,x=>x[campo]===k)]).filter(x=>x[1]>0).map(([n,v])=>'<span>'+esc(n)+': <b>'+usd(Math.round(v*100)/100)+'</b></span>').join('');
+  const todos=viajes.flatMap(g=>g.L);
+  return '<div class="head"><div><h2>Gastos de viaje</h2><p>Lo que anotan los clientes en su registro de gastos (kairoslogistics.net/gastos) durante el viaje por tierra. Todo en dólares, con la tasa del día que usó el teléfono.</p></div></div>'+
+    (viajes.length?'<section class="cotiza"><h3>Todos los viajes ('+viajes.length+')</h3><div class="meta">'+tabla(todos,G_CATS,'cat')+'</div><div class="meta">'+tabla(todos,G_PAIS,'pais')+'</div>'+
+      '<p class="sub">Promedio por viaje: '+usd(Math.round(sum(todos,()=>true)/viajes.length*100)/100)+'</p></section>':'')+
+    (viajes.length?'<div class="list">'+viajes.map(g=>{const dias=[...new Set(g.L.map(x=>dia(x.fecha)))], tot=sum(g.L,()=>true);
+      return '<details class="costo"><summary class="c-sum"><span class="c-nom" style="font-weight:700">'+esc(g.codigo||g.id)+'<br><span class="sub" style="font-weight:400">'+esc(g.cliente||'Sin cliente')+' · '+g.L.length+' gastos · '+dias.length+' día(s)</span></span><span class="c-k"><small>Total</small><b>'+usd(Math.round(tot*100)/100)+'</b></span></summary>'+
+        '<div style="display:grid;gap:8px;padding:8px 0"><div class="meta">'+tabla(g.L,G_CATS,'cat')+'</div><div class="meta">'+tabla(g.L,G_PAIS,'pais')+'</div>'+
+        '<div style="overflow-x:auto"><table class="g-tab"><thead><tr><th>Fecha</th><th>Tipo</th><th>Descripción</th><th>País</th><th>Monto</th><th>USD</th></tr></thead><tbody>'+
+        [...g.L].sort((a,b)=>a.fecha-b.fecha).map(x=>'<tr><td>'+esc(new Date(+x.fecha).toLocaleString('es-CL',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}))+'</td><td>'+esc(G_CATS[x.cat]||'Otros')+'</td><td>'+esc(x.desc||'')+'</td><td>'+esc(G_PAIS[x.pais]||'')+'</td><td>'+esc((+x.monto).toLocaleString('es-CL')+' '+x.moneda)+'</td><td>'+(x.usd==null?'—':usd(x.usd))+'</td></tr>').join('')+
+        '</tbody></table></div></div></details>';}).join('')+'</div>':'<p class="sub">Todavía ningún cliente anotó gastos. El enlace a su registro les llega en el correo del itinerario y aparece al final de su itinerario.</p>');
 }
 function vCodigos(){
   const L=S.codigos.slice().sort((a,b)=>(b.created_at||0)-(a.created_at||0));

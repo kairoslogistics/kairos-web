@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0E3B43">
+<title>Mis gastos del viaje · Kairos Logistics</title>
+<link rel="manifest" href="/gastos/manifest.webmanifest">
+<link rel="icon" href="/gastos/icono-192.png">
+<link rel="apple-touch-icon" href="/gastos/icono-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Mis gastos">
+<!-- Registro de gastos del viaje por tierra (Jesús, 27 oct. 2026). Cada gasto se guarda primero en el teléfono y se envía
+     a Kairos (/api/gastos) cuando hay internet. Todo se suma en dólares con la tasa del día de cada moneda. -->
+<style>
+:root{--brand:#0E3B43;--gold:#E0A526;--gold-ink:#8a5d00;--bg:#F6F4EE;--card:#fff;--ink:#14262a;--muted:#55686c;--line:#d9e1e2;--ok:#1f7a4d;--warn:#9a5b00;--danger:#b3261e}
+@media (prefers-color-scheme:dark){:root{--bg:#0d1a1d;--card:#142529;--ink:#e8efef;--muted:#9fb3b6;--line:#2a3f43;--gold-ink:#E0A526;--ok:#5cc28f;--warn:#e0a526;--danger:#ff8a80}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%}
+header{background:var(--brand);color:#fff;padding:14px 16px calc(14px);position:sticky;top:0;z-index:2;border-bottom:3px solid var(--gold)}
+header .w{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.marca{font-weight:800;letter-spacing:.12em;font-size:15px}.marca span{color:var(--gold)}
+.sync{font-size:12px;opacity:.9;text-align:right}
+main{max-width:560px;margin:0 auto;padding:14px 16px 90px;display:grid;gap:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;display:grid;gap:10px}
+h1{font-size:20px;margin:0}h2{font-size:16px;margin:0}
+.muted{color:var(--muted);font-size:14px;margin:0}
+label{display:grid;gap:6px;font-size:14px;font-weight:600}
+input,select{font:inherit;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:10px;padding:11px 12px;width:100%;min-width:0}
+input:focus,select:focus,button:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+button{font:inherit;cursor:pointer}
+.btn{background:var(--gold);color:#14262a;border:0;border-radius:10px;padding:13px 16px;font-weight:700;width:100%}
+.btn.sec{background:transparent;color:var(--ink);border:1.5px solid var(--line);font-weight:600}
+.btn:disabled{opacity:.6}
+.chips{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:8px}
+.chip{border:1.5px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:10px 6px;font-size:14px;font-weight:600;display:grid;gap:2px;justify-items:center}
+.chip .ic{font-size:20px;line-height:1}
+.chip[aria-pressed="true"]{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 18%,var(--card))}
+.dos{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.total{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.total b{font-size:30px;font-variant-numeric:tabular-nums}
+.conv{font-size:14px;color:var(--muted);min-height:20px}
+.cats{display:grid;gap:8px}
+.cat{display:grid;grid-template-columns:110px 1fr auto;gap:8px;align-items:center;font-size:14px}
+.bar{height:8px;border-radius:4px;background:var(--line);overflow:hidden}.bar i{display:block;height:100%;background:var(--gold)}
+.num{font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.dia{border-top:1px dashed var(--line);padding-top:10px;display:grid;gap:6px}
+.dia-h{display:flex;justify-content:space-between;gap:8px;font-weight:700}
+.dia-h small{font-weight:500;color:var(--muted)}
+.g{display:grid;grid-template-columns:auto 1fr auto auto;gap:8px;align-items:center;font-size:14px}
+.g .x{border:0;background:transparent;color:var(--muted);font-size:18px;padding:2px 6px}
+.g .pend{color:var(--warn);font-size:12px}
+.err{color:var(--danger);font-size:14px;margin:0}
+.ok{color:var(--ok);font-size:14px;margin:0}
+.inst{font-size:14px}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<header><div class="w"><div class="marca">KAIROS <span>LOGISTICS</span></div><div class="sync" id="sync"></div></div></header>
+<main>
+  <section class="card" id="entrar" hidden>
+    <h1>Mis gastos del viaje</h1>
+    <p class="muted">Anota lo que gastas en el camino: combustible, comida, hospedaje y peajes. Todo se suma en dólares y funciona aunque no tengas señal.</p>
+    <label>Tu código de itinerario o de asesoría<input id="codigo" placeholder="KAI-XXXXXX" autocomplete="off" autocapitalize="characters"></label>
+    <button class="btn" id="entrar-btn" type="button">Entrar</button>
+    <p class="err" id="entrar-err" role="alert"></p>
+  </section>
+
+  <div id="app" hidden>
+    <section class="card">
+      <div class="total"><span class="muted">Llevas gastado en el viaje</span><b id="t-total">US$ 0</b></div>
+      <div class="total"><span class="muted" id="t-hoy-l">Hoy</span><span class="num" id="t-hoy">US$ 0</span></div>
+      <div class="cats" id="cats"></div>
+    </section>
+
+    <section class="card" id="form">
+      <h2>Anotar un gasto</h2>
+      <div class="chips" id="f-cat" role="group" aria-label="Tipo de gasto"></div>
+      <label>Descripción<input id="f-desc" list="f-sug" maxlength="80" placeholder="Ej.: carga de combustible"></label>
+      <datalist id="f-sug"></datalist>
+      <div><div class="muted" style="font-weight:600;margin-bottom:6px">¿En qué país?</div><div class="chips" id="f-pais" role="group" aria-label="País"></div></div>
+      <div><div class="muted" style="font-weight:600;margin-bottom:6px">Moneda de pago</div><div class="dos" id="f-mon" role="group" aria-label="Moneda"></div></div>
+      <label><span id="f-monto-l">Monto</span><input id="f-monto" inputmode="decimal" autocomplete="off" placeholder="0"></label>
+      <div class="conv" id="f-conv"></div>
+      <label>Fecha<input id="f-fecha" type="date"></label>
+      <button class="btn" id="f-guardar" type="button">Guardar gasto</button>
+      <p class="ok" id="f-ok" role="status"></p>
+    </section>
+
+    <section class="card">
+      <h2>Día por día</h2>
+      <div id="dias"><p class="muted">Todavía no anotas gastos.</p></div>
+    </section>
+
+    <section class="card inst" id="instalar">
+      <h2>Tenlo como una app</h2>
+      <p class="muted" id="inst-txt">Agrégalo a la pantalla de inicio de tu teléfono para abrirlo con un toque, aunque no tengas señal.</p>
+      <button class="btn sec" id="inst-btn" type="button" hidden>Agregar a la pantalla de inicio</button>
+    </section>
+
+    <section class="card">
+      <button class="btn sec" id="csv" type="button">Descargar mis gastos (Excel)</button>
+      <p class="muted" id="tasas-txt"></p>
+      <button class="btn sec" id="salir" type="button">Usar otro código</button>
+    </section>
+  </div>
+</main>
+<script>
+(()=>{
+  const $=id=>document.getElementById(id);
+  const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
+  const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const CATS=[['combustible','⛽','Combustible',['Carga de combustible','Bidón de combustible']],['alimentacion','🍽️','Alimentación',['Desayuno','Almuerzo','Cena','Agua y snacks','Supermercado']],
+    ['hospedaje','🛏️','Hospedaje',['Hotel','Posada']],['peaje','🛣️','Peaje',['Peaje']],['otro','➕','Otro gasto',['Ferry','Estacionamiento','Lavado','Repuesto o mecánico','Trámite en frontera','Seguro']]];
+  const PAISES=[['cl','Chile','CLP','Pesos chilenos'],['ar','Argentina','ARS','Pesos argentinos'],['br','Brasil','BRL','Reales'],['ve','Venezuela','VES','Bolívares']];
+  const TASA_DE={CLP:'clp',ARS:'ars',BRL:'brl',VES:'bcv_usd'};
+  const usd=v=>'US$ '+(+v||0).toLocaleString('es-CL',{minimumFractionDigits:0,maximumFractionDigits:2});
+  const hoyISO=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
+  const diaDe=ms=>{const d=new Date(ms);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
+  const nuevoId=()=>{const b=new Uint32Array(3);crypto.getRandomValues(b);return [...b].map(n=>n.toString(36)).join('').slice(0,16);};
+  const equipo=()=>{const u=navigator.userAgent||'';return (/iPhone|iPad/.test(u)?'iPhone':/Android/.test(u)?'Android':/Mac/.test(u)?'Mac':/Windows/.test(u)?'Windows':'Otro');};
+
+  let codigo=ls.get('kg-codigo')||'', gastos=[], tasas=null, cat='combustible', pais=ls.get('kg-pais')||'cl', moneda='local', enviando=false;
+  try{tasas=JSON.parse(ls.get('kg-tasas')||'null');}catch(e){}
+  const clave=()=>'kg-gastos-'+codigo;
+  const cargar=()=>{try{gastos=JSON.parse(ls.get(clave())||'[]')||[];}catch(e){gastos=[];}};
+  const guardarLocal=()=>ls.set(clave(),JSON.stringify(gastos));
+  const monedaActual=()=>moneda==='usd'?'USD':PAISES.find(p=>p[0]===pais)[2];
+  const tasaDe=m=>m==='USD'?1:(tasas&&+tasas[TASA_DE[m]])||null;
+  const vivos=()=>gastos.filter(g=>!g.borrado);
+
+  // Tasas del día: se guardan en el teléfono para usarlas sin señal.
+  async function traerTasas(){
+    try{const r=await fetch('/api/tasas',{cache:'no-store'}); if(!r.ok) return; const t=await r.json(); if(t&&(t.clp||t.bcv_usd)){tasas={...(tasas||{}),...Object.fromEntries(Object.entries(t).filter(([,v])=>v!=null)),guardadas:Date.now()}; ls.set('kg-tasas',JSON.stringify(tasas));}}catch(e){}
+    // Gastos anotados sin tasa (sin señal y sin tasas guardadas): se calculan ahora.
+    let cambio=false; gastos.forEach(g=>{if(!g.borrado&&g.usd==null){const t=tasaDe(g.moneda); if(t){g.tasa=t;g.usd=Math.round(g.monto/t*100)/100;g.cambiado=Date.now();g.pend=true;cambio=true;}}});
+    if(cambio){guardarLocal();sincronizar();}
+    pintar();
+  }
+
+  // Envía lo pendiente y trae lo que esté guardado desde otro teléfono.
+  async function sincronizar(){
+    if(enviando||!codigo) return; if(!navigator.onLine){estado();return;}
+    enviando=true; estado();
+    const pend=gastos.filter(g=>g.pend).map(({pend,...g})=>g);
+    try{
+      const r=await fetch('/api/gastos',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({codigo,gastos:pend,equipo:equipo()})});
+      const j=await r.json().catch(()=>({}));
+      if(r.ok&&j.ok){
+        const enviados=new Map(pend.map(g=>[g.id,g.cambiado]));
+        gastos.forEach(g=>{if(g.pend&&enviados.get(g.id)===g.cambiado) delete g.pend;});
+        const m=new Map(gastos.map(g=>[g.id,g]));
+        (j.gastos||[]).forEach(s=>{const l=m.get(s.id); if(!l||(!l.pend&&(+s.cambiado||0)>=(+l.cambiado||0))) m.set(s.id,s);});
+        gastos=[...m.values()]; guardarLocal(); ls.set('kg-sync',String(Date.now()));
+      }
+    }catch(e){}
+    enviando=false; estado(); pintar();
+  }
+  function estado(){
+    const n=gastos.filter(g=>g.pend).length, t=+ls.get('kg-sync')||0;
+    $('sync').textContent=!navigator.onLine?(n?n+' sin enviar · sin señal':'Sin señal · guardado en el teléfono'):enviando?'Enviando…':n?n+' por enviar':t?'Todo enviado':'';
+  }
+
+  function pintar(){
+    const L=vivos(), total=L.reduce((a,g)=>a+(+g.usd||0),0), hoy=hoyISO();
+    $('t-total').textContent=usd(total);
+    $('t-hoy').textContent=usd(L.filter(g=>diaDe(g.fecha)===hoy).reduce((a,g)=>a+(+g.usd||0),0));
+    const sinT=L.filter(g=>g.usd==null).length;
+    const porCat=CATS.map(([k,ic,n])=>[ic+' '+n,L.filter(g=>g.cat===k).reduce((a,g)=>a+(+g.usd||0),0)]), max=Math.max(1,...porCat.map(x=>x[1]));
+    $('cats').innerHTML=porCat.map(([n,v])=>'<div class="cat"><span>'+esc(n)+'</span><span class="bar"><i style="width:'+(v/max*100).toFixed(1)+'%"></i></span><span class="num">'+usd(v)+'</span></div>').join('')+(sinT?'<p class="muted">'+sinT+' gasto(s) sin convertir: se suman cuando tengas internet.</p>':'');
+    // Día por día, del más reciente al primero, con el acumulado del viaje hasta ese día.
+    const dias=[...new Set(L.map(g=>diaDe(g.fecha)))].sort(), primer=dias[0];
+    let acum=0; const filas=dias.map((d,i)=>{const G=L.filter(g=>diaDe(g.fecha)===d).sort((a,b)=>a.fecha-b.fecha), sub=G.reduce((a,g)=>a+(+g.usd||0),0); acum+=sub;
+      const f=new Date(d+'T12:00:00').toLocaleDateString('es-CL',{weekday:'short',day:'numeric',month:'short'}), n=Math.round((new Date(d)-new Date(primer))/864e5)+1;
+      return '<div class="dia"><div class="dia-h"><span>Día '+n+' · '+esc(f)+'</span><span class="num">'+usd(sub)+'</span></div><div class="dia-h"><small>Acumulado del viaje</small><small class="num">'+usd(acum)+'</small></div>'+
+        G.map(g=>{const c=CATS.find(x=>x[0]===g.cat)||CATS[4];return '<div class="g"><span>'+c[1]+'</span><span>'+esc(g.desc||c[2])+'<br><span class="muted">'+(g.moneda==='USD'?'':(+g.monto).toLocaleString('es-CL',{maximumFractionDigits:2})+' '+g.moneda+' · ')+esc((PAISES.find(p=>p[0]===g.pais)||['','Otro'])[1])+(g.pend?' · <span class="pend">por enviar</span>':'')+'</span></span><span class="num">'+(g.usd==null?'—':usd(g.usd))+'</span><button class="x" type="button" data-borrar="'+esc(g.id)+'" aria-label="Borrar gasto">×</button></div>';}).join('')+'</div>';});
+    $('dias').innerHTML=filas.length?filas.reverse().join(''):'<p class="muted">Todavía no anotas gastos.</p>';
+    $('dias').querySelectorAll('[data-borrar]').forEach(b=>b.onclick=()=>{const g=gastos.find(x=>x.id===b.dataset.borrar); if(!g||!confirm('¿Borrar este gasto?')) return; g.borrado=true;g.cambiado=Date.now();g.pend=true;guardarLocal();pintar();sincronizar();});
+    $('tasas-txt').textContent=tasas?'Tasas usadas (dólar): '+[['CLP','clp'],['ARS','ars'],['BRL','brl'],['Bs (BCV)','bcv_usd']].filter(([,k])=>tasas[k]).map(([n,k])=>n+' '+(+tasas[k]).toLocaleString('es-CL',{maximumFractionDigits:2})).join(' · ')+(tasas.guardadas?'. Actualizadas el '+new Date(tasas.guardadas).toLocaleString('es-CL',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):''):'Sin tasas guardadas todavía: se descargan cuando tengas internet.';
+    conv(); estado();
+  }
+
+  function formulario(){
+    $('f-cat').innerHTML=CATS.map(([k,ic,n])=>'<button type="button" class="chip" data-cat="'+k+'" aria-pressed="'+(k===cat)+'"><span class="ic">'+ic+'</span>'+n+'</button>').join('');
+    $('f-pais').innerHTML=PAISES.map(([k,n])=>'<button type="button" class="chip" data-pais="'+k+'" aria-pressed="'+(k===pais)+'">'+n+'</button>').join('');
+    const P=PAISES.find(p=>p[0]===pais);
+    $('f-mon').innerHTML='<button type="button" class="chip" data-mon="local" aria-pressed="'+(moneda==='local')+'">'+P[3]+' ('+P[2]+')</button><button type="button" class="chip" data-mon="usd" aria-pressed="'+(moneda==='usd')+'">Dólares (USD)</button>';
+    $('f-sug').innerHTML=(CATS.find(c=>c[0]===cat)[3]).map(s=>'<option value="'+esc(s)+'">').join('');
+    $('f-monto-l').textContent='Monto en '+(moneda==='usd'?'dólares':P[3].toLowerCase());
+    document.querySelectorAll('[data-cat]').forEach(b=>b.onclick=()=>{cat=b.dataset.cat;formulario();});
+    document.querySelectorAll('[data-pais]').forEach(b=>b.onclick=()=>{pais=b.dataset.pais;ls.set('kg-pais',pais);formulario();});
+    document.querySelectorAll('[data-mon]').forEach(b=>b.onclick=()=>{moneda=b.dataset.mon;formulario();});
+    conv();
+  }
+  const montoNum=()=>{const v=$('f-monto').value.trim().replace(/\s/g,''); if(!v) return NaN; // 47.500 y 47500 son cuarenta y siete mil quinientos; 8,5 y 8.5 son ocho y medio.
+    const n=v.includes(',')?v.replace(/\./g,'').replace(',','.'):/^\d{1,3}(\.\d{3})+$/.test(v)?v.replace(/\./g,''):v; return +n;};
+  function conv(){
+    const m=monedaActual(), n=montoNum(), t=tasaDe(m);
+    $('f-conv').textContent=m==='USD'||!(n>0)?'':t?'≈ '+usd(n/t)+' (1 dólar = '+t.toLocaleString('es-CL',{maximumFractionDigits:2})+' '+m+')':'Sin tasa guardada: se convierte a dólares cuando tengas internet.';
+  }
+  $('f-monto').addEventListener('input',conv);
+  $('f-guardar').onclick=()=>{
+    const n=montoNum(); if(!(n>0)){$('f-ok').textContent='';$('f-monto').focus();return;}
+    const m=monedaActual(), t=tasaDe(m), f=$('f-fecha').value||hoyISO(), hoy=hoyISO();
+    const fecha=f===hoy?Date.now():new Date(f+'T12:00:00').getTime();
+    const c=CATS.find(x=>x[0]===cat), ahora=Date.now();
+    gastos.push({id:nuevoId(),monto:Math.round(n*100)/100,moneda:m,tasa:t,usd:t?Math.round(n/t*100)/100:null,cat,desc:$('f-desc').value.trim().slice(0,80)||c[2],pais,fecha,cambiado:ahora,pend:true});
+    guardarLocal(); $('f-monto').value=''; $('f-desc').value=''; $('f-fecha').value=hoyISO();
+    $('f-ok').textContent='Guardado'+(navigator.onLine?'.':' en el teléfono. Se envía cuando tengas señal.'); setTimeout(()=>{$('f-ok').textContent='';},3000);
+    pintar(); sincronizar();
+  };
+  $('csv').onclick=()=>{
+    const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
+    const filas=[['Fecha','Tipo','Descripción','País','Monto','Moneda','Tasa','USD']].concat(vivos().sort((a,b)=>a.fecha-b.fecha).map(g=>[new Date(g.fecha).toLocaleString('es-CL'),(CATS.find(c=>c[0]===g.cat)||CATS[4])[2],g.desc,(PAISES.find(p=>p[0]===g.pais)||['','Otro'])[1],String(g.monto).replace('.',','),g.moneda,g.tasa?String(g.tasa).replace('.',','):'',g.usd==null?'':String(g.usd).replace('.',',')]));
+    const b=new Blob(['﻿'+filas.map(r=>r.map(q).join(';')).join('\r\n')],{type:'text/csv;charset=utf-8'}), a=document.createElement('a');
+    a.href=URL.createObjectURL(b); a.download='gastos-viaje-'+codigo+'.csv'; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);
+  };
+  $('salir').onclick=()=>{if(gastos.some(g=>g.pend)&&!confirm('Hay gastos sin enviar. Se quedan guardados en este teléfono con tu código. ¿Usar otro código?')) return; ls.del('kg-codigo'); codigo=''; mostrar();};
+
+  // Entrar con el código: la primera vez necesita internet para revisarlo.
+  async function entrar(c){
+    c=String(c||'').trim().toUpperCase(); if(!/^[A-Z0-9-]{4,40}$/.test(c)){$('entrar-err').textContent='Escribe tu código tal como llegó a tu correo.';return;}
+    if(!navigator.onLine){$('entrar-err').textContent='Necesitas internet la primera vez para revisar tu código.';return;}
+    $('entrar-btn').disabled=true; $('entrar-err').textContent='';
+    try{const r=await fetch('/api/gastos',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({codigo:c,gastos:[]})}); const j=await r.json().catch(()=>({}));
+      if(!r.ok||!j.ok){$('entrar-err').textContent=j.error||'No pudimos revisar tu código.';$('entrar-btn').disabled=false;return;}
+      codigo=c; ls.set('kg-codigo',c); cargar(); const m=new Map(gastos.map(g=>[g.id,g])); (j.gastos||[]).forEach(s=>{if(!m.has(s.id)) m.set(s.id,s);}); gastos=[...m.values()]; guardarLocal();
+    }catch(e){$('entrar-err').textContent='No pudimos revisar tu código. Revisa tu conexión.';}
+    $('entrar-btn').disabled=false; mostrar();
+  }
+  $('entrar-btn').onclick=()=>entrar($('codigo').value);
+  $('codigo').addEventListener('keydown',e=>{if(e.key==='Enter') entrar($('codigo').value);});
+  function mostrar(){
+    $('entrar').hidden=!!codigo; $('app').hidden=!codigo;
+    if(!codigo){estado();return;}
+    cargar(); $('f-fecha').value=hoyISO(); formulario(); pintar(); traerTasas(); sincronizar();
+  }
+
+  // Instalar como app.
+  let aviso=null;
+  addEventListener('beforeinstallprompt',e=>{e.preventDefault();aviso=e;$('inst-btn').hidden=false;});
+  $('inst-btn').onclick=async()=>{if(!aviso) return; aviso.prompt(); await aviso.userChoice.catch(()=>{}); aviso=null; $('inst-btn').hidden=true;};
+  if(/iPhone|iPad/.test(navigator.userAgent)) $('inst-txt').textContent='En el iPhone: toca el botón Compartir de Safari y luego «Agregar a inicio». Así lo abres con un toque, aunque no tengas señal.';
+  if(matchMedia('(display-mode: standalone)').matches||navigator.standalone) $('instalar').hidden=true;
+  if('serviceWorker' in navigator) navigator.serviceWorker.register('/gastos/sw.js',{scope:'/gastos/'}).catch(()=>{});
+  addEventListener('online',()=>{traerTasas();sincronizar();}); addEventListener('offline',estado);
+  setInterval(()=>{if(gastos.some(g=>g.pend)) sincronizar();},60000);
+
+  const q=new URLSearchParams(location.search).get('codigo');
+  if(q&&q.trim().toUpperCase()!==codigo){ if(codigo) ls.del('kg-codigo'); codigo=''; mostrar(); $('codigo').value=q.trim().toUpperCase(); entrar(q); }
+  else mostrar();
+})();
+</script>
+</body>
+</html>
