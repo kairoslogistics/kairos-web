@@ -635,7 +635,7 @@ const COSTOS_INI=[
   {id:'gnb',cuando:{via:'terr'},nombre:'Segunda revisión Guardia Nacional Bolivariana Puerto Ordaz',lineas:[{c:'Revisión de la Guardia Nacional',m:500,mon:'USD'}],precio:500,orden:4.5},
   {id:'homologacion',nombre:'Homologación',lineas:[],precio:700,orden:5},
   {id:'titulo',nombre:'Título y placas',lineas:[],precio:800,orden:6},
-  {id:'sencamer',cuando:{reg:'ord'},nombre:'SENCAMER (solo importación ordinaria)',lineas:[],precio:450,orden:7}];
+  {id:'sencamer',cuando:{reg:'ord'},nombre:'SENCAMER (solo importación ordinaria)',lineas:[{c:'SENCAMER: impuesto y habilitación',m:500,mon:'USD'}],precio:570,orden:7}];
 // Dólar del día (Jesús, 25 oct. 2026): viene de /api/tasas; si escribes otro en Cotizar, se usa el tuyo mientras no recargues.
 let tasaClp=+(pref.get('clp')||950), TASAS={}, tasaMano=false;
 fetch('/api/tasas').then(r=>r.ok?r.json():{}).catch(()=>({})).then(t=>{TASAS=t||{}; if(t.clp>0&&!tasaMano){tasaClp=Math.round(t.clp);} if($('#view')&&$('#view').innerHTML&&['costos','cotizacion','pagos'].includes(tab)) render();});
