@@ -605,7 +605,6 @@ footer a{color:var(--hero-muted)}
             <label id="v-nveh-l" hidden>Vehículos que comparten el contenedor<select id="v-nveh"><option>2</option><option selected>3</option><option>4</option></select></label>
           </div>
           <!-- Jesús (26 oct. 2026): casillas sin precio; si no se marcan, el desglose muestra el valor sin sumarlo. -->
-          <label class="check" id="v-cer-l"><input type="checkbox" id="v-cer"> Quiero que Kairos tramite el certificado de uso emitido por la embajada o el consulado</label>
           <div id="v-desinc-l"><label class="check"><input type="checkbox" id="v-exp"> Quiero que Kairos tramite el certificado de exportación ante la Aduana de Chile</label>
           <label class="check v-sub"><input type="checkbox" id="v-baja"> y la baja del vehículo ante el Registro Civil</label></div>
           <p class="note" id="v-val-usd"></p>
@@ -1498,11 +1497,10 @@ footer a{color:var(--hero-muted)}
   const FERRY_STM='https://www.google.com/maps/place/Terminal+Hidrovi%C3%A1rio+de+Santar%C3%A9m/@-2.4258858,-54.6982713,17z';
   const CONTROLES=[
     {c:'Foz de Iguazú',t:'Parada obligatoria: entrada a Brasil en Foz de Iguazú',d:'Migración y registro obligatorio de entrada del vehículo en la Receita Federal.',url:'https://www.google.com/maps/place/Receita+Federal+de+Foz+de+Igua%C3%A7u/@-25.5856945,-54.5635158,18z'},
-    {c:'Pacaraima',t:'Parada obligatoria: Aduana de Brasil en Pacaraima',d:'Salida de Brasil y registro del vehículo en la Receita Federal, antes de cruzar a Santa Elena de Uairén.',url:'https://www.google.com/maps/place/Aduana+-+Receita+Federal+do+Brasil/@4.4803968,-61.1491728,17z'},
-    {c:'Puerto Ordaz',t:'Segunda revisión obligatoria: Guardia Nacional en Puerto Ordaz',d:'Comando Regional de la Guardia Nacional (CORE 8).',url:'https://www.google.com/maps/place/Comando+Regional+de+la+Guardia+Nacional+-+CORE+8/@8.2434995,-62.8159297,17z'}];
+    {c:'Pacaraima',t:'Parada obligatoria: Aduana de Brasil en Pacaraima',d:'Salida de Brasil y registro del vehículo en la Receita Federal, antes de cruzar a Santa Elena de Uairén.',url:'https://www.google.com/maps/place/Aduana+-+Receita+Federal+do+Brasil/@4.4803968,-61.1491728,17z'}];
   function itinerario(p,tr,kmDia){
     const pts=[{c:vSalida().n,km:0,k:tr[0][0]}];
-    // Paradas obligadas (Elise): se duerme en Manaos, se llega a la frontera en Santa Elena de Uairén y, tras la nacionalización, se pasa por la revisión de la GNB en Puerto Ordaz.
+    // Paradas obligadas (Elise): se duerme en Manaos, se llega a la frontera en Santa Elena de Uairén y, tras la nacionalización, se pasa por Puerto Ordaz. Jesús (27 oct. 2026): la revisión de la Guardia Nacional no se muestra en la web; se explica en privado.
     const FIJA=new Set(['Manaos','Santa Elena de Uairén','Puerto Ordaz']);
     tr.forEach(t=>{let acc=pts[pts.length-1].km; t[3].forEach(([c,k])=>{acc+=k; pts.push({c,km:acc,k:t[0]==='ferry'?'ferry':t[0],fija:FIJA.has(c)});});});
     const etapas=[]; let i=0, dia=1;
@@ -1519,7 +1517,6 @@ footer a{color:var(--hero-muted)}
       const ks=[...new Set(pts.slice(i+1,best+1).map(x=>x.k))];
       etapas.push({d:'Día '+dia,de:pts[i].c,a:pts[best].c,km:pts[best].km-pts[i].km,paises:ks,pais:pts[best].k,fin:best===pts.length-1,via:pts.slice(i+1,best+1).map(x=>x.c),ctl:CONTROLES.filter(k=>pts.slice(i+1,best+1).some(x=>x.c===k.c))}); dia++; i=best;
       if(pts[i].c==='Santa Elena de Uairén'&&i<pts.length-1){etapas.push({pausa:true,d:'En la frontera',de:'Santa Elena de Uairén',a:'nacionalización',km:0});}
-      if(pts[i].c==='Puerto Ordaz'){etapas[etapas.length-1].gnb=true;}
     }
     return {etapas,dias:dia-1};
   }
@@ -1573,18 +1570,18 @@ footer a{color:var(--hero-muted)}
       if(big) taxRows.push(['Motor de más de 2.0: '+VEH.motorExtra+' % adicional',ext,2]);
       taxRows.push(['IVA '+VEH.iva+' %',iva,2],['Tasa aduanera '+VEH.tasa+' %',ts,2]);
     }
-    // Elise (24 oct. 2026): todo vehículo por tierra pasa la revisión de la Guardia Nacional: 500 USD. Es la segunda revisión, en Puerto Ordaz (Elise, 26 oct. 2026).
-    const venRows=r==='terr'?[['Agente de aduanas en Santa Elena de Uairén',VEH.ageTierra],['Segunda revisión Guardia Nacional Bolivariana Puerto Ordaz',VEH.gnb]]:[...MAR_VE_AGENCIA,...MAR_VE_PUERTO];
+    // La revisión de la Guardia Nacional ya no va en el desglose público (Jesús, 27 oct. 2026); está en el panel.
+    const venRows=r==='terr'?[['Agente de aduanas en Santa Elena de Uairén',VEH.ageTierra]]:[...MAR_VE_AGENCIA,...MAR_VE_PUERTO];
     venRows.push(['Homologación',VEH.homolog],['Título y placas',VEH.titulo]);
     if(reg==='ord') venRows.push(['SENCAMER',VEH.sencamer]); // Elise: el régimen de equipaje no lleva SENCAMER.
     // Elise (22 oct. 2026): el certificado de uso solo aparece en el desglose con código, y solo en régimen de equipaje. 550 USD tramitado por Kairos, cualquier país (25 oct. 2026; antes 500 y 350).
-    const cerOk=reg==='equi'&&$('v-cer').checked, cer=cerOk?RATES.cer:0;
+    const cer=0; // Jesús (27 oct. 2026): el certificado de uso sale «a consultar», sin sumar
     const ven=venRows.reduce((a,x)=>a+x[1],0);
     // El total no incluye el valor del vehículo: el cliente ya lo tiene. El valor solo sirve de base para los impuestos.
     // Elise (12 oct. 2026): sin honorario de Kairos ni imprevistos en el desglose.
     const enCl=p==='cl'&&r==='terr', expOk=enCl&&$('v-exp').checked, bajaOk=expOk&&$('v-baja').checked, desinc=bajaOk?VEH.desinc:expOk?VEH.desincExp:0, noSum=v=>usd(v)+' (no sumado al total)';
     const sub=log+tax+ven+cer+desinc+(r==='mar'?VEH.gestionMar:0)+(r==='terr'&&p==='cl'&&$('v-caravana').checked?VEH.caravana:0);
-    return {r,reg,d,val,land,tax,base,total:sub,fleteVar:r==='mar'&&p!=='cl'&&!MAR_FLETE[p],rows:[[r==='mar'?(p==='cl'?'Gastos en Chile y flete':'Logística hasta Venezuela'):'Viaje por tierra hasta '+(land?land.zona:''),log,1],...logRows.map(x=>[x[0],x[1],2]),...taxRows,['Trámites en Venezuela',ven,1],...venRows.map(x=>[x[0],x[1],2]),...(reg==='equi'?[['Certificado de uso emitido por la embajada o el consulado (Kairos), incluye el envío a Venezuela',cerOk?cer:noSum(RATES.cer),1]]:[]),...(cerOk&&r==='mar'&&p==='cl'?[['Plazo del certificado: llega a Caracas desde el pago','Unos 15 días hábiles',2]]:[]),...(r==='mar'?[['Traslado del puerto a tu ciudad','A consultar',2],['Gestión Kairos Logistics',VEH.gestionMar,1]]:[]),...(r==='terr'&&$('v-caravana').checked?[['Viaje en caravana con Kairos',p==='cl'?VEH.caravana:'A consultar',1]]:[]),...(enCl?[['Certificado de exportación ante la Aduana de Chile (Kairos)',expOk?VEH.desincExp:noSum(VEH.desincExp),1],['Baja del vehículo ante el Registro Civil (Kairos), incluye el envío de las patentes de Venezuela a Chile',bajaOk?VEH.desinc-VEH.desincExp:noSum(VEH.desinc-VEH.desincExp)+(expOk?'':', va con el certificado de exportación'),1]]:[])]};
+    return {r,reg,d,val,land,tax,base,total:sub,fleteVar:r==='mar'&&p!=='cl'&&!MAR_FLETE[p],rows:[[r==='mar'?(p==='cl'?'Gastos en Chile y flete':'Logística hasta Venezuela'):'Viaje por tierra hasta '+(land?land.zona:''),log,1],...logRows.map(x=>[x[0],x[1],2]),...taxRows,['Trámites en Venezuela',ven,1],...venRows.map(x=>[x[0],x[1],2]),...(reg==='equi'?[['Certificado de uso emitido por la embajada o el consulado (Kairos), incluye el envío a Venezuela','Precio a consultar',1]]:[]),...(reg==='equi'&&r==='mar'&&p==='cl'?[['Plazo del certificado: llega a Caracas desde el pago','Unos 15 días hábiles',2]]:[]),...(r==='mar'?[['Traslado del puerto a tu ciudad','A consultar',2],['Gestión Kairos Logistics',VEH.gestionMar,1]]:[]),...(r==='terr'&&$('v-caravana').checked?[['Viaje en caravana con Kairos',p==='cl'?VEH.caravana:'A consultar',1]]:[]),...(enCl?[['Certificado de exportación ante la Aduana de Chile (Kairos)',expOk?VEH.desincExp:noSum(VEH.desincExp),1],['Baja del vehículo ante el Registro Civil (Kairos), incluye el envío de las patentes de Venezuela a Chile',bajaOk?VEH.desinc-VEH.desincExp:noSum(VEH.desinc-VEH.desincExp)+(expOk?'':', va con el certificado de exportación'),1]]:[])]};
   }
   function lines(target,rows,locked){
     const el=$(target); el.innerHTML='';
@@ -1618,9 +1615,9 @@ footer a{color:var(--hero-muted)}
           const bus=!e.ferry&&!e.fin&&!(HC[e.a]||[]).length?'<a class="hot-s" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query='+encodeURIComponent('hoteles en '+lugar)+'">Ver hoteles en '+esc(e.a)+' en Google Maps</a>':'';
           hb.innerHTML=adu+rec+bus;
         }
-d.querySelector('b').append(e.pausa?'Nacionalización en Santa Elena de Uairén':e.de+' → '+e.a);d.querySelector('span').textContent=e.pausa?'El vehículo queda en la aduana durante todo el trámite. Los días de espera no están en el hospedaje. Antes de cruzar, llena el tanque en Brasil y lleva dos bidones de 20 litros para llegar hasta Puerto Ordaz.':e.ferry?'Ferry por el río Amazonas, con camarote':e.paises.map(k=>PAISN[k]).join(' y ')+(e.gnb?'. Segunda revisión Guardia Nacional Bolivariana Puerto Ordaz':'');d.querySelector('em').textContent=e.pausa?'según aduana':e.ferry?'3 días':e.km.toLocaleString('es-CL')+' km';el.appendChild(d);});
+d.querySelector('b').append(e.pausa?'Nacionalización en Santa Elena de Uairén':e.de+' → '+e.a);d.querySelector('span').textContent=e.pausa?'El vehículo queda en la aduana durante todo el trámite. Los días de espera no están en el hospedaje. Antes de cruzar, llena el tanque en Brasil y lleva dos bidones de 20 litros para llegar hasta Puerto Ordaz.':e.ferry?'Ferry por el río Amazonas, con camarote':e.paises.map(k=>PAISN[k]).join(' y ');d.querySelector('em').textContent=e.pausa?'según aduana':e.ferry?'3 días':e.km.toLocaleString('es-CL')+' km';el.appendChild(d);});
       const tot=document.createElement('div');tot.className='tr';tot.innerHTML='<div><b>Total por carretera</b><br><span></span></div><em></em>';tot.querySelector('em').textContent=c.land.totalKm.toLocaleString('es-CL')+' km';tot.querySelector('span').textContent=c.land.dias+' días de viaje'+(c.land.br==='stm'?', incluidos 3 días de ferry':'')+'. Las paradas son una guía: duerme donde te sientas seguro.';el.appendChild(tot);}
-    $('v-nveh-l').hidden=true; $('v-desinc-l').hidden=!(p==='cl'&&r==='terr'); $('v-cer-l').hidden=c.reg!=='equi'; $('v-baja').disabled=!$('v-exp').checked; if(!$('v-exp').checked) $('v-baja').checked=false; $('v-br-seg').hidden=!!vSalida().manaos; $('v-mar-note').hidden=!(r==='mar'&&p==='cl');
+    $('v-nveh-l').hidden=true; $('v-desinc-l').hidden=!(p==='cl'&&r==='terr'); $('v-baja').disabled=!$('v-exp').checked; if(!$('v-exp').checked) $('v-baja').checked=false; $('v-br-seg').hidden=!!vSalida().manaos; $('v-mar-note').hidden=!(r==='mar'&&p==='cl');
     $('v-val-usd').textContent=p==='cl'?'Equivale a '+usd(c.val)+' (dólar del día: '+RATES.clpUsd+' pesos). Este valor solo se usa para calcular los impuestos; no se suma al costo.':'Este valor solo se usa para calcular los impuestos; no se suma al costo.';
     $('v-reg-note').textContent=c.reg==='equi'?'Requisitos: haber vivido 1 año o más fuera de Venezuela, vehículo a tu nombre con 11 meses o más de registro y certificado de uso legalizado por el consulado. Un vehículo por persona y no puedes venderlo en 3 años. Pagas el 1 % del valor del vehículo si vale hasta 20.000 USD; si vale más, 20 % ad valorem y 1 % de tasa, más 20 % si el motor es de más de 2.0.':'Para cualquier persona con RIF. Solo vehículos de hasta 5 años de uso: en '+ANIO_ACTUAL+', de '+ORD_MIN+' a '+ANIO_ACTUAL+' (recomendado '+ORD_REC+' en adelante). Pagas 20 % ad valorem, 16 % IVA y 1 % de tasa; los motores de más de 2.0 que no son pick-up pagan 20 % adicional.';
     $('v-title').textContent=TIPO[$('v-tipo').value]+' · '+($('v-modelo').value||'Vehículo')+' '+($('v-anio').value||'');
@@ -1707,7 +1704,7 @@ d.querySelector('b').append(e.pausa?'Nacionalización en Santa Elena de Uairén'
       :'<p class="note">Tu video completo estará aquí muy pronto. Te avisaremos por correo cuando esté listo.</p>';
   }
   // Datos del simulador: se guardan antes de ir a pagar y se recuperan al volver o al abrir el enlace del correo.
-  const SIM_CAMPOS=['v-vive-ve','v-vive-fuera','v-pais','v-mar','v-terr','v-ciudad','v-br-pv','v-br-stm','v-dest','v-pax','v-kmdia','v-kml','v-espera','v-caravana','v-equi','v-ord','v-tipo','v-cil','v-modelo','v-anio','v-val','v-cer','v-exp','v-baja'];
+  const SIM_CAMPOS=['v-vive-ve','v-vive-fuera','v-pais','v-mar','v-terr','v-ciudad','v-br-pv','v-br-stm','v-dest','v-pax','v-kmdia','v-kml','v-espera','v-caravana','v-equi','v-ord','v-tipo','v-cil','v-modelo','v-anio','v-val','v-exp','v-baja'];
   function guardarSim(){ss.set('kairos-sim',JSON.stringify(camposSim()));}
   const camposSim=()=>{const o={};SIM_CAMPOS.forEach(k=>{const e=$(k);if(e) o[k]=e.type==='radio'||e.type==='checkbox'?e.checked:e.value;});return o;};
   function restaurarSim(dado){
@@ -1852,7 +1849,7 @@ d.querySelector('b').append(e.pausa?'Nacionalización en Santa Elena de Uairén'
     c.rows.forEach(([k,v,l],i)=>{const isTax=i>=t0&&i<t1;
       h+='<tr class="'+(l===2?'sub':'g')+'"><td>'+esc(k)+'</td><td class="n">'+(typeof v==='string'?esc(v):usd(v))+'</td><td class="n">'+(isTax?bs(v*bcv):'')+'</td></tr>';});
     h+='<tr class="tot"><td>Costo total para traerlo</td><td class="n">'+usd(c.total)+'</td><td class="n">'+bs(c.total*bcv)+'</td></tr></tbody></table></div>';
-    if(c.land&&planOk) h+='<div class="sh-notes"><p><b>Itinerario:</b> '+c.land.itin.map(e=>esc(e.pausa?'Nacionalización en Santa Elena de Uairén (el vehículo queda en aduana)':e.d+': '+e.de+' → '+e.a+(e.ferry?' (ferry)':' ('+e.km.toLocaleString('es-CL')+' km)')+(e.ctl||[]).filter(k=>k.c!=='Puerto Ordaz').map(k=>', '+k.t.replace('Parada obligatoria: ','').toLowerCase()).join('')+(e.gnb?', revisión GNB':''))).join(' · ')+'</p></div>';
+    if(c.land&&planOk) h+='<div class="sh-notes"><p><b>Itinerario:</b> '+c.land.itin.map(e=>esc(e.pausa?'Nacionalización en Santa Elena de Uairén (el vehículo queda en aduana)':e.d+': '+e.de+' → '+e.a+(e.ferry?' (ferry)':' ('+e.km.toLocaleString('es-CL')+' km)')+(e.ctl||[]).filter(k=>k.c!=='Puerto Ordaz').map(k=>', '+k.t.replace('Parada obligatoria: ','').toLowerCase()).join(''))).join(' · ')+'</p></div>';
     h+='<div class="sh-notes"><p>No incluye el valor del vehículo. Los impuestos se pagan en bolívares a la tasa oficial del BCV del día del pago; la tasa usada fue '+bs(bcv)+' por dólar ('+BCV_FECHA+'). Impuestos según la experiencia de Kairos, por confirmar con el agente de aduanas. Tarifas de ejemplo de este prototipo.</p><p>Estimado de la web. Kairos lo confirma en la cotización formal. Kairos Logistics · WhatsApp +'+WA.ve+'</p></div>';
     $('v-sheet').innerHTML=h;
   }
