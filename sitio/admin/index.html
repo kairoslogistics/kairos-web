@@ -586,7 +586,8 @@ function verDisp(c){
   const L=Array.isArray(c.dispositivos)?c.dispositivos:[], n=L.length;
   return '<div class="meta"><span class="pill '+(n>=3?'off':n?'mid':'done')+'">Itinerario: '+n+' de 3 dispositivos</span><span>Abierto '+(+c.aperturas||0)+' '+((+c.aperturas||0)===1?'vez':'veces')+'</span>'+
     (+c.rechazos?'<span style="color:var(--danger,#b3261e)">'+c.rechazos+' intento(s) desde otro dispositivo</span>':'')+
-    (n?'<button class="btn sm ghost" type="button" data-codlib="'+esc(c.id)+'">Liberar dispositivos</button>':'')+'</div>'+
+    (n?'<button class="btn sm ghost" type="button" data-codlib="'+esc(c.id)+'">Liberar dispositivos</button>':'')+
+    (c.anulado?'':'<button class="btn sm ghost" type="button" data-codmas="'+esc(c.id)+'">Dar más días</button>')+'</div>'+
     (n?'<div class="meta">'+L.map((d,i)=>'<span>'+(i+1)+'. '+esc(d.equipo||'Dispositivo')+' · '+(+d.veces||1)+' '+((+d.veces||1)===1?'vez':'veces')+' · último '+new Date(+d.ultima).toLocaleString('es-CL')+'</span>').join('')+'</div>':'');
 }
 function vCodigos(){
@@ -919,6 +920,12 @@ function bind(){
     if(await guardar('codigos',{id,tipo:$('#cod-tipo').value,vence:venceDe($('#cod-tipo').value),max:Math.max(1,Math.round(+$('#cod-max').value||1)),usos:0,cliente:$('#cod-cli').value.trim()},'Código '+id+' creado')){const ok=await copiar(id); if(ok) toast('Código '+id+' copiado');}};
   document.querySelectorAll('[data-codlib]').forEach(b=>b.onclick=async()=>{if(!confirm('¿Liberar los dispositivos de '+b.dataset.codlib+'? El cliente podrá abrir su itinerario en 3 dispositivos nuevos.')) return;
     try{await DB.patch('codigos',b.dataset.codlib,{dispositivos:[],rechazos:0});render();toast('Dispositivos liberados');}catch(e){toast('No se pudo liberar');}});
+  // Jesús (27 oct. 2026): si un cliente en viaje lo pide, se alargan los días del itinerario (desde hoy si ya venció).
+  document.querySelectorAll('[data-codmas]').forEach(b=>b.onclick=async()=>{const c=S.codigos.find(x=>x.id===b.dataset.codmas); if(!c) return;
+    const r=prompt('¿Cuántos días más le das al itinerario de '+c.id+'?\nHoy vence el '+fechaCod(c.vence)+'.','15'); if(r===null) return; const dias=Math.round(+r);
+    if(!(dias>0&&dias<=365)){toast('Escribe un número de días entre 1 y 365');return;}
+    const v=c.vence&&c.vence.toDate?c.vence.toDate():new Date(c.vence||0), base=isNaN(v)||v<new Date()?new Date():v, nueva=new Date(base.getTime()+dias*864e5);
+    try{await DB.patch('codigos',c.id,{vence:nueva});render();toast('Ahora vence el '+nueva.toLocaleDateString('es-CL'));}catch(e){toast('No se pudo cambiar');}});
   document.querySelectorAll('[data-codcopy]').forEach(b=>b.onclick=async()=>toast((await copiar(b.dataset.codcopy))?'Código copiado':'No se pudo copiar'));
   document.querySelectorAll('[data-coddel]').forEach(b=>b.onclick=async()=>{if(!b.classList.contains('sure')){b.classList.add('sure');b.textContent='¿Seguro?';return;}
     try{await DB.del('codigos',b.dataset.coddel);render();toast('Código borrado');}catch(e){toast('No se pudo borrar');}});
