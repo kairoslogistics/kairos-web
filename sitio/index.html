@@ -610,7 +610,7 @@ footer a{color:var(--hero-muted)}
           <label class="check v-sub"><input type="checkbox" id="v-baja"> y la baja del vehículo ante el Registro Civil</label></div>
           <p class="note" id="v-val-usd"></p>
         </fieldset>
-        <p class="note" id="v-tax-note">Impuestos según la experiencia de Kairos, por confirmar con el agente de aduanas. Régimen de equipaje: 1 % del valor del vehículo. Régimen ordinario: 20 % ad valorem, 16 % IVA y 1 % de tasa aduanera, más 20 % adicional para motores de más de 2.0 (salvo pick-up). Fletes por contenedor, valor variable. Los demás trámites en Venezuela los ves uno por uno en el desglose con tu código.</p>
+        <p class="note" id="v-tax-note">Impuestos según la experiencia de Kairos, por confirmar con el agente de aduanas. Régimen de equipaje: 1 % del valor del vehículo hasta 20.000 USD; si vale más, 20 % ad valorem y 1 % de tasa aduanera, más 20 % adicional para motores de más de 2.0 (salvo pick-up). Régimen ordinario: 20 % ad valorem, 16 % IVA y 1 % de tasa aduanera, más 20 % adicional para motores de más de 2.0 (salvo pick-up). Fletes por contenedor, valor variable. Los demás trámites en Venezuela los ves uno por uno en el desglose con tu código.</p>
       </form>
       <aside class="slip" id="v-slip" aria-live="polite">
         <div class="slip-head"><h3 id="v-title">Toyota Corolla 2018</h3><span class="stamp example" id="v-stamp">Estimado</span></div>
@@ -1128,7 +1128,7 @@ footer a{color:var(--hero-muted)}
   const MAR_VE_AGENCIA=[['Agenciamiento aduanal',1000]];
   // Flete marítimo por vehículo hasta La Guaira. EE. UU., Dubái y China: valores de Elise (14 oct. 2026). Argentina y Brasil: estimados, por confirmar.
   const MAR_FLETE={us:{n:'Estados Unidos',f:2500},ae:{n:'Dubái',f:1000},cn:{n:'China',f:3000},ar:{n:'Argentina',f:2200,est:1},br:{n:'Brasil',f:2000,est:1}};
-  const VEH={equiPct:1, adv:20, motorExtra:20, iva:16, tasa:1, homolog:700, titulo:800, sencamer:600 /* Jesús (27 oct. 2026): cobro al cliente; el costo es 500 con impuesto y habilitación */, ageTierra:1650, desinc:600, desincExp:400, caravana:300, gnb:500, gestionMar:400 /* Elise (26 oct. 2026): línea del desglose marítimo, no es un producto de la web */} /* desinc: servicio opcional Kairos en Chile, solo por tierra (Elise, 25 oct. 2026: exportación + baja 600, solo exportación 400) */;
+  const VEH={equiPct:1, equiTope:20000, adv:20, motorExtra:20, iva:16, tasa:1, homolog:700, titulo:800, sencamer:600 /* Jesús (27 oct. 2026): cobro al cliente; el costo es 500 con impuesto y habilitación */, ageTierra:1650, desinc:600, desincExp:400, caravana:300, gnb:500, gestionMar:400 /* Elise (26 oct. 2026): línea del desglose marítimo, no es un producto de la web */} /* desinc: servicio opcional Kairos en Chile, solo por tierra (Elise, 25 oct. 2026: exportación + baja 600, solo exportación 400) */;
   // Ruta terrestre. Combustible en USD por litro: Chile 1,36 (GlobalPetrolPrices, ene. 2026); Argentina 2.052 ARS (YPF Mendoza, may. 2026) a 1.420 ARS por USD (Banco Nación, mar. 2026);
   // Brasil R$ 6,90 promedio de la ruta (ANP, jul. 2026: Cuiabá 6,72, Porto Velho 7,49, Manaos 7,05, Boa Vista 7,58) a 5,4 BRL por USD; Venezuela 0,50 (precio internacional PDVSA).
   const TIERRA={
@@ -1558,7 +1558,15 @@ footer a{color:var(--hero-muted)}
       land=tierra(p); logRows=land.rows; log=logRows.reduce((a,x)=>a+(typeof x[1]==='number'?x[1]:0),0); base=val;
     }
     let taxRows, tax;
-    if(reg==='equi'){ tax=val*VEH.equiPct/100; taxRows=[['Impuestos (régimen de equipaje)',tax,1],[VEH.equiPct+' % del valor del vehículo',tax,2]]; }
+    // Jesús (27 oct. 2026): en equipaje, hasta 20.000 USD de valor se paga 1 %. Sobre 20.000 USD: 20 % ad valorem y 1 % de tasa aduanera,
+    // más 20 % si el motor es de más de 2.0 (como en el ordinario, salvo pick-up). Sin IVA.
+    if(reg==='equi'&&val<=VEH.equiTope){ tax=val*VEH.equiPct/100; taxRows=[['Impuestos (régimen de equipaje)',tax,1],[VEH.equiPct+' % del valor del vehículo (hasta 20.000 USD)',tax,2]]; }
+    else if(reg==='equi'){
+      const adv=base*VEH.adv/100, ext=big?base*VEH.motorExtra/100:0, ts=base*VEH.tasa/100; tax=adv+ext+ts;
+      taxRows=[['Impuestos (régimen de equipaje, vehículo de más de 20.000 USD)',tax,1],['Ad valorem '+VEH.adv+' %',adv,2]];
+      if(big) taxRows.push(['Motor de más de 2.0: '+VEH.motorExtra+' % adicional',ext,2]);
+      taxRows.push(['Tasa aduanera '+VEH.tasa+' %',ts,2]);
+    }
     else{
       const adv=base*VEH.adv/100, ext=big?base*VEH.motorExtra/100:0, iva=base*VEH.iva/100, ts=base*VEH.tasa/100; tax=adv+ext+iva+ts;
       taxRows=[['Impuestos (régimen ordinario)',tax,1],['Ad valorem '+VEH.adv+' %',adv,2]];
@@ -1614,7 +1622,7 @@ d.querySelector('b').append(e.pausa?'Nacionalización en Santa Elena de Uairén'
       const tot=document.createElement('div');tot.className='tr';tot.innerHTML='<div><b>Total por carretera</b><br><span></span></div><em></em>';tot.querySelector('em').textContent=c.land.totalKm.toLocaleString('es-CL')+' km';tot.querySelector('span').textContent=c.land.dias+' días de viaje'+(c.land.br==='stm'?', incluidos 3 días de ferry':'')+'. Las paradas son una guía: duerme donde te sientas seguro.';el.appendChild(tot);}
     $('v-nveh-l').hidden=true; $('v-desinc-l').hidden=!(p==='cl'&&r==='terr'); $('v-cer-l').hidden=c.reg!=='equi'; $('v-baja').disabled=!$('v-exp').checked; if(!$('v-exp').checked) $('v-baja').checked=false; $('v-br-seg').hidden=!!vSalida().manaos; $('v-mar-note').hidden=!(r==='mar'&&p==='cl');
     $('v-val-usd').textContent=p==='cl'?'Equivale a '+usd(c.val)+' (dólar del día: '+RATES.clpUsd+' pesos). Este valor solo se usa para calcular los impuestos; no se suma al costo.':'Este valor solo se usa para calcular los impuestos; no se suma al costo.';
-    $('v-reg-note').textContent=c.reg==='equi'?'Requisitos: haber vivido 1 año o más fuera de Venezuela, vehículo a tu nombre con 11 meses o más de registro y certificado de uso legalizado por el consulado. Un vehículo por persona y no puedes venderlo en 3 años. Pagas el 1 % del valor del vehículo.':'Para cualquier persona con RIF. Solo vehículos de hasta 5 años de uso: en '+ANIO_ACTUAL+', de '+ORD_MIN+' a '+ANIO_ACTUAL+' (recomendado '+ORD_REC+' en adelante). Pagas 20 % ad valorem, 16 % IVA y 1 % de tasa; los motores de más de 2.0 que no son pick-up pagan 20 % adicional.';
+    $('v-reg-note').textContent=c.reg==='equi'?'Requisitos: haber vivido 1 año o más fuera de Venezuela, vehículo a tu nombre con 11 meses o más de registro y certificado de uso legalizado por el consulado. Un vehículo por persona y no puedes venderlo en 3 años. Pagas el 1 % del valor del vehículo si vale hasta 20.000 USD; si vale más, 20 % ad valorem y 1 % de tasa, más 20 % si el motor es de más de 2.0.':'Para cualquier persona con RIF. Solo vehículos de hasta 5 años de uso: en '+ANIO_ACTUAL+', de '+ORD_MIN+' a '+ANIO_ACTUAL+' (recomendado '+ORD_REC+' en adelante). Pagas 20 % ad valorem, 16 % IVA y 1 % de tasa; los motores de más de 2.0 que no son pick-up pagan 20 % adicional.';
     $('v-title').textContent=TIPO[$('v-tipo').value]+' · '+($('v-modelo').value||'Vehículo')+' '+($('v-anio').value||'');
     $('v-route').textContent='Desde '+(c.land?vSalida().n+', ':'')+c.d.name+' · '+(r==='mar'?'marítima, contenedor compartido':'terrestre'+(c.land?(c.land.br==='stm'?' con ferry por Santarém':' por Porto Velho')+' hasta '+c.land.zona+' ('+c.land.dest+')':''))+' · '+(c.reg==='equi'?'régimen de equipaje':'régimen ordinario');
     const ok=unlockKey&&unlockKey===vKey();
