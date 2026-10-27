@@ -561,8 +561,8 @@ footer a{color:var(--hero-muted)}
           </div>
           <label>País desde donde envías el vehículo<select id="v-pais"><option value="cl">Chile</option><option value="ar">Argentina</option><option value="br">Brasil</option><option value="us">Estados Unidos</option><option value="pa">Panamá</option><option value="ae">Dubái</option><option value="cn">China</option></select></label>
           <div class="seg">
-            <label><input type="radio" name="v-ruta" id="v-mar" value="mar" checked><span><b>Marítima</b><em id="v-mar-desc">Contenedor compartido desde Valparaíso</em></span></label>
-            <label><input type="radio" name="v-ruta" id="v-terr" value="terr"><span><b>Terrestre</b><em id="v-terr-desc">Por carretera hasta Santa Elena de Uairén</em></span></label>
+            <label><input type="radio" name="v-ruta" id="v-mar" value="mar"><span><b>Marítima</b><em id="v-mar-desc">Contenedor compartido desde Valparaíso</em></span></label>
+            <label><input type="radio" name="v-ruta" id="v-terr" value="terr" checked><span><b>Terrestre</b><em id="v-terr-desc">Por carretera hasta Santa Elena de Uairén</em></span></label>
           </div>
           <p class="note" id="v-mar-note">Desde Valparaíso hasta el puerto de La Guaira. Valores basados en una cotización real de julio de 2026. El certificado de exportación ya está incluido; la desincorporación en el Registro Civil la haces tú.</p>
           <p class="note" id="v-terr-note" hidden>Viajas en tu propio vehículo hasta la aduana de Santa Elena de Uairén. Solo el dueño puede manejarlo, o alguien con autorización notarial.</p>
@@ -1403,7 +1403,7 @@ footer a{color:var(--hero-muted)}
   const vVal=()=>parseInt(($('v-val').value||'').replace(/\D/g,''),10)||0;
   const fmtMiles=v=>v?v.toLocaleString('es-CL'):'';
   let unlocked=null;
-  const vRoute=()=>$('v-terr').checked?'terr':'mar';
+  const vRoute=()=>$('v-terr').checked&&SALIDA[$('v-pais').value]?'terr':'mar'; // sin ruta por tierra desde ese país, va por mar
   // Régimen de equipaje: exoneración hasta este valor (reportes de nov. 2025, por confirmar con el agente de aduanas).
   // Régimen ordinario: hasta 5 años de fabricación contando el año en curso (2026: 2022 a 2026). Se recomienda año actual − 3 por si el trámite cruza de año.
   const EQUI_EXONERA=20000, ANIO_ACTUAL=new Date().getFullYear(), ORD_MIN=ANIO_ACTUAL-5, ORD_REC=ANIO_ACTUAL-3; // Elise (25 oct. 2026): régimen ordinario solo hasta 5 años de uso (2026: de 2021 en adelante).
@@ -1439,7 +1439,7 @@ footer a{color:var(--hero-muted)}
     $('v-val-l').dataset.cur=isCl?'cl':'usd';
     $('v-val-l').textContent=isCl?'Valor del vehículo (pesos chilenos)':'Valor del vehículo (USD)';
     // EE. UU., Dubái y China solo llegan por mar.
-    const soloMar=!SALIDA[p]; $('v-terr').disabled=soloMar; if(soloMar) $('v-mar').checked=true;
+    const soloMar=!SALIDA[p]; $('v-terr').disabled=soloMar; if(soloMar) $('v-mar').checked=true; else $('v-terr').checked=true; /* Jesús (27 oct. 2026): por defecto, vía terrestre */
     // Brasil (Elise, 19 oct. 2026) y Argentina (25 oct. 2026: aún sin proveedores marítimos) solo por tierra.
     const soloTierra=!!d.soloTierra; $('v-mar').disabled=soloTierra; if(soloTierra) $('v-terr').checked=true;
     const sel=$('v-ciudad'); if(!soloMar&&sel.dataset.p!==p){sel.dataset.p=p; sel.innerHTML=''; Object.entries(SALIDA[p]).forEach(([k,v])=>{const o=document.createElement('option');o.value=k;o.textContent=v.n;sel.appendChild(o);});}
