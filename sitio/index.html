@@ -978,7 +978,7 @@ footer a{color:var(--hero-muted)}
     </div>
     <div class="ladder">
       <div class="tier feat"><span class="chip sim" style="justify-self:start">Empieza aquí</span><h3>Asesoría completa para importar tu vehículo a Venezuela</h3><div class="price">45 USD <small id="curso-local"></small></div>
-        <ul class="clean muted small"><li>Revisamos tu caso de forma personalizada</li><li>¿Tu vehículo califica? Régimen de equipaje u ordinario</li><li>Ruta recomendada: vía marítima o terrestre</li><li>Documentos que necesitas, con los requisitos del certificado de uso</li><li>1 código de la Calculadora Kairos con el costo detallado de tu vehículo: cada gasto por separado y tu resumen en una hoja</li><li>El video completo de la asesoría</li><li>Si vas por tierra: itinerario de viaje día por día con hoteles recomendados</li></ul>
+        <ul class="clean muted small"><li>Revisamos tu caso de forma personalizada</li><li>Una llamada de 15 minutos, sin costo, para aclarar tus dudas</li><li>¿Tu vehículo califica? Régimen de equipaje u ordinario</li><li>Ruta recomendada: vía marítima o terrestre</li><li>Documentos que necesitas, con los requisitos del certificado de uso</li><li>1 código de la Calculadora Kairos con el costo detallado de tu vehículo: cada gasto por separado y tu resumen en una hoja</li><li>El video completo de la asesoría</li><li>Si vas por tierra: itinerario de viaje día por día con hoteles recomendados</li></ul>
         <button class="btn primary" type="button" data-pagar="asesoria">Comprar mi asesoría · 45 USD</button></div>
       <div class="tier"><h3>Cálculo de otro vehículo</h3><div class="price">15 USD</div>
         <ul class="clean muted small"><li>Para calcular un vehículo más, además del de tu asesoría</li><li>Cada gasto por separado: impuestos, trámites, ruta y servicios</li><li>Tu resumen en una hoja, con los impuestos en bolívares</li><li>Recibes un código por correo y lo usas en el simulador</li><li>Cada código sirve para un vehículo: revisa el país, la marca, el modelo y el año antes de usarlo</li></ul>
@@ -988,7 +988,7 @@ footer a{color:var(--hero-muted)}
         <button class="btn primary" type="button" data-pagar="plan">Comprar mi itinerario · 30 USD</button></div>
     </div>
     <div class="tier" style="margin-top:20px"><h3>Acompañamiento completo por tierra</h3><div class="price">200 USD</div>
-      <ul class="clean muted small"><li>Si ya pagaste la asesoría, pagas 155 USD: descontamos los 45</li><li><b>Todo lo de la asesoría, y además:</b></li><li>Realizamos una llamada de 15 minutos contigo</li><li>Atención personalizada 24/7 durante todo el proceso</li><li>Te acompañamos desde cero hasta que tu vehículo esté nacionalizado</li><li>Revisamos tus documentos antes de salir</li><li>Qué hacer en cada frontera y en las paradas obligatorias</li><li>Seguimiento por WhatsApp durante el viaje y la nacionalización</li><li>Opción de viajar en caravana con Kairos (valor aparte)</li></ul>
+      <ul class="clean muted small"><li>Si ya pagaste la asesoría, pagas 155 USD: descontamos los 45</li><li><b>Todo lo de la asesoría (con la llamada de 15 minutos), y además:</b></li><li>Atención personalizada 24/7 durante todo el proceso</li><li>Te acompañamos desde cero hasta que tu vehículo esté nacionalizado</li><li>Revisamos tus documentos antes de salir</li><li>Qué hacer en cada frontera y en las paradas obligatorias</li><li>Seguimiento por WhatsApp durante el viaje y la nacionalización</li><li>Opción de viajar en caravana con Kairos (valor aparte)</li></ul>
       <button class="btn ghost" type="button" data-wa="Quiero mi acompañamiento completo" data-noref>Quiero mi acompañamiento completo</button></div>
     <div class="box traslado" id="traslado" style="margin-top:20px">
       <span class="chip sim" style="justify-self:start">Nuevo</span>
@@ -1690,7 +1690,7 @@ d.querySelector('b').append(e.pausa?'Nacionalización en Santa Elena de Uairén'
   /* ---------- Pago en línea: NOWPayments por las funciones de Netlify (repo/netlify/functions) ---------- */
   // El precio real lo pone el servidor; aquí solo se muestra.
   // Elise (25 oct. 2026): solo 3 productos. Asesoría 45, otro vehículo 15, itinerario 30.
-  const PAGO={asesoria:{t:'Asesoría completa',p:45,inc:'Incluye el detalle de cada gasto, tu resumen en una hoja, el video completo de la asesoría y tu plan de viaje día por día.'},
+  const PAGO={asesoria:{t:'Asesoría completa',p:45,inc:'Incluye el detalle de cada gasto, tu resumen en una hoja, el video completo de la asesoría, tu plan de viaje día por día y una llamada de 15 minutos para aclarar tus dudas.'},
     extra:{t:'Cálculo de otro vehículo',p:15,inc:'Incluye el detalle de cada gasto y tu resumen en una hoja para un vehículo más. El código llega a tu correo y lo usas en el simulador.'},
     plan:{t:'Itinerario de viaje día por día',p:30,inc:'Incluye tu itinerario con dónde dormir, el mapa con las paradas y la ruta en Google Maps por tramos.'}};
   // Video completo de la asesoría por país: 'yt:ID' o 'vimeo:ID'. Vacío: aún no está grabado.

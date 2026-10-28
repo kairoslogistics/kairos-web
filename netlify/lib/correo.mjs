@@ -36,6 +36,7 @@ export function correoCodigo(o) {
 <p style="font-family:'Courier New',monospace;font-size:30px;font-weight:bold;letter-spacing:6px;color:#0E3B43;background:#E0A526;padding:14px 18px;border-radius:8px;text-align:center;margin:18px 0">${esc(o.codigo)}</p>
 ${plan ? boton(enlace, 'Abrir mi itinerario', true) : boton(enlace, 'Ver mi detalle', true) + (conItin ? boton(itin, 'Abrir mi itinerario', true) : '')}
 ${conItin ? boton(gastos, 'Registrar mis gastos del viaje', true) + '<p style="font-size:14px">Anota en el camino lo que gastas en combustible, comida, hospedaje y peajes. Funciona sin señal y te suma todo en dólares.</p>' : ''}
+${o.producto === 'asesoria' ? `<p><b>Tu llamada de 15 minutos:</b> escríbenos por WhatsApp al ${esc(WHATSAPP)} y la agendamos.</p>` : ''}
 <p>Incluye ${esc(p.incluye)}. Tu código sirve por ${o.dias} días.${notaItin ? ' ' + esc(notaItin) : ''}</p>
 <p style="font-size:14px;color:#c9d8da">Orden: ${esc(o.id)}<br>Monto pagado: ${esc(o.monto)} USD</p>`),
   };
