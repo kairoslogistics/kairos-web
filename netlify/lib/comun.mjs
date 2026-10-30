@@ -9,8 +9,9 @@ export const PRODUCTOS = {
 };
 // Qué abre cada tipo de código (Elise, 30 oct. 2026). La asesoría 1 a 1 (150 USD, se vende por WhatsApp) trae todo:
 // detalle, video, itinerario y registrador. El registrador ya no viene con el itinerario ni con la asesoría de 45.
-// El itinerario y el registrador se cobran solo por Hotmart (Elise, 30 oct. 2026): así pagan desde Argentina y Brasil, y el video de uso se ve ahí.
-export const SOLO_HOTMART = ['plan', 'gastos'];
+// Todo lo que se vende en la web se cobra solo por Hotmart (Elise, 30 oct. 2026): así pagan desde Argentina y Brasil, y los videos se ven ahí.
+// Por Binance o directo a su cuenta solo se cobra la asesoría 1 a 1, que se coordina por WhatsApp.
+export const SOLO_HOTMART = ['asesoria', 'extra', 'plan', 'gastos'];
 export const TIPOS_ITINERARIO = ['plan', 'asesoria', 'unoauno'];
 export const TIPOS_GASTOS = ['gastos', 'unoauno'];
 // Los códigos de itinerario y asesoría vendidos antes de este cambio traían el registrador; se les respeta.

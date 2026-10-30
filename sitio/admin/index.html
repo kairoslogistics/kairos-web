@@ -764,16 +764,16 @@ function bindCz(){
 /* Videos cortos de cómo usar el itinerario y el registrador (Elise, 30 oct. 2026). Van en el correo del código al confirmarse el pago
    (publico/videos). Pega el enlace de YouTube o de Drive; si queda vacío, el correo sale sin ese botón. */
 let VID=null;
-async function cargarVID(){VID={itinerario:'',gastos:''};
+async function cargarVID(){VID={calculo:'',itinerario:'',gastos:''};
   try{ if(MODO==='real'){const d=await db.collection('publico').doc('videos').get(); if(d.exists) Object.assign(VID,d.data());} else Object.assign(VID,JSON.parse(pref.get('videos')||'{}')); }catch(e){}
   return VID;}
 function vVideos(){
   if(!VID){cargarVID().then(render); return '';}
-  return '<section class="cotiza cz-form" style="margin:16px 0"><h3>Videos de cómo usarlo</h3><p class="sub">Opcional: si pegas un enlace, también va en el correo del código. El itinerario y el registrador se pagan por Hotmart y el video principal se sube allá. El del itinerario va también a la asesoría de 45.</p>'+
-    '<div class="cz-g"><label>Video del itinerario (1 minuto)<input id="vid-itin" type="url" value="'+esc(VID.itinerario||'')+'" placeholder="https://youtu.be/…"></label><label>Video del registrador de gastos<input id="vid-gastos" type="url" value="'+esc(VID.gastos||'')+'" placeholder="https://youtu.be/…"></label></div>'+
+  return '<section class="cotiza cz-form" style="margin:16px 0"><h3>Videos de cómo usarlo</h3><p class="sub">Van en el correo con el código apenas Hotmart confirma el pago. El del cálculo va a la asesoría de 45 y a otro vehículo; el del itinerario, a la asesoría y al itinerario. Si queda vacío, el correo sale sin ese botón.</p>'+
+    '<div class="cz-g"><label>Video de cómo abrir el cálculo (asesoría y otro vehículo)<input id="vid-calc" type="url" value="'+esc(VID.calculo||'')+'" placeholder="https://youtu.be/…"></label><label>Video del itinerario (1 minuto)<input id="vid-itin" type="url" value="'+esc(VID.itinerario||'')+'" placeholder="https://youtu.be/…"></label><label>Video del registrador de gastos<input id="vid-gastos" type="url" value="'+esc(VID.gastos||'')+'" placeholder="https://youtu.be/…"></label></div>'+
     '<div><button class="btn" type="button" data-vidsave>Guardar videos</button></div></section>';
 }
-async function guardarVID(){const v={itinerario:$('#vid-itin').value.trim(),gastos:$('#vid-gastos').value.trim()};
+async function guardarVID(){const v={calculo:$('#vid-calc').value.trim(),itinerario:$('#vid-itin').value.trim(),gastos:$('#vid-gastos').value.trim()};
   if(Object.values(v).some(u=>u&&!/^https:\/\//.test(u))){toast('Pega el enlace completo, que empiece con https://');return;}
   try{ if(MODO==='real') await db.collection('publico').doc('videos').set({...v,actualizado:Date.now()}); else pref.set('videos',JSON.stringify(v)); VID=v; toast('Videos guardados'); }
   catch(e){toast('No se pudo guardar: '+(e.message||'revisa la conexión'));}}

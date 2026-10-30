@@ -990,7 +990,7 @@ footer a{color:var(--hero-muted)}
         <ul class="clean muted small"><li>Revisamos tu caso de forma personalizada</li><li>¿Tu vehículo califica? Régimen de equipaje u ordinario</li><li>Ruta recomendada: vía marítima o terrestre</li><li>Documentos que necesitas, con los requisitos del certificado de uso</li><li>1 código de la Calculadora Kairos con el costo detallado de tu vehículo: cada gasto por separado y tu resumen en una hoja</li><li>El video completo de la asesoría</li><li>Si vas por tierra: itinerario de viaje día por día con hoteles recomendados</li></ul>
         <button class="btn primary" type="button" data-pagar="asesoria">Comprar mi asesoría · 45 USD</button></div>
       <div class="tier"><h3>Cálculo de otro vehículo</h3><div class="price">15 USD</div>
-        <ul class="clean muted small"><li>Para calcular un vehículo más, además del de tu asesoría</li><li>Cada gasto por separado: impuestos, trámites, ruta y servicios</li><li>Tu resumen en una hoja, con los impuestos en bolívares</li><li>Recibes un código por correo y lo usas en el simulador</li><li>Cada código sirve para un vehículo: revisa el país, la marca, el modelo y el año antes de usarlo</li></ul>
+        <ul class="clean muted small"><li>Para calcular un vehículo más, además del de tu asesoría</li><li>Cada gasto por separado: impuestos, trámites, ruta y servicios</li><li>Tu resumen en una hoja, con los impuestos en bolívares</li><li>Pagas por Hotmart en la moneda de tu país: tu código llega a tu correo con un video corto de cómo abrir tu cálculo</li><li>Cada código sirve para un vehículo: revisa el país, la marca, el modelo y el año antes de usarlo</li></ul>
         <button class="btn primary" type="button" data-pagar="extra">Comprar otro cálculo · 15 USD</button></div>
       <div class="tier"><h3>Itinerario de viaje día por día</h3><div class="price">30 USD</div>
         <ul class="clean muted small"><li>Para traer tu vehículo por tierra a Venezuela</li><li>Dónde dormir cada noche, según los kilómetros que quieras manejar por día</li><li>Hoteles recomendados en el camino, donde ya nos quedamos en más de 15 viajes</li><li>Mapa con las paradas y la ruta en Google Maps por tramos</li><li>Fronteras y paradas obligatorias del recorrido</li><li>Recomendaciones para el viaje y tu lista de requisitos</li><li>Pagas por Hotmart en la moneda de tu país: ahí ves un video de 1 minuto de cómo usarlo y tu código llega a tu correo</li><li>Ya viene incluido en la asesoría completa</li></ul>
@@ -1707,8 +1707,8 @@ d.querySelector('b').append(e.pausa?'Nacionalización en Santa Elena de Uairén'
   /* ---------- Pago en línea: NOWPayments por las funciones de Netlify (repo/netlify/functions) ---------- */
   // El precio real lo pone el servidor; aquí solo se muestra.
   // Elise (25 oct. 2026): asesoría 45, otro vehículo 15, itinerario 30. 30 oct. 2026: registrador de gastos 15, aparte del itinerario.
-  const PAGO={asesoria:{t:'Asesoría completa',p:45,inc:'Incluye el detalle de cada gasto, tu resumen en una hoja, el video completo de la asesoría, y tu plan de viaje día por día.'},
-    extra:{t:'Cálculo de otro vehículo',p:15,inc:'Incluye el detalle de cada gasto y tu resumen en una hoja para un vehículo más. El código llega a tu correo y lo usas en el simulador.'},
+  const PAGO={asesoria:{t:'Asesoría completa',p:45,inc:'Incluye el detalle de cada gasto, tu resumen en una hoja, el video completo de la asesoría, y tu plan de viaje día por día. Pagas por Hotmart en la moneda de tu país; tu código llega a tu correo.'},
+    extra:{t:'Cálculo de otro vehículo',p:15,inc:'Incluye el detalle de cada gasto y tu resumen en una hoja para un vehículo más. Pagas por Hotmart en la moneda de tu país; tu código llega a tu correo con un video corto de cómo abrir tu cálculo.'},
     plan:{t:'Itinerario de viaje día por día',p:30,inc:'Incluye tu itinerario con dónde dormir, el mapa con las paradas, la ruta en Google Maps por tramos, recomendaciones para el viaje y tu lista de requisitos. Pagas por Hotmart en la moneda de tu país; ahí ves un video de 1 minuto de cómo usarlo y tu código llega a tu correo.'},
     gastos:{t:'Registrador de gastos del viaje',p:15,inc:'Anotas en el camino lo que gastas en cada país y te lo suma en dólares, aunque no tengas señal. Pagas por Hotmart en la moneda de tu país; ahí ves un video de 1 minuto de cómo usarlo y tu código llega a tu correo.'}};
   // Video completo de la asesoría por país: 'yt:ID' o 'vimeo:ID'. Vacío: aún no está grabado.
@@ -1757,12 +1757,12 @@ d.querySelector('b').append(e.pausa?'Nacionalización en Santa Elena de Uairén'
   // Formas de pago con claves en Netlify (/api/metodos). PayPal se quitó (Jesús, 25 oct. 2026: no acepta sus bancos de Chile).
   let MET=null;
   const cargarMet=()=>MET?Promise.resolve(MET):fetch('/api/metodos').then(r=>r.ok?r.json():{}).catch(()=>({})).then(j=>MET=j);
-  const SOLO_HOTMART=['plan','gastos'];
+  const SOLO_HOTMART=['asesoria','extra','plan','gastos'];
   let metElegido=false;
   const payMet=()=>{if($('pay-met').hidden) return 'np'; const r=document.querySelector('[name="pay-met"]:checked'); return r?r.value:'np';};
   function pintarMetodo(){
     // Jesús (25 oct. 2026): en Chile se cobra en pesos con Mercado Pago.
-    // Elise (30 oct. 2026): el itinerario y el registrador se pagan solo por Hotmart (cobra en Argentina y Brasil, y ahí ven el video de uso).
+    // Elise (30 oct. 2026): todo lo de la web se paga solo por Hotmart (cobra en Argentina y Brasil, y ahí se ven los videos). La 1 a 1 va por WhatsApp.
     const solo=SOLO_HOTMART.includes(payProd);
     const ve=!solo&&$('pay-pais').value==='Venezuela'&&!!PM, mp=!solo&&$('pay-pais').value==='Chile'&&!!(MET&&MET.mp), hm=!!(MET&&(MET.hotmart||[]).includes(payProd)); // Jesús (25 oct. 2026): Hotmart en todos los países, también Chile.
     $('pay-met-pm-l').hidden=!ve; $('pay-met-mp-l').hidden=!mp; $('pay-met-hm-l').hidden=!hm; $('pay-met-np-l').hidden=solo;
