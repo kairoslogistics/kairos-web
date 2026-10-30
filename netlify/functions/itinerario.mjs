@@ -1,7 +1,7 @@
 // Abre el itinerario de viaje (Elise, 26 oct. 2026). Con un código de itinerario o de asesoría: vence a los 60 días y se abre
 // en hasta 3 dispositivos. Cada apertura queda contada en el código para ver en el panel quién lo comparte.
 import { leer, cambiar } from '../lib/firestore.mjs';
-import { json, texto, MAX_DISPOSITIVOS } from '../lib/comun.mjs';
+import { json, texto, MAX_DISPOSITIVOS, TIPOS_ITINERARIO } from '../lib/comun.mjs';
 
 const ERR = {
   no: 'Ese código no existe o no es de un itinerario. Revisa que esté escrito igual que en tu correo.',
@@ -18,7 +18,7 @@ export default async (req) => {
   try {
     for (let i = 0; i < 3; i++) {
       const doc = await leer('codigos/' + codigo), c = doc?.datos;
-      if (!c || !['plan', 'asesoria'].includes(c.tipo)) return json({ error: ERR.no, motivo: 'no' }, 404);
+      if (!c || !TIPOS_ITINERARIO.includes(c.tipo)) return json({ error: ERR.no, motivo: 'no' }, 404);
       if (c.anulado) return json({ error: ERR.anulado, motivo: 'anulado' }, 410);
       if (c.vence && new Date(c.vence) < new Date()) return json({ error: ERR.vencido, motivo: 'vencido' }, 410);
       const lista = Array.isArray(c.dispositivos) ? c.dispositivos : [], ahora = Date.now();

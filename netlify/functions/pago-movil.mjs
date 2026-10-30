@@ -2,7 +2,7 @@
 // (Elise, 24 oct. 2026) y manda aquí su número de referencia. La orden queda «por verificar» hasta que Elise
 // la aprueba en el panel; entonces la página, que sigue preguntando por la orden, muestra el código.
 import { crear, leer, cambiar } from '../lib/firestore.mjs';
-import { nuevaOrden, json, validarCliente, texto } from '../lib/comun.mjs';
+import { nuevaOrden, json, validarCliente, texto, SOLO_HOTMART } from '../lib/comun.mjs';
 import { enviar, correoAviso } from '../lib/correo.mjs';
 import { obtenerTasas } from '../lib/tasas.mjs';
 
@@ -11,6 +11,7 @@ export default async (req) => {
   let d; try { d = await req.json(); } catch { return json({ error: 'Datos inválidos' }, 400); }
   const v = validarCliente(d);
   if (v.error) return json({ error: v.error }, 400);
+  if (SOLO_HOTMART.includes(d.producto)) return json({ error: 'Este producto se paga por Hotmart.' }, 400);
   const referencia = texto(d.referencia, 30).replace(/\s/g, ''), telefono = texto(d.telefono_pago, 30);
   if (!/^\d{4,20}$/.test(referencia)) return json({ error: 'Escribe el número de referencia del Pago Móvil (solo números).' }, 400);
   try {

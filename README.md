@@ -8,6 +8,8 @@
   - `create-order` (`/api/create-order`): guarda la orden y crea el pedido en PayPal (intent CAPTURE, USD). El monto sale de `PRODUCTOS`, nunca del navegador.
   - `capture-order` (`/api/capture-order`): cobra el pedido aprobado, revisa el monto, crea el código y devuelve estado e ID de transacción.
   - `orden` (`/api/orden?orden=…&correo=…`): la página pregunta si ya se pagó y muestra el código en pantalla.
+  - `correo-codigo` (`/api/correo-codigo`): el panel lo llama al aprobar un Pago Móvil; envía al cliente el correo con su código y el video de uso.
+- Videos de uso (itinerario y registrador de gastos): se pegan en el panel, pestaña Códigos (Firestore `publico/videos`).
 
 Variables de entorno en Netlify: `NOWPAYMENTS_API_KEY`, `NOWPAYMENTS_IPN_SECRET`, `ZOHO_SMTP_USER`, `ZOHO_SMTP_PASS`, `SITE_URL`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY`, `PAYPAL_CLIENT_ID`, `PAYPAL_SECRET` (app Live; el SECRET solo se usa en las funciones).
-Opcionales: `NOWPAYMENTS_SANDBOX=si` (pruebas sin dinero), `CORREO_PRUEBA=si` (no envía correos), `CODIGO_DIAS` (por defecto 30), `ZOHO_SMTP_HOST` (por defecto smtp.zoho.com), `AVISOS_A`.
+Opcionales: `NOWPAYMENTS_SANDBOX=si` (pruebas sin dinero), `CORREO_PRUEBA=si` (no envía correos), `CODIGO_DIAS` (por defecto 30), `ZOHO_SMTP_HOST` (por defecto smtp.zoho.com), `AVISOS_A`, `HOTMART_GASTOS` (enlace de pago del registrador de gastos en Hotmart).

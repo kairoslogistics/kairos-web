@@ -1,7 +1,7 @@
 // La página manda los datos del cliente y de su simulación; aquí se guarda la orden y se crea la factura en NOWPayments.
 // A la página solo vuelve el enlace de pago.
 import { crear, cambiar } from '../lib/firestore.mjs';
-import { nuevaOrden, json, sitio, validarCliente } from '../lib/comun.mjs';
+import { nuevaOrden, json, sitio, validarCliente, SOLO_HOTMART } from '../lib/comun.mjs';
 import { mpActivo, montoClp, crearPreferencia } from '../lib/mercadopago.mjs';
 import { hotmartActivo, urlHotmart } from '../lib/hotmart.mjs';
 
@@ -20,6 +20,7 @@ export default async (req) => {
   if (mp && !mpActivo()) return json({ error: 'El pago con Mercado Pago no está disponible ahora. Elige otra forma de pago.' }, 503);
   if (mp) { orden.metodo = 'mercadopago'; orden.monto_clp = await montoClp(p.precio); }
   const hm = d.metodo === 'hotmart';
+  if (!hm && SOLO_HOTMART.includes(d.producto)) return json({ error: 'Este producto se paga por Hotmart.' }, 400);
   if (hm && !hotmartActivo(d.producto)) return json({ error: 'El pago con Hotmart no está disponible ahora. Elige otra forma de pago.' }, 503);
   if (hm) orden.metodo = 'hotmart';
   try {

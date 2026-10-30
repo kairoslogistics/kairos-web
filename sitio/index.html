@@ -331,7 +331,9 @@ textarea{min-height:80px;resize:vertical}
 .box{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;display:grid;gap:8px;align-content:start;min-width:0}
 ul.clean{margin:0;padding-left:18px;display:grid;gap:4px}
 .ladder{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
-@media (max-width:820px){.ladder{grid-template-columns:minmax(0,1fr)}}
+.ladder.cuatro{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media (max-width:1060px){.ladder.cuatro{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:820px){.ladder,.ladder.cuatro{grid-template-columns:minmax(0,1fr)}}
 .tier{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;display:grid;gap:10px;align-content:start}
 .tier.feat{border:2px solid var(--brand)}
 .tier .price{font-family:var(--display);font-size:32px;font-weight:700}
@@ -527,9 +529,9 @@ footer a{color:var(--hero-muted)}
     <div class="wrap stack">
       <div class="page-head" style="margin-bottom:0"><div class="eyebrow">Cómo trabajamos</div><h2>Primero sabes si conviene. Después lo hacemos.</h2></div>
       <div class="steps">
-        <div class="step"><span class="n">PASO 1</span><b>Asesoría completa</b><span class="price">45 USD</span><span class="muted small">Revisamos tu caso de forma personalizada: si tu vehículo califica, qué régimen te conviene y qué documentos necesitas.</span></div>
+        <div class="step"><span class="n">PASO 1</span><b>Asesoría para importar tu vehículo</b><span class="price">45 USD</span><span class="muted small">Revisamos tu caso de forma personalizada: si tu vehículo califica, qué régimen te conviene y qué documentos necesitas.</span></div>
         <div class="step"><span class="n">PASO 2</span><b>Calculadora Kairos</b><span class="price">Incluida</span><span class="muted small">La asesoría trae un código para calcular el costo total de un vehículo.</span></div>
-        <div class="step"><span class="n">PASO 3</span><b>Asesoría 1 a 1 en vivo</b><span class="price">150 USD</span><span class="muted small">Una sesión en vivo de 1 hora y media y asistencia 24/7, desde cero hasta que tu vehículo esté nacionalizado. También en caravana, con valor aparte.</span></div>
+        <div class="step"><span class="n">PASO 3</span><b>Asesoría 1 a 1 en vivo</b><span class="price">150 USD</span><span class="muted small">Una sesión en vivo de 1 hora y media y asistencia 24/7, desde cero hasta que tu vehículo esté nacionalizado. Trae el video completo, tu itinerario día por día y tu registrador de gastos. También en caravana, con valor aparte.</span></div>
       </div>
     </div>
   </div>
@@ -664,7 +666,7 @@ footer a{color:var(--hero-muted)}
           <label class="km-it">¿Cuántos kilómetros quieres manejar por día?<select id="v-kmdia-it"><option value="500">500 km (muy tranquilo)</option><option value="600">600 km (tranquilo)</option><option value="700">700 km</option><option value="800">800 km</option><option value="900">900 km</option><option value="1000">1.000 km (lo recomendado: unos 8 días hasta la frontera)</option><option value="1100">1.100 km (rápido)</option></select></label>
           <div class="route-list" id="v-tramos"></div>
           <div class="v-recs" id="v-recs"></div>
-          <div class="cta-box" id="v-gastos-box"><b>Registra tus gastos en el camino</b><p class="note">Anota combustible, comida, hospedaje y peajes en la moneda de cada país. Te suma todo en dólares, día por día, y funciona sin señal. Agrégalo a la pantalla de inicio de tu teléfono.</p><a class="btn primary" id="v-gastos" href="/gastos/">Abrir mi registro de gastos</a></div>
+          <div class="cta-box" id="v-gastos-box"><b>Registra tus gastos en el camino · 15 USD</b><p class="note">Anota combustible, comida, hospedaje y peajes en la moneda de cada país. Te suma todo en dólares, día por día, y funciona sin señal. Ya viene incluido en la asesoría 1 a 1.</p><button class="btn primary" type="button" data-pagar="gastos">Comprar mi registrador de gastos · 15 USD</button> <a class="btn ghost" id="v-gastos" href="/gastos/">Ya lo tengo: abrir mi registro</a></div>
           </div>
     </div>
   </div>
@@ -980,18 +982,22 @@ footer a{color:var(--hero-muted)}
     </div>
     <!-- Jesús (28 oct. 2026): asesoría 1 a 1 en vivo, 150 USD, arriba. Reemplaza al acompañamiento completo por tierra. Se coordina y se paga por WhatsApp (USD, pesos chilenos por transferencia o Binance). -->
     <div class="tier feat" id="uno-a-uno" style="margin-bottom:20px"><span class="chip sim" style="justify-self:start">En vivo</span><h3>Asesoría 1 a 1 personalizada, totalmente en vivo</h3><div class="price">150 USD</div>
-      <ul class="clean muted small"><li>Una sesión en vivo de 1 hora y media aproximadamente, solo para tu caso, para revisar tu vehículo y tu plan paso a paso</li><li>Atención personalizada y asistencia 24/7 durante todo el proceso</li><li>Consultas y dudas día tras día, desde cero hasta que tu vehículo esté nacionalizado en Venezuela</li><li>Acompañamiento completo por tierra: qué hacer en cada frontera y en las paradas obligatorias, revisión de tus documentos antes de salir y seguimiento por WhatsApp durante el viaje y la nacionalización</li><li>Todo lo de la asesoría completa: ¿tu vehículo califica? Régimen de equipaje u ordinario, ruta recomendada, documentos y requisitos del certificado de uso, y el detalle de cada gasto en tu resumen</li><li>Tu itinerario de viaje día por día con hoteles recomendados, en una página interactiva que recibes en tu teléfono: dónde dormir cada noche según los kilómetros que manejes por día, mapa con las paradas y ruta en Google Maps por tramos</li><li>Agentes aduanales: con quién y cómo trabajar, y las letras pequeñas que nadie te dice</li><li>Gastos que realizarás: combustible, peajes, alimentación, hospedaje, trámites, impuestos y servicios, cada uno por separado</li><li>Opción de viajar en caravana con Kairos (valor aparte)</li><li>Respaldo de nuestra experiencia: más de 15 viajes por tierra que hicimos nosotros mismos, más de 300 importaciones exitosas y más de 700 asesorías realizadas, y envíos marítimos. Y muchísimo más</li></ul>
+      <ul class="clean muted small"><li>Una sesión en vivo de 1 hora y media aproximadamente, solo para tu caso, para revisar tu vehículo y tu plan paso a paso</li><li>Atención personalizada y asistencia 24/7 durante todo el proceso</li><li>Consultas y dudas día tras día, desde cero hasta que tu vehículo esté nacionalizado en Venezuela</li><li>Acompañamiento completo por tierra: qué hacer en cada frontera y en las paradas obligatorias, revisión de tus documentos antes de salir y seguimiento por WhatsApp durante el viaje y la nacionalización</li><li>Todo lo de la asesoría completa: ¿tu vehículo califica? Régimen de equipaje u ordinario, ruta recomendada, documentos y requisitos del certificado de uso, y el detalle de cada gasto en tu resumen</li><li>Tu itinerario de viaje día por día con hoteles recomendados, en una página interactiva que recibes en tu teléfono: dónde dormir cada noche según los kilómetros que manejes por día, mapa con las paradas y ruta en Google Maps por tramos</li><li>El video completo de la asesoría</li><li>Tu registrador de gastos del viaje: anotas en el camino lo que gastas en cada país y te lo suma en dólares, aunque no tengas señal</li><li>Agentes aduanales: con quién y cómo trabajar, y las letras pequeñas que nadie te dice</li><li>Gastos que realizarás: combustible, peajes, alimentación, hospedaje, trámites, impuestos y servicios, cada uno por separado</li><li>Opción de viajar en caravana con Kairos (valor aparte)</li><li>Respaldo de nuestra experiencia: más de 15 viajes por tierra que hicimos nosotros mismos, más de 300 importaciones exitosas y más de 700 asesorías realizadas, y envíos marítimos. Y muchísimo más</li></ul>
       <button class="btn primary" type="button" data-wa="Quiero mi asesoría 1 a 1, totalmente en vivo" data-noref>Quiero mi asesoría 1 a 1 en vivo</button></div>
-    <div class="ladder">
-      <div class="tier feat"><span class="chip sim" style="justify-self:start">Empieza aquí</span><h3>Asesoría completa para importar tu vehículo a Venezuela</h3><div class="price">45 USD <small id="curso-local"></small></div>
+    <!-- Elise (30 oct. 2026): el registrador de gastos se vende aparte (15 USD) y viene solo con la asesoría 1 a 1. El itinerario ya no lo trae. -->
+    <div class="ladder cuatro">
+      <div class="tier feat"><span class="chip sim" style="justify-self:start">Empieza aquí</span><h3>Asesoría para importar tu vehículo a Venezuela</h3><div class="price">45 USD <small id="curso-local"></small></div>
         <ul class="clean muted small"><li>Revisamos tu caso de forma personalizada</li><li>¿Tu vehículo califica? Régimen de equipaje u ordinario</li><li>Ruta recomendada: vía marítima o terrestre</li><li>Documentos que necesitas, con los requisitos del certificado de uso</li><li>1 código de la Calculadora Kairos con el costo detallado de tu vehículo: cada gasto por separado y tu resumen en una hoja</li><li>El video completo de la asesoría</li><li>Si vas por tierra: itinerario de viaje día por día con hoteles recomendados</li></ul>
         <button class="btn primary" type="button" data-pagar="asesoria">Comprar mi asesoría · 45 USD</button></div>
       <div class="tier"><h3>Cálculo de otro vehículo</h3><div class="price">15 USD</div>
-        <ul class="clean muted small"><li>Para calcular un vehículo más, además del de tu asesoría</li><li>Cada gasto por separado: impuestos, trámites, ruta y servicios</li><li>Tu resumen en una hoja, con los impuestos en bolívares</li><li>Recibes un código por correo y lo usas en el simulador</li><li>Cada código sirve para un vehículo: revisa el país, la marca, el modelo y el año antes de usarlo</li></ul>
+        <ul class="clean muted small"><li>Para calcular un vehículo más, además del de tu asesoría</li><li>Cada gasto por separado: impuestos, trámites, ruta y servicios</li><li>Tu resumen en una hoja, con los impuestos en bolívares</li><li>Pagas por Hotmart en la moneda de tu país: tu código llega a tu correo con un video corto de cómo abrir tu cálculo</li><li>Cada código sirve para un vehículo: revisa el país, la marca, el modelo y el año antes de usarlo</li></ul>
         <button class="btn primary" type="button" data-pagar="extra">Comprar otro cálculo · 15 USD</button></div>
       <div class="tier"><h3>Itinerario de viaje día por día</h3><div class="price">30 USD</div>
-        <ul class="clean muted small"><li>Para traer tu vehículo por tierra a Venezuela</li><li>Dónde dormir cada noche, según los kilómetros que quieras manejar por día</li><li>Hoteles recomendados en el camino, donde ya nos quedamos en más de 15 viajes</li><li>Mapa con las paradas y la ruta en Google Maps por tramos</li><li>Fronteras y paradas obligatorias del recorrido</li><li>Ya viene incluido en la asesoría completa</li></ul>
+        <ul class="clean muted small"><li>Para traer tu vehículo por tierra a Venezuela</li><li>Dónde dormir cada noche, según los kilómetros que quieras manejar por día</li><li>Hoteles recomendados en el camino, donde ya nos quedamos en más de 15 viajes</li><li>Mapa con las paradas y la ruta en Google Maps por tramos</li><li>Fronteras y paradas obligatorias del recorrido</li><li>Recomendaciones para el viaje y tu lista de requisitos</li><li>Pagas por Hotmart en la moneda de tu país: ahí ves un video de 1 minuto de cómo usarlo y tu código llega a tu correo</li><li>Ya viene incluido en la asesoría completa</li></ul>
         <button class="btn primary" type="button" data-pagar="plan">Comprar mi itinerario · 30 USD</button></div>
+      <div class="tier"><h3>Registrador de gastos del viaje</h3><div class="price">15 USD</div>
+        <ul class="clean muted small"><li>Para el viaje por tierra hasta Venezuela</li><li>Anotas combustible, comida, hospedaje y peajes en la moneda de cada país</li><li>Te suma todo en dólares, día por día, y funciona sin señal</li><li>Lo agregas a la pantalla de inicio de tu teléfono</li><li>Pagas por Hotmart en la moneda de tu país: ahí ves un video de 1 minuto de cómo usarlo y tu código llega a tu correo</li><li>Ya viene incluido en la asesoría 1 a 1 en vivo</li></ul>
+        <button class="btn primary" type="button" data-pagar="gastos">Comprar mi registrador · 15 USD</button></div>
     </div>
     <div class="box traslado" id="traslado" style="margin-top:20px">
       <span class="chip sim" style="justify-self:start">Nuevo</span>
@@ -1087,7 +1093,7 @@ footer a{color:var(--hero-muted)}
       <label class="check" id="pay-met-pm-l"><input type="radio" name="pay-met" id="pay-met-pm" value="pm" checked> Pago Móvil en bolívares</label>
       <label class="check" id="pay-met-mp-l" hidden><input type="radio" name="pay-met" id="pay-met-mp" value="mp"> Tarjeta de crédito o débito en Chile, o tu saldo Mercado Pago (pesos chilenos)</label>
       <label class="check" id="pay-met-hm-l" hidden><input type="radio" name="pay-met" id="pay-met-hm" value="hm"> Tarjeta o medios de pago de tu país (Hotmart, en tu moneda)</label>
-      <label class="check"><input type="radio" name="pay-met" id="pay-met-np" value="np"> Cripto o Binance (USDT)</label>
+      <label class="check" id="pay-met-np-l"><input type="radio" name="pay-met" id="pay-met-np" value="np"> Cripto o Binance (USDT)</label>
     </fieldset>
     <div class="pay-pm" id="pay-pm" hidden>
       <div class="pay-price"><span id="pm-bs">—</span> Bs</div>
@@ -1358,7 +1364,7 @@ footer a{color:var(--hero-muted)}
 
   /* ---------- Simulador de vehículo ---------- */
   // Códigos (Elise, 22 oct. 2026): viven en Firebase, colección «codigos», y se crean en el panel. Ninguno está escrito en esta página.
-  // Tipos: asesoria (desglose y plan de viaje), calculo (desglose, 25 USD) y plan (plan de viaje, 20 USD). El servidor solo deja sumar un uso mientras queden.
+  // Tipos: asesoria (desglose y plan de viaje), unoauno (asesoría 1 a 1: lo mismo más el registrador), calculo (desglose), plan (plan de viaje) y gastos (solo /gastos/). El servidor solo deja sumar un uso mientras queden.
   const CODIGOS_URL=c=>'https://firestore.googleapis.com/v1/projects/'+FB_WEB.projectId+'/databases/(default)/documents/codigos/'+encodeURIComponent(c)+'?key='+FB_WEB.apiKey;
   const numF=f=>f?+(f.integerValue??f.doubleValue??0):0;
   async function canjear(code,para){
@@ -1367,7 +1373,7 @@ footer a{color:var(--hero-muted)}
     if(r.status===404||r.status===403) return {err:'no'};
     if(!r.ok) return {err:'red'};
     const f=(await r.json()).fields||{}, tipo=(f.tipo||{}).stringValue||'', usos=numF(f.usos), max=numF(f.max)||1;
-    const sirve=para==='plan'?(tipo==='plan'||tipo==='asesoria'):(tipo==='asesoria'||tipo==='calculo');
+    const ases=tipo==='asesoria'||tipo==='unoauno', sirve=para==='plan'?(tipo==='plan'||ases):(ases||tipo==='calculo');
     if(!sirve) return {err:'tipo',tipo};
     const vence=(f.vence||{}).timestampValue||(f.vence||{}).stringValue; if(vence&&new Date(vence)<new Date()) return {err:'vencido'};
     // Cada código sirve para un vehículo (Elise, 23 oct. 2026). Queda ligado al primero que abre y ese mismo se puede volver a abrir.
@@ -1599,7 +1605,7 @@ footer a{color:var(--hero-muted)}
     const c=vCompute(), r=c.r;
     const p=$('v-pais').value;
     $('v-terr-note').hidden=r!=='terr'; $('v-land').hidden=r!=='terr'; $('v-plan-box').hidden=r!=='terr';
-    $('v-plan').hidden=!planOk; $('v-plan-lock').hidden=planOk; $('v-cta-plan').hidden=r!=='terr'||planOk; $('v-kmdia-it').value=$('v-kmdia').value; if(planOk&&abiertos.plan) $('v-gastos').href='/gastos/?codigo='+encodeURIComponent(abiertos.plan);
+    $('v-plan').hidden=!planOk; $('v-plan-lock').hidden=planOk; $('v-cta-plan').hidden=r!=='terr'||planOk; $('v-kmdia-it').value=$('v-kmdia').value; if(abiertos.gastos) $('v-gastos').href='/gastos/?codigo='+encodeURIComponent(abiertos.gastos);
     // Sin código solo se ve el total de kilómetros; el mapa, los tramos y el viaje día por día son del plan (Elise, 25 oct. 2026).
     if(c.land) $('v-km-total').textContent='Recorrido total: unos '+c.land.totalKm.toLocaleString('es-CL')+' km por carretera hasta '+c.land.dest+', en unos '+c.land.dias+' días de viaje.';
     if(c.land&&planOk){drawMap(p,c.land.br,c.land.dest);const el=$('v-tramos'); el.innerHTML='';
@@ -1666,9 +1672,11 @@ d.querySelector('b').append(e.pausa?'Nacionalización en Santa Elena de Uairén'
     btn.disabled=true; st.textContent='Revisando tu código…'; st.className='status';
     const r=await canjear(code,'desglose'); btn.disabled=false;
     if(r.err==='tipo'&&r.tipo==='plan'&&!$('v-terr').disabled){ $('v-terr').checked=true; vCalc(); $('v-plan-code').value=code; st.textContent=''; $('v-plan-open').click(); $('v-plan-lock').scrollIntoView({block:'center'}); return; }
+    if(r.err==='tipo'&&r.tipo==='gastos'){location.href='/gastos/?codigo='+encodeURIComponent(code);return;}
     if(r.err){st.textContent=r.err==='tipo'?'Ese código es del plan de viaje. Escríbelo en el recuadro «Plan de viaje».':COD_ERR[r.err];st.className='status err';return;}
     unlockKey=vKey(); unlockCode=code; abiertos.desglose={code,key:unlockKey};
-    if(r.tipo==='asesoria'){abiertos.video=code; const it=await abrirItin(code); if(!it.error){abiertos.plan=code; planOk=true;} else if(it.motivo!=='red'){ $('v-plan-status').textContent=it.error; $('v-plan-status').className='status err'; }}
+    if(r.tipo==='unoauno') abiertos.gastos=code;
+    if(r.tipo==='asesoria'||r.tipo==='unoauno'){abiertos.video=code; const it=await abrirItin(code); if(!it.error){abiertos.plan=code; planOk=true;} else if(it.motivo!=='red'){ $('v-plan-status').textContent=it.error; $('v-plan-status').className='status err'; }}
     guardarAbiertos();
     vCalc(); st.textContent='Listo. Ya ves cada gasto y puedes descargar tu resumen. Puedes cambiar la ruta o el régimen. Para otro vehículo, cada detalle extra cuesta 15 USD.'; st.className='status ok';
   });
@@ -1691,16 +1699,18 @@ d.querySelector('b').append(e.pausa?'Nacionalización en Santa Elena de Uairén'
     if(it.campos&&(itinEnlace||!ss.get('kairos-sim'))){try{restaurarSim(JSON.parse(it.campos));}catch(e){} if(!$('v-terr').disabled) $('v-terr').checked=true; vCalc();}
     itinEnlace=false;
     const r=await canjear(code,'plan'); btn.disabled=false;
+    if(r.err==='tipo'&&r.tipo==='gastos'){location.href='/gastos/?codigo='+encodeURIComponent(code);return;}
     if(r.err){st.textContent=r.err==='tipo'?'Ese código es del cálculo, no del plan de viaje. Escríbelo en «¿Ya tienes tu código?».':COD_ERR[r.err];st.className='status err';return;}
     abiertos.plan=code; planOk=true; guardarAbiertos(); st.textContent=''; vCalc();
   });
   const vResumenTxt=c=>'Vehículo: '+TIPO[$('v-tipo').value]+', '+($('v-modelo').value||'')+' '+($('v-anio').value||'')+'\nDesde: '+(c.land?vSalida().n+', ':'')+c.d.name+'\nRégimen: '+(c.reg==='equi'?'equipaje':'ordinario');
   /* ---------- Pago en línea: NOWPayments por las funciones de Netlify (repo/netlify/functions) ---------- */
   // El precio real lo pone el servidor; aquí solo se muestra.
-  // Elise (25 oct. 2026): solo 3 productos. Asesoría 45, otro vehículo 15, itinerario 30.
-  const PAGO={asesoria:{t:'Asesoría completa',p:45,inc:'Incluye el detalle de cada gasto, tu resumen en una hoja, el video completo de la asesoría, y tu plan de viaje día por día.'},
-    extra:{t:'Cálculo de otro vehículo',p:15,inc:'Incluye el detalle de cada gasto y tu resumen en una hoja para un vehículo más. El código llega a tu correo y lo usas en el simulador.'},
-    plan:{t:'Itinerario de viaje día por día',p:30,inc:'Incluye tu itinerario con dónde dormir, el mapa con las paradas y la ruta en Google Maps por tramos.'}};
+  // Elise (25 oct. 2026): asesoría 45, otro vehículo 15, itinerario 30. 30 oct. 2026: registrador de gastos 15, aparte del itinerario.
+  const PAGO={asesoria:{t:'Asesoría para importar tu vehículo a Venezuela',p:45,inc:'Incluye el detalle de cada gasto, tu resumen en una hoja, el video completo de la asesoría, y tu plan de viaje día por día. Pagas por Hotmart en la moneda de tu país; tu código llega a tu correo.'},
+    extra:{t:'Cálculo de otro vehículo',p:15,inc:'Incluye el detalle de cada gasto y tu resumen en una hoja para un vehículo más. Pagas por Hotmart en la moneda de tu país; tu código llega a tu correo con un video corto de cómo abrir tu cálculo.'},
+    plan:{t:'Itinerario de viaje día por día',p:30,inc:'Incluye tu itinerario con dónde dormir, el mapa con las paradas, la ruta en Google Maps por tramos, recomendaciones para el viaje y tu lista de requisitos. Pagas por Hotmart en la moneda de tu país; ahí ves un video de 1 minuto de cómo usarlo y tu código llega a tu correo.'},
+    gastos:{t:'Registrador de gastos del viaje',p:15,inc:'Anotas en el camino lo que gastas en cada país y te lo suma en dólares, aunque no tengas señal. Pagas por Hotmart en la moneda de tu país; ahí ves un video de 1 minuto de cómo usarlo y tu código llega a tu correo.'}};
   // Video completo de la asesoría por país: 'yt:ID' o 'vimeo:ID'. Vacío: aún no está grabado.
   const VIDEO_COMPLETO={cl:'',ar:'',br:'',us:'',pa:''};
   function pintarVideo(){
@@ -1747,15 +1757,19 @@ d.querySelector('b').append(e.pausa?'Nacionalización en Santa Elena de Uairén'
   // Formas de pago con claves en Netlify (/api/metodos). PayPal se quitó (Jesús, 25 oct. 2026: no acepta sus bancos de Chile).
   let MET=null;
   const cargarMet=()=>MET?Promise.resolve(MET):fetch('/api/metodos').then(r=>r.ok?r.json():{}).catch(()=>({})).then(j=>MET=j);
+  const SOLO_HOTMART=['asesoria','extra','plan','gastos'];
   let metElegido=false;
   const payMet=()=>{if($('pay-met').hidden) return 'np'; const r=document.querySelector('[name="pay-met"]:checked'); return r?r.value:'np';};
   function pintarMetodo(){
     // Jesús (25 oct. 2026): en Chile se cobra en pesos con Mercado Pago.
-    const ve=$('pay-pais').value==='Venezuela'&&!!PM, mp=$('pay-pais').value==='Chile'&&!!(MET&&MET.mp), hm=!!(MET&&(MET.hotmart||[]).includes(payProd)); // Jesús (25 oct. 2026): Hotmart en todos los países, también Chile.
-    $('pay-met-pm-l').hidden=!ve; $('pay-met-mp-l').hidden=!mp; $('pay-met-hm-l').hidden=!hm;
+    // Elise (30 oct. 2026): todo lo de la web se paga solo por Hotmart (cobra en Argentina y Brasil, y ahí se ven los videos). La 1 a 1 va por WhatsApp.
+    const solo=SOLO_HOTMART.includes(payProd);
+    const ve=!solo&&$('pay-pais').value==='Venezuela'&&!!PM, mp=!solo&&$('pay-pais').value==='Chile'&&!!(MET&&MET.mp), hm=!!(MET&&(MET.hotmart||[]).includes(payProd)); // Jesús (25 oct. 2026): Hotmart en todos los países, también Chile.
+    $('pay-met-pm-l').hidden=!ve; $('pay-met-mp-l').hidden=!mp; $('pay-met-hm-l').hidden=!hm; $('pay-met-np-l').hidden=solo;
     const cur=document.querySelector('[name="pay-met"]:checked');
     if(!metElegido||!cur||cur.closest('label').hidden) $(ve?'pay-met-pm':hm?'pay-met-hm':mp?'pay-met-mp':'pay-met-np').checked=true;
-    $('pay-met').hidden=!ve&&!mp&&!hm; const pm=payMet()==='pm';
+    $('pay-met').hidden=solo?!hm:(!ve&&!mp&&!hm); const pm=payMet()==='pm';
+    $('pay-btn').disabled=solo&&!hm; if(solo&&!hm&&MET) $('pay-err').textContent='Este producto se paga por Hotmart y estará disponible muy pronto. Mientras tanto, escríbenos por WhatsApp.';
     $('pay-pm').hidden=!pm; $('pay-precio').parentNode.hidden=pm;
     const P=PAGO[payProd];
     if(pm){const bsv=Math.round(P.p*PM.tasa*100)/100;
@@ -1763,6 +1777,7 @@ d.querySelector('b').append(e.pausa?'Nacionalización en Santa Elena de Uairén'
       $('pm-datos').innerHTML=[['Banco',PM.banco],['Teléfono',PM.telefono],['Cédula o RIF',PM.cedula],['Titular',PM.titular]].filter(x=>x[1]).map(([k,v])=>'<dt>'+k+'</dt><dd>'+esc(v)+'</dd>').join('');
       $('pay-btn').textContent='Ya pagué, enviar referencia';
     } else if(payMet()==='mp') $('pay-btn').textContent='Pagar $'+(Math.round(P.p*MET.mp.tasa/100)*100).toLocaleString('es-CL')+' CLP con Mercado Pago';
+    else if(payMet()==='hm') $('pay-btn').textContent='Pagar '+P.p+' USD con Hotmart';
     else $('pay-btn').textContent='Pagar '+P.p+' USD';
   }
   $('pay-pais').addEventListener('change',()=>{metElegido=false;pintarMetodo();});
@@ -1819,6 +1834,10 @@ d.querySelector('b').append(e.pausa?'Nacionalización en Santa Elena de Uairén'
     while(Date.now()<fin){
       try{
         const r=await fetch('/api/orden?orden='+encodeURIComponent(o.orden)+'&correo='+encodeURIComponent(o.correo)); const j=await r.json().catch(()=>({}));
+        if(j.estado==='pagada'&&j.codigo&&j.producto==='gastos'){
+          ss.set('kairos-orden',''); abiertos.gastos=j.codigo; guardarAbiertos(); $('v-gastos').href='/gastos/?codigo='+encodeURIComponent(j.codigo); msg.hidden=false; msg.className='pago-msg ok';
+          msg.innerHTML='¡Pago confirmado! Tu código del registrador de gastos es <b>'+esc(j.codigo)+'</b>. También te lo enviamos por correo con un video de cómo usarlo. <a href="/gastos/?codigo='+encodeURIComponent(j.codigo)+'">Abrir mi registrador</a>'; return;
+        }
         if(j.estado==='pagada'&&j.codigo){
           msg.className='pago-msg ok'; msg.textContent='¡Pago confirmado! Tu código es '+j.codigo+'. Ya abrimos tu detalle; también te lo enviamos por correo. Guárdalo: queda ligado a este vehículo.';
           ss.set('kairos-orden',''); $('v-code').value=j.codigo; $('v-calc').click(); return;

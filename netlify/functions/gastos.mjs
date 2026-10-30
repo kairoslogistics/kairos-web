@@ -1,13 +1,13 @@
 // Registro de gastos del viaje por tierra (Jesús, 27 oct. 2026). La página /gastos/ guarda cada gasto en el teléfono y,
-// cuando hay internet, los manda aquí con el código de itinerario o de asesoría. Se juntan por id en gastos/{código}
+// cuando hay internet, los manda aquí con el código del registrador o de la asesoría 1 a 1 (Elise, 30 oct. 2026). Se juntan por id en gastos/{código}
 // y se devuelven todos, para que el cliente los vea igual en otro teléfono. Kairos los ve en el panel (pestaña Gastos de viaje).
 import { leer, crear, cambiar } from '../lib/firestore.mjs';
-import { json, texto } from '../lib/comun.mjs';
+import { json, texto, abreGastos } from '../lib/comun.mjs';
 
 const MONEDAS = ['USD', 'CLP', 'ARS', 'BRL', 'VES'], PAISES = ['cl', 'ar', 'br', 've', 'otro'];
 const CATS = ['combustible', 'alimentacion', 'hospedaje', 'peaje', 'otro'], MAX_GASTOS = 600;
 const ERR = {
-  no: 'Ese código no existe o no es de un itinerario. Revisa que esté escrito igual que en tu correo.',
+  no: 'Ese código no existe o no incluye el registrador de gastos. Revisa que esté escrito igual que en tu correo.',
   anulado: 'Este código fue anulado porque la compra se canceló o se reembolsó.',
 };
 const num = (v, max) => { const n = +v; return Number.isFinite(n) && n >= 0 && n <= max ? Math.round(n * 100) / 100 : null; };
@@ -44,7 +44,7 @@ export default async (req) => {
   const nuevos = (Array.isArray(d.gastos) ? d.gastos.slice(0, MAX_GASTOS) : []).map(limpiarGasto).filter(Boolean);
   try {
     const c = (await leer('codigos/' + codigo))?.datos;
-    if (!c || !['plan', 'asesoria'].includes(c.tipo)) return json({ error: ERR.no, motivo: 'no' }, 404);
+    if (!c || !abreGastos(c)) return json({ error: ERR.no, motivo: 'no' }, 404);
     if (c.anulado) return json({ error: ERR.anulado, motivo: 'anulado' }, 410);
     for (let i = 0; i < 3; i++) {
       const doc = await leer('gastos/' + codigo), items = juntar(doc?.datos?.items, nuevos);
