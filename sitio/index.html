@@ -69,6 +69,7 @@ header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;backgroun
 .flag:hover{border-color:var(--line)}
 .flag[aria-pressed="true"]{border-color:var(--accent);background:var(--soft)}
 .menu-btn{display:none;font:inherit;font-weight:600;background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:7px 12px;cursor:pointer}
+.top-ases{display:none;font:inherit;font-weight:700;text-decoration:none;color:var(--brand-ink);background:var(--brand);border-radius:8px;padding:7px 12px;white-space:nowrap}
 nav.main{display:flex;flex-wrap:wrap;gap:4px;padding-bottom:10px}
 nav.main a{font-size:15px;font-weight:600;text-decoration:none;color:var(--muted);padding:6px 10px;border-radius:6px}
 nav.main a:hover{color:var(--ink);background:var(--soft)}
@@ -82,6 +83,7 @@ nav.main a[aria-current="page"]{color:var(--ink);background:var(--soft);box-shad
 [data-for][hidden]{display:none!important}
 @media (max-width:760px){
   .menu-btn{display:inline-block}
+  .top-ases{display:inline-block}
   nav.main{display:none;flex-direction:column;padding-bottom:12px}
   nav.main.open{display:flex}
   .nav-dd{flex-direction:column}.nav-sub{display:flex;position:static;box-shadow:none;border:0;padding:0 0 0 14px;min-width:0;background:none}.nav-dd>a::after{display:none}
@@ -450,6 +452,7 @@ footer a{color:var(--hero-muted)}
         <span><b>KAIROS</b><small>LOGISTICS</small></span>
       </a>
       <div class="flags-wrap" role="group" aria-label="¿Dónde vives?"><span class="flags-label"><span id="pais-vives">Vives en </span><b id="pais-nombre">Escoge tu país</b></span><div class="flags"><button type="button" class="flag" data-pais="ve" aria-pressed="false" title="Venezuela" aria-label="Vivo en Venezuela"><svg viewBox="0 0 30 20" aria-hidden="true"><rect width="30" height="6.67" fill="#FFCC00"/><rect y="6.67" width="30" height="6.67" fill="#00247D"/><rect y="13.33" width="30" height="6.67" fill="#CF142B"/><circle cx="10.56" cy="11.21" r=".6" fill="#fff"/><circle cx="11.30" cy="9.67" r=".6" fill="#fff"/><circle cx="12.55" cy="8.51" r=".6" fill="#fff"/><circle cx="14.14" cy="7.88" r=".6" fill="#fff"/><circle cx="15.85" cy="7.88" r=".6" fill="#fff"/><circle cx="17.44" cy="8.50" r=".6" fill="#fff"/><circle cx="18.69" cy="9.66" r=".6" fill="#fff"/><circle cx="19.44" cy="11.19" r=".6" fill="#fff"/><rect width="30" height="20" fill="none" stroke="rgba(0,0,0,.18)"/></svg></button><button type="button" class="flag" data-pais="cl" aria-pressed="false" title="Chile" aria-label="Vivo en Chile"><svg viewBox="0 0 30 20" aria-hidden="true"><rect width="30" height="20" fill="#fff"/><rect y="10" width="30" height="10" fill="#D52B1E"/><rect width="10" height="10" fill="#0039A6"/><polygon points="5.00,2.30 5.71,4.33 7.85,4.37 6.14,5.67 6.76,7.73 5.00,6.50 3.24,7.73 3.86,5.67 2.15,4.37 4.29,4.33" fill="#fff"/><rect width="30" height="20" fill="none" stroke="rgba(0,0,0,.18)"/></svg></button><button type="button" class="flag" data-pais="ar" aria-pressed="false" title="Argentina" aria-label="Vivo en Argentina"><svg viewBox="0 0 30 20" aria-hidden="true"><rect width="30" height="20" fill="#74ACDF"/><rect y="6.67" width="30" height="6.67" fill="#fff"/><circle cx="15" cy="10" r="2" fill="#F6B40E"/><rect width="30" height="20" fill="none" stroke="rgba(0,0,0,.18)"/></svg></button><button type="button" class="flag" data-pais="br" aria-pressed="false" title="Brasil" aria-label="Vivo en Brasil"><svg viewBox="0 0 30 20" aria-hidden="true"><rect width="30" height="20" fill="#009C3B"/><polygon points="15,2.5 27,10 15,17.5 3,10" fill="#FFDF00"/><circle cx="15" cy="10" r="4.4" fill="#002776"/><rect width="30" height="20" fill="none" stroke="rgba(0,0,0,.18)"/></svg></button><button type="button" class="flag" data-pais="us" aria-pressed="false" title="Estados Unidos" aria-label="Vivo en Estados Unidos"><svg viewBox="0 0 30 20" aria-hidden="true"><rect width="30" height="20" fill="#fff"/><rect y="0.00" width="30" height="1.54" fill="#B22234"/><rect y="3.08" width="30" height="1.54" fill="#B22234"/><rect y="6.15" width="30" height="1.54" fill="#B22234"/><rect y="9.23" width="30" height="1.54" fill="#B22234"/><rect y="12.31" width="30" height="1.54" fill="#B22234"/><rect y="15.38" width="30" height="1.54" fill="#B22234"/><rect y="18.46" width="30" height="1.54" fill="#B22234"/><rect width="12" height="10.77" fill="#3C3B6E"/><circle cx="2.0" cy="2.0" r=".5" fill="#fff"/><circle cx="4.7" cy="2.0" r=".5" fill="#fff"/><circle cx="7.4" cy="2.0" r=".5" fill="#fff"/><circle cx="10.1" cy="2.0" r=".5" fill="#fff"/><circle cx="2.0" cy="4.3" r=".5" fill="#fff"/><circle cx="4.7" cy="4.3" r=".5" fill="#fff"/><circle cx="7.4" cy="4.3" r=".5" fill="#fff"/><circle cx="10.1" cy="4.3" r=".5" fill="#fff"/><circle cx="2.0" cy="6.6" r=".5" fill="#fff"/><circle cx="4.7" cy="6.6" r=".5" fill="#fff"/><circle cx="7.4" cy="6.6" r=".5" fill="#fff"/><circle cx="10.1" cy="6.6" r=".5" fill="#fff"/><circle cx="2.0" cy="8.9" r=".5" fill="#fff"/><circle cx="4.7" cy="8.9" r=".5" fill="#fff"/><circle cx="7.4" cy="8.9" r=".5" fill="#fff"/><circle cx="10.1" cy="8.9" r=".5" fill="#fff"/><rect width="30" height="20" fill="none" stroke="rgba(0,0,0,.18)"/></svg></button></div></div>
+      <a class="top-ases" href="#curso" data-go="curso" aria-label="Ir a las asesorías">Asesorías</a>
       <button class="menu-btn" id="menu-btn" aria-expanded="false" aria-controls="nav">Menú</button>
     </div>
     <nav class="main" id="nav" aria-label="Secciones">
@@ -529,7 +532,7 @@ footer a{color:var(--hero-muted)}
     <div class="wrap stack">
       <div class="page-head" style="margin-bottom:0"><div class="eyebrow">Cómo trabajamos</div><h2>Primero sabes si conviene. Después lo hacemos.</h2></div>
       <div class="steps">
-        <div class="step"><span class="n">PASO 1</span><b>Asesoría para importar tu vehículo</b><span class="price">45 USD</span><span class="muted small">Revisamos tu caso de forma personalizada: si tu vehículo califica, qué régimen te conviene y qué documentos necesitas.</span></div>
+        <div class="step"><span class="n">PASO 1</span><b>Asesoría para importar tu vehículo</b><span class="price">45 USD</span><span class="muted small">La plataforma personaliza tu caso: si tu vehículo califica, qué régimen te conviene y qué documentos necesitas.</span></div>
         <div class="step"><span class="n">PASO 2</span><b>Calculadora Kairos</b><span class="price">Incluida</span><span class="muted small">La asesoría trae un código para calcular el costo total de un vehículo.</span></div>
         <div class="step"><span class="n">PASO 3</span><b>Asesoría 1 a 1 en vivo</b><span class="price">150 USD</span><span class="muted small">Una sesión en vivo de 1 hora y media y asistencia 24/7, desde cero hasta que tu vehículo esté nacionalizado. Trae el video completo, tu itinerario día por día y tu registrador de gastos. También en caravana, con valor aparte.</span></div>
       </div>
@@ -987,7 +990,7 @@ footer a{color:var(--hero-muted)}
     <!-- Elise (30 oct. 2026): el registrador de gastos se vende aparte (15 USD) y viene solo con la asesoría 1 a 1. El itinerario ya no lo trae. -->
     <div class="ladder cuatro">
       <div class="tier feat"><span class="chip sim" style="justify-self:start">Empieza aquí</span><h3>Asesoría para importar tu vehículo a Venezuela</h3><div class="price">45 USD <small id="curso-local"></small></div>
-        <ul class="clean muted small"><li>Revisamos tu caso de forma personalizada</li><li>¿Tu vehículo califica? Régimen de equipaje u ordinario</li><li>Ruta recomendada: vía marítima o terrestre</li><li>Documentos que necesitas, con los requisitos del certificado de uso</li><li>1 código de la Calculadora Kairos con el costo detallado de tu vehículo: cada gasto por separado y tu resumen en una hoja</li><li>El video completo de la asesoría</li><li>Si vas por tierra: itinerario de viaje día por día con hoteles recomendados</li></ul>
+        <ul class="clean muted small"><li>La plataforma personaliza tu caso</li><li>¿Tu vehículo califica? Régimen de equipaje u ordinario</li><li>Ruta recomendada: vía marítima o terrestre</li><li>Documentos que necesitas, con los requisitos del certificado de uso</li><li>1 código de la Calculadora Kairos con el costo detallado de tu vehículo: cada gasto por separado y tu resumen en una hoja</li><li>El video completo de la asesoría</li><li>Si vas por tierra: itinerario de viaje día por día con hoteles recomendados</li></ul>
         <button class="btn primary" type="button" data-pagar="asesoria">Comprar mi asesoría · 45 USD</button></div>
       <div class="tier"><h3>Cálculo de otro vehículo</h3><div class="price">15 USD</div>
         <ul class="clean muted small"><li>Para calcular un vehículo más, además del de tu asesoría</li><li>Cada gasto por separado: impuestos, trámites, ruta y servicios</li><li>Tu resumen en una hoja, con los impuestos en bolívares</li><li>Pagas por Hotmart en la moneda de tu país: tu código llega a tu correo con un video corto de cómo abrir tu cálculo</li><li>Cada código sirve para un vehículo: revisa el país, la marca, el modelo y el año antes de usarlo</li></ul>
@@ -1221,6 +1224,8 @@ footer a{color:var(--hero-muted)}
     pages.forEach(p=>p.hidden=p.dataset.page!==id);
     document.querySelectorAll('nav.main a').forEach(a=>{if(a.dataset.go===id)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
     $('nav').classList.remove('open'); $('menu-btn').setAttribute('aria-expanded','false');
+    // Elise (30 oct. 2026): al tocar una opción el menú se cierra de una vez, sin tener que tocar dos veces.
+    if(document.activeElement&&document.activeElement.blur) document.activeElement.blur();
     if(scroll!==false) window.scrollTo(0,0);
     if(show.sec!==id&&typeof window.clarity==='function'){show.sec=id;try{clarity('set','seccion',id);clarity('event','seccion_'+id);}catch(e){}} // Clarity: cada sección cuenta aparte (Jesús, 27 oct. 2026)
     cur=id; if(typeof mbar==='function') mbar();
