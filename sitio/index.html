@@ -529,7 +529,7 @@ footer a{color:var(--hero-muted)}
     <div class="wrap stack">
       <div class="page-head" style="margin-bottom:0"><div class="eyebrow">Cómo trabajamos</div><h2>Primero sabes si conviene. Después lo hacemos.</h2></div>
       <div class="steps">
-        <div class="step"><span class="n">PASO 1</span><b>Asesoría completa</b><span class="price">45 USD</span><span class="muted small">Revisamos tu caso de forma personalizada: si tu vehículo califica, qué régimen te conviene y qué documentos necesitas.</span></div>
+        <div class="step"><span class="n">PASO 1</span><b>Asesoría para importar tu vehículo</b><span class="price">45 USD</span><span class="muted small">Revisamos tu caso de forma personalizada: si tu vehículo califica, qué régimen te conviene y qué documentos necesitas.</span></div>
         <div class="step"><span class="n">PASO 2</span><b>Calculadora Kairos</b><span class="price">Incluida</span><span class="muted small">La asesoría trae un código para calcular el costo total de un vehículo.</span></div>
         <div class="step"><span class="n">PASO 3</span><b>Asesoría 1 a 1 en vivo</b><span class="price">150 USD</span><span class="muted small">Una sesión en vivo de 1 hora y media y asistencia 24/7, desde cero hasta que tu vehículo esté nacionalizado. Trae el video completo, tu itinerario día por día y tu registrador de gastos. También en caravana, con valor aparte.</span></div>
       </div>
@@ -986,7 +986,7 @@ footer a{color:var(--hero-muted)}
       <button class="btn primary" type="button" data-wa="Quiero mi asesoría 1 a 1, totalmente en vivo" data-noref>Quiero mi asesoría 1 a 1 en vivo</button></div>
     <!-- Elise (30 oct. 2026): el registrador de gastos se vende aparte (15 USD) y viene solo con la asesoría 1 a 1. El itinerario ya no lo trae. -->
     <div class="ladder cuatro">
-      <div class="tier feat"><span class="chip sim" style="justify-self:start">Empieza aquí</span><h3>Asesoría completa para importar tu vehículo a Venezuela</h3><div class="price">45 USD <small id="curso-local"></small></div>
+      <div class="tier feat"><span class="chip sim" style="justify-self:start">Empieza aquí</span><h3>Asesoría para importar tu vehículo a Venezuela</h3><div class="price">45 USD <small id="curso-local"></small></div>
         <ul class="clean muted small"><li>Revisamos tu caso de forma personalizada</li><li>¿Tu vehículo califica? Régimen de equipaje u ordinario</li><li>Ruta recomendada: vía marítima o terrestre</li><li>Documentos que necesitas, con los requisitos del certificado de uso</li><li>1 código de la Calculadora Kairos con el costo detallado de tu vehículo: cada gasto por separado y tu resumen en una hoja</li><li>El video completo de la asesoría</li><li>Si vas por tierra: itinerario de viaje día por día con hoteles recomendados</li></ul>
         <button class="btn primary" type="button" data-pagar="asesoria">Comprar mi asesoría · 45 USD</button></div>
       <div class="tier"><h3>Cálculo de otro vehículo</h3><div class="price">15 USD</div>
@@ -1707,7 +1707,7 @@ d.querySelector('b').append(e.pausa?'Nacionalización en Santa Elena de Uairén'
   /* ---------- Pago en línea: NOWPayments por las funciones de Netlify (repo/netlify/functions) ---------- */
   // El precio real lo pone el servidor; aquí solo se muestra.
   // Elise (25 oct. 2026): asesoría 45, otro vehículo 15, itinerario 30. 30 oct. 2026: registrador de gastos 15, aparte del itinerario.
-  const PAGO={asesoria:{t:'Asesoría completa',p:45,inc:'Incluye el detalle de cada gasto, tu resumen en una hoja, el video completo de la asesoría, y tu plan de viaje día por día. Pagas por Hotmart en la moneda de tu país; tu código llega a tu correo.'},
+  const PAGO={asesoria:{t:'Asesoría para importar tu vehículo a Venezuela',p:45,inc:'Incluye el detalle de cada gasto, tu resumen en una hoja, el video completo de la asesoría, y tu plan de viaje día por día. Pagas por Hotmart en la moneda de tu país; tu código llega a tu correo.'},
     extra:{t:'Cálculo de otro vehículo',p:15,inc:'Incluye el detalle de cada gasto y tu resumen en una hoja para un vehículo más. Pagas por Hotmart en la moneda de tu país; tu código llega a tu correo con un video corto de cómo abrir tu cálculo.'},
     plan:{t:'Itinerario de viaje día por día',p:30,inc:'Incluye tu itinerario con dónde dormir, el mapa con las paradas, la ruta en Google Maps por tramos, recomendaciones para el viaje y tu lista de requisitos. Pagas por Hotmart en la moneda de tu país; ahí ves un video de 1 minuto de cómo usarlo y tu código llega a tu correo.'},
     gastos:{t:'Registrador de gastos del viaje',p:15,inc:'Anotas en el camino lo que gastas en cada país y te lo suma en dólares, aunque no tengas señal. Pagas por Hotmart en la moneda de tu país; ahí ves un video de 1 minuto de cómo usarlo y tu código llega a tu correo.'}};

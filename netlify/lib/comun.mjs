@@ -2,7 +2,7 @@ import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
 
 // Precios en USD (Elise, 25 oct. 2026: asesoría 45, otro vehículo 15 e itinerario 30; 30 oct. 2026: registrador de gastos 15). El precio lo pone el servidor, nunca la página.
 export const PRODUCTOS = {
-  asesoria: { precio: 45, nombre: 'Asesoría completa para importar tu vehículo a Venezuela', incluye: 'el detalle de cada gasto, tu resumen en una hoja, el video completo de la asesoría y tu itinerario de viaje día por día' },
+  asesoria: { precio: 45, nombre: 'Asesoría para importar tu vehículo a Venezuela', incluye: 'el detalle de cada gasto, tu resumen en una hoja, el video completo de la asesoría y tu itinerario de viaje día por día' },
   extra: { precio: 15, nombre: 'Cálculo de otro vehículo', incluye: 'el detalle de cada gasto y tu resumen en una hoja para un vehículo más', tipo: 'calculo' },
   plan: { precio: 30, nombre: 'Itinerario de viaje día por día', incluye: 'tu itinerario con los enlaces de cada tramo, recomendaciones para el viaje y tu lista de requisitos' },
   gastos: { precio: 15, nombre: 'Registrador de gastos del viaje', incluye: 'tu registro de gastos para el viaje por tierra: anotas lo que gastas en cada país y te lo suma en dólares, aunque no tengas señal' },
