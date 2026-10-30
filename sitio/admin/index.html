@@ -769,7 +769,7 @@ async function cargarVID(){VID={itinerario:'',gastos:''};
   return VID;}
 function vVideos(){
   if(!VID){cargarVID().then(render); return '';}
-  return '<section class="cotiza cz-form" style="margin:16px 0"><h3>Videos de cómo usarlo</h3><p class="sub">Llegan en el correo con el código apenas se confirma el pago. El del itinerario va también a la asesoría de 45.</p>'+
+  return '<section class="cotiza cz-form" style="margin:16px 0"><h3>Videos de cómo usarlo</h3><p class="sub">Opcional: si pegas un enlace, también va en el correo del código. El itinerario y el registrador se pagan por Hotmart y el video principal se sube allá. El del itinerario va también a la asesoría de 45.</p>'+
     '<div class="cz-g"><label>Video del itinerario (1 minuto)<input id="vid-itin" type="url" value="'+esc(VID.itinerario||'')+'" placeholder="https://youtu.be/…"></label><label>Video del registrador de gastos<input id="vid-gastos" type="url" value="'+esc(VID.gastos||'')+'" placeholder="https://youtu.be/…"></label></div>'+
     '<div><button class="btn" type="button" data-vidsave>Guardar videos</button></div></section>';
 }
