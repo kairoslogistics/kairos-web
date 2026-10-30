@@ -1,7 +1,7 @@
 // Hoja de requisitos para imprimir (Elise, 25 oct. 2026). Solo con un código de asesoría: /api/requisitos?codigo=KAI-XXXXXX
 // Por defecto muestra lo que el cliente eligió en el simulador; con p, v y r se cambia el país, la vía o el régimen.
 import { leer } from '../lib/firestore.mjs';
-import { esc } from '../lib/comun.mjs';
+import { esc, TIPOS_ITINERARIO } from '../lib/comun.mjs';
 import { cargarLista, deSim, filtrar, hojaHtml, PAISES_REQ, VIAS, REGS, soloMar } from '../lib/requisitos.mjs';
 
 const pagina = (html, status = 200) => new Response(html, { status, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'private, no-store', 'X-Robots-Tag': 'noindex' } });
@@ -13,7 +13,7 @@ export default async (req) => {
   try {
     const c = await leer('codigos/' + codigo);
     if (c && c.datos.anulado) return aviso('Este código fue anulado porque la compra se canceló o se reembolsó.');
-    if (!c || !['asesoria', 'plan'].includes(c.datos.tipo)) return aviso('Este código no es de una asesoría ni de un itinerario. Escríbenos por WhatsApp y te enviamos tu lista.');
+    if (!c || !TIPOS_ITINERARIO.includes(c.datos.tipo)) return aviso('Este código no es de una asesoría ni de un itinerario. Escríbenos por WhatsApp y te enviamos tu lista.');
     const o = c.datos.orden ? (await leer('ordenes/' + c.datos.orden))?.datos || {} : {};
     const sel = deSim(o.sim || c.datos.sim || {}, o.pais);
     for (const [k, ok] of [['p', PAISES_REQ], ['v', VIAS], ['r', REGS]]) { const x = q.get(k); if (x !== null) sel[k] = ok[x] ? x : ''; }

@@ -1,17 +1,25 @@
 import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
 
-// Precios en USD (Elise, 25 oct. 2026: solo asesoría 45, otro vehículo 15 e itinerario 30). El precio lo pone el servidor, nunca la página.
+// Precios en USD (Elise, 25 oct. 2026: asesoría 45, otro vehículo 15 e itinerario 30; 30 oct. 2026: registrador de gastos 15). El precio lo pone el servidor, nunca la página.
 export const PRODUCTOS = {
-  asesoria: { precio: 45, nombre: 'Asesoría completa para importar tu vehículo a Venezuela', incluye: 'el detalle de cada gasto, tu resumen en una hoja, el video completo y tu itinerario de viaje día por día' },
+  asesoria: { precio: 45, nombre: 'Asesoría completa para importar tu vehículo a Venezuela', incluye: 'el detalle de cada gasto, tu resumen en una hoja, el video completo de la asesoría y tu itinerario de viaje día por día' },
   extra: { precio: 15, nombre: 'Cálculo de otro vehículo', incluye: 'el detalle de cada gasto y tu resumen en una hoja para un vehículo más', tipo: 'calculo' },
-  plan: { precio: 30, nombre: 'Itinerario de viaje día por día', incluye: 'tu itinerario, el mapa con las paradas y la ruta en Google Maps por tramos' },
+  plan: { precio: 30, nombre: 'Itinerario de viaje día por día', incluye: 'tu itinerario con los enlaces de cada tramo, recomendaciones para el viaje y tu lista de requisitos' },
+  gastos: { precio: 15, nombre: 'Registrador de gastos del viaje', incluye: 'tu registro de gastos para el viaje por tierra: anotas lo que gastas en cada país y te lo suma en dólares, aunque no tengas señal' },
 };
+// Qué abre cada tipo de código (Elise, 30 oct. 2026). La asesoría 1 a 1 (150 USD, se vende por WhatsApp) trae todo:
+// detalle, video, itinerario y registrador. El registrador ya no viene con el itinerario ni con la asesoría de 45.
+export const TIPOS_ITINERARIO = ['plan', 'asesoria', 'unoauno'];
+export const TIPOS_GASTOS = ['gastos', 'unoauno'];
+// Los códigos de itinerario y asesoría vendidos antes de este cambio traían el registrador; se les respeta.
+export const GASTOS_APARTE_DESDE = Date.parse('2026-10-31T03:00:00Z');
+export const abreGastos = c => TIPOS_GASTOS.includes(c.tipo) || (['plan', 'asesoria'].includes(c.tipo) && (+c.created_at || 0) < GASTOS_APARTE_DESDE);
 export const PAISES = ['Venezuela', 'Chile', 'Argentina', 'Brasil', 'Estados Unidos', 'Panamá', 'Otro'];
 // Cuánto dura el código. Cada código sirve para un vehículo; cada vehículo extra se paga aparte, 15 USD (Elise, 23 oct. 2026).
 export const DIAS_CODIGO = +(process.env.CODIGO_DIAS || 30);
 // El itinerario (solo o dentro de la asesoría) dura 60 días y se abre en hasta 3 dispositivos (Elise, 26 oct. 2026).
 export const DIAS_ITINERARIO = 60, MAX_DISPOSITIVOS = 3;
-export const diasDe = producto => (producto === 'plan' || producto === 'asesoria' ? DIAS_ITINERARIO : DIAS_CODIGO);
+export const diasDe = producto => (['plan', 'asesoria', 'gastos', 'unoauno'].includes(producto) ? DIAS_ITINERARIO : DIAS_CODIGO);
 export const USOS_CODIGO = 1;
 export const WHATSAPP = '+58 422 701 0497';
 export const sitio = () => (process.env.SITE_URL || 'https://kairoslogistics.net').replace(/\/+$/, '');

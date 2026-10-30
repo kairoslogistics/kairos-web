@@ -566,10 +566,11 @@ function vReferidos(){
 
 /* Códigos para la web (Elise, 22 oct. 2026): la página pública ya no trae códigos escritos. Cada código se crea aquí, se manda al cliente
    cuando paga y el servidor lo marca al usarse. La web solo puede leer un código que ya conoce y sumarle un uso (ver firestore.rules). */
-const COD_TIPOS=[['asesoria','Asesoría 45 USD: desglose e itinerario'],['calculo','Otro vehículo 15 USD: desglose'],['plan','Itinerario de viaje 30 USD']];
+// Elise (30 oct. 2026): el registrador de gastos va aparte (15 USD) y solo viene con la asesoría 1 a 1 (150 USD, se vende por WhatsApp).
+const COD_TIPOS=[['unoauno','Asesoría 1 a 1 150 USD: desglose, video, itinerario y registrador'],['asesoria','Asesoría 45 USD: desglose, video e itinerario'],['calculo','Otro vehículo 15 USD: desglose'],['plan','Itinerario de viaje 30 USD'],['gastos','Registrador de gastos 15 USD']];
 // Un vehículo extra (15 USD) es un código de tipo «calculo» con un vehículo.
 // Elise (26 oct. 2026): itinerario y asesoría duran 60 días (el itinerario se abre en hasta 3 dispositivos); otro vehículo, 30.
-const venceDe=t=>new Date(Date.now()+(t==='plan'||t==='asesoria'?60:30)*864e5);
+const venceDe=t=>new Date(Date.now()+(['plan','asesoria','unoauno','gastos'].includes(t)?60:30)*864e5);
 const codTipo=k=>(COD_TIPOS.find(x=>x[0]===k)||[,k])[1];
 function nuevoCodigo(){const A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',b=new Uint32Array(6);crypto.getRandomValues(b);let c;do{c='KAI-'+[...b].map(n=>A[n%32]).join('');crypto.getRandomValues(b);}while(S.codigos.some(x=>x.id===c));return c;}
 // Lo que el cliente vio cuando usó el código: datos del vehículo, el desglose y, si aplica, el plan de viaje.
@@ -583,7 +584,7 @@ function verSim(c){
 // Itinerario: cuántas veces se abrió y en qué dispositivos (máximo 3). Si alguien cambia de teléfono, «Liberar» deja abrirlo de nuevo.
 const fechaCod=v=>{const d=v&&v.toDate?v.toDate():new Date(v&&v.seconds?v.seconds*1000:v); return isNaN(d)?'—':d.toLocaleDateString('es-CL');};
 function verDisp(c){
-  if(c.tipo!=='plan'&&c.tipo!=='asesoria') return '';
+  if(!['plan','asesoria','unoauno'].includes(c.tipo)) return '';
   const L=Array.isArray(c.dispositivos)?c.dispositivos:[], n=L.length;
   return '<div class="meta"><span class="pill '+(n>=3?'off':n?'mid':'done')+'">Itinerario: '+n+' de 3 dispositivos</span><span>Abierto '+(+c.aperturas||0)+' '+((+c.aperturas||0)===1?'vez':'veces')+'</span>'+
     (+c.rechazos?'<span style="color:var(--danger,#b3261e)">'+c.rechazos+' intento(s) desde otro dispositivo</span>':'')+
@@ -607,7 +608,7 @@ function vGastos(){
         '<div style="display:grid;gap:8px;padding:8px 0"><div class="meta">'+tabla(g.L,G_CATS,'cat')+'</div><div class="meta">'+tabla(g.L,G_PAIS,'pais')+'</div>'+
         '<div style="overflow-x:auto"><table class="g-tab"><thead><tr><th>Fecha</th><th>Tipo</th><th>Descripción</th><th>País</th><th>Monto</th><th>USD</th></tr></thead><tbody>'+
         [...g.L].sort((a,b)=>a.fecha-b.fecha).map(x=>'<tr><td>'+esc(new Date(+x.fecha).toLocaleString('es-CL',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}))+'</td><td>'+esc(G_CATS[x.cat]||'Otros')+'</td><td>'+esc(x.desc||'')+'</td><td>'+esc(G_PAIS[x.pais]||'')+'</td><td>'+esc((+x.monto).toLocaleString('es-CL')+' '+x.moneda)+'</td><td>'+(x.usd==null?'—':usd(x.usd))+'</td></tr>').join('')+
-        '</tbody></table></div></div></details>';}).join('')+'</div>':'<p class="sub">Todavía ningún cliente anotó gastos. El enlace a su registro les llega en el correo del itinerario y aparece al final de su itinerario.</p>');
+        '</tbody></table></div></div></details>';}).join('')+'</div>':'<p class="sub">Todavía ningún cliente anotó gastos. El registrador se vende aparte (15 USD) y viene con la asesoría 1 a 1; el enlace les llega en el correo del código.</p>');
 }
 function vCodigos(){
   const L=S.codigos.slice().sort((a,b)=>(b.created_at||0)-(a.created_at||0));
@@ -616,7 +617,7 @@ function vCodigos(){
     '<div class="stats"><div class="stat"><small>Códigos</small><b>'+L.length+'</b></div><div class="stat"><small>Disponibles</small><b>'+libres+'</b></div><div class="stat"><small>Usados</small><b>'+(L.length-libres)+'</b></div></div>'+
     '<form class="cod-new" id="cod-new"><label>Qué compró<select id="cod-tipo">'+COD_TIPOS.map(([k,l])=>'<option value="'+k+'">'+esc(l)+'</option>').join('')+'</select></label>'+
     '<label>Vehículos<input id="cod-max" type="number" min="1" max="20" value="1" inputmode="numeric"></label>'+
-    '<label>Cliente<input id="cod-cli" type="text" autocomplete="off" placeholder="Nombre y WhatsApp"></label><button class="btn" type="submit">Crear código</button></form>'+
+    '<label>Cliente<input id="cod-cli" type="text" autocomplete="off" placeholder="Nombre y WhatsApp"></label><button class="btn" type="submit">Crear código</button></form>'+vVideos()+
     (L.length?'<div class="cod-new" style="grid-template-columns:minmax(0,1fr)"><label>Buscar por nombre o correo<input id="cod-buscar" type="search" placeholder="Escribe un nombre o un correo" autocomplete="off"></label></div><div class="list">'+L.map(c=>{const u=+c.usos||0,m=+c.max||1,q=((c.nombre||'')+' '+(c.correo||'')+' '+(c.cliente||'')+' '+c.id).toLowerCase();return '<div class="row" data-q="'+esc(q)+'"><div style="min-width:0;display:grid;gap:6px"><b class="code">'+esc(c.id)+'</b><div class="meta"><span>'+esc(codTipo(c.tipo))+'</span>'+(c.nombre||c.correo?'<span><b>'+esc(c.nombre||'Sin nombre')+'</b></span><span>'+esc(c.correo||'Sin correo')+'</span>':'<span>'+esc(c.cliente||'Sin cliente')+'</span>')+(c.ultimo_uso?'<span>Usado el '+new Date(+c.ultimo_uso).toLocaleString('es-CL')+'</span>':'')+(c.orden?'<span>Orden '+esc(c.orden)+'</span>':'')+(c.vence?'<span>Vence el '+fechaCod(c.vence)+'</span>':'')+'</div>'+verDisp(c)+(c.sim?verSim(c):'')+'</div>'+
       '<div class="side"><span class="pill '+(u>=m?'off':u?'mid':'done')+'">'+(u>=m?'Usado':'Libre')+' · '+u+' de '+m+'</span><span><button class="btn sm ghost" data-codcopy="'+esc(c.id)+'">Copiar</button> <button class="btn sm danger" data-coddel="'+esc(c.id)+'">Borrar</button></span></div></div>';}).join('')+'</div>'
     :'<p class="empty">Todavía no hay códigos. Crea el primero arriba.</p>');
@@ -760,6 +761,22 @@ function bindCz(){
 }
 /* Pagos (Elise, 24 oct. 2026): Pago Móvil en bolívares a tasa euro del BCV. Los datos y la tasa se publican en
    publico/pagomovil (la web los lee). Las órdenes «por verificar» se aprueban aquí: se crea el código y la web del cliente lo muestra. */
+/* Videos cortos de cómo usar el itinerario y el registrador (Elise, 30 oct. 2026). Van en el correo del código al confirmarse el pago
+   (publico/videos). Pega el enlace de YouTube o de Drive; si queda vacío, el correo sale sin ese botón. */
+let VID=null;
+async function cargarVID(){VID={itinerario:'',gastos:''};
+  try{ if(MODO==='real'){const d=await db.collection('publico').doc('videos').get(); if(d.exists) Object.assign(VID,d.data());} else Object.assign(VID,JSON.parse(pref.get('videos')||'{}')); }catch(e){}
+  return VID;}
+function vVideos(){
+  if(!VID){cargarVID().then(render); return '';}
+  return '<section class="cotiza cz-form" style="margin:16px 0"><h3>Videos de cómo usarlo</h3><p class="sub">Llegan en el correo con el código apenas se confirma el pago. El del itinerario va también a la asesoría de 45.</p>'+
+    '<div class="cz-g"><label>Video del itinerario (1 minuto)<input id="vid-itin" type="url" value="'+esc(VID.itinerario||'')+'" placeholder="https://youtu.be/…"></label><label>Video del registrador de gastos<input id="vid-gastos" type="url" value="'+esc(VID.gastos||'')+'" placeholder="https://youtu.be/…"></label></div>'+
+    '<div><button class="btn" type="button" data-vidsave>Guardar videos</button></div></section>';
+}
+async function guardarVID(){const v={itinerario:$('#vid-itin').value.trim(),gastos:$('#vid-gastos').value.trim()};
+  if(Object.values(v).some(u=>u&&!/^https:\/\//.test(u))){toast('Pega el enlace completo, que empiece con https://');return;}
+  try{ if(MODO==='real') await db.collection('publico').doc('videos').set({...v,actualizado:Date.now()}); else pref.set('videos',JSON.stringify(v)); VID=v; toast('Videos guardados'); }
+  catch(e){toast('No se pudo guardar: '+(e.message||'revisa la conexión'));}}
 let PMC=null;
 async function cargarPMC(){if(PMC) return PMC; PMC={tasa_euro:'',fecha:'',banco:'',telefono:'',cedula:'',titular:''};
   try{ if(MODO==='real'){const d=await db.collection('publico').doc('pagomovil').get(); if(d.exists) Object.assign(PMC,d.data());} else Object.assign(PMC,JSON.parse(pref.get('pagomovil')||'{}')); }catch(e){}
@@ -767,8 +784,8 @@ async function cargarPMC(){if(PMC) return PMC; PMC={tasa_euro:'',fecha:'',banco:
 async function guardarPMC(){PMC.fecha=new Date().toLocaleDateString('es-VE');
   try{ if(MODO==='real') await db.collection('publico').doc('pagomovil').set({...PMC,tasa_euro:+PMC.tasa_euro||0,actualizado:Date.now()}); else pref.set('pagomovil',JSON.stringify(PMC)); toast('Datos de Pago Móvil publicados'); render(); }
   catch(e){toast('No se pudo guardar: '+(e.message||'revisa la conexión'));}}
-const PROD_TXT={asesoria:'Asesoría (45 USD)',calculo:'Cálculo completo (ya no se vende)',extra:'Otro vehículo (15 USD)',plan:'Itinerario de viaje (30 USD)'};
-const PROD_TIPO={asesoria:'asesoria',calculo:'calculo',extra:'calculo',plan:'plan'};
+const PROD_TXT={asesoria:'Asesoría (45 USD)',calculo:'Cálculo completo (ya no se vende)',extra:'Otro vehículo (15 USD)',plan:'Itinerario de viaje (30 USD)',gastos:'Registrador de gastos (15 USD)'};
+const PROD_TIPO={asesoria:'asesoria',calculo:'calculo',extra:'calculo',plan:'plan',gastos:'gastos'};
 const bsTxt=v=>'Bs '+(+v||0).toLocaleString('es-VE',{minimumFractionDigits:2,maximumFractionDigits:2});
 function vPagos(){
   if(!PMC){cargarPMC().then(render); return '<p class="sub">Cargando…</p>';}
@@ -786,7 +803,7 @@ function vPagos(){
     '<h3 style="margin:20px 0 8px">Por verificar'+(pend.length?' ('+pend.length+')':'')+'</h3>'+(pend.length?pend.map(o=>fila(o,1)).join(''):'<p class="sub">No hay pagos por verificar.</p>')+
     '<h3 style="margin:20px 0 8px">Últimas órdenes</h3>'+(resto.length?resto.map(o=>fila(o,0)).join(''):'<p class="sub">Todavía no hay órdenes.</p>');
 }
-const waCodigo=o=>'https://wa.me/'+String(o.whatsapp||'').replace(/\D/g,'')+'?text='+encodeURIComponent('Hola '+(o.nombre||'').split(' ')[0]+', confirmamos tu pago. Tu código Kairos es '+o.codigo+'. Ábrelo aquí: https://kairoslogistics.net/?codigo='+o.codigo+'#vehiculo (queda ligado al primer vehículo que calcules).'+(o.producto==='asesoria'?' Tu lista de requisitos para imprimir: https://kairoslogistics.net/api/requisitos?codigo='+o.codigo:''));
+const waCodigo=o=>'https://wa.me/'+String(o.whatsapp||'').replace(/\D/g,'')+'?text='+encodeURIComponent('Hola '+(o.nombre||'').split(' ')[0]+', confirmamos tu pago. Tu código Kairos es '+o.codigo+'. '+(o.producto==='gastos'?'Abre tu registrador de gastos aquí: https://kairoslogistics.net/gastos/?codigo='+o.codigo+'. También te llegó por correo.':o.producto==='plan'?'Abre tu itinerario aquí: https://kairoslogistics.net/?itinerario='+o.codigo+'#vehiculo. También te llegó por correo.':'Ábrelo aquí: https://kairoslogistics.net/?codigo='+o.codigo+'#vehiculo (queda ligado al primer vehículo que calcules).')+(o.producto==='asesoria'?' Tu lista de requisitos para imprimir: https://kairoslogistics.net/api/requisitos?codigo='+o.codigo:''));
 function bindPagos(){
   const sv=document.querySelector('[data-pmsave]'); if(!sv) return;
   sv.onclick=()=>{Object.assign(PMC,{tasa_euro:$('#pm-tasa').value,banco:$('#pm-banco').value.trim(),telefono:$('#pm-tel').value.trim(),cedula:$('#pm-ced').value.trim(),titular:$('#pm-tit').value.trim()});
@@ -795,6 +812,8 @@ function bindPagos(){
     b.disabled=true; const id=nuevoCodigo();
     try{await DB.save('codigos',{id,tipo:PROD_TIPO[o.producto]||'calculo',vence:venceDe(PROD_TIPO[o.producto]||'calculo'),max:1,usos:0,cliente:o.nombre+' · '+o.correo,orden:o.id,origen:'Pago Móvil'});
       await DB.patch('ordenes',o.id,{estado:'pagada',codigo:id,verificada_at:Date.now()}); render(); toast('Aprobado: código '+id);
+      // Elise (30 oct. 2026): el cliente también recibe el correo con su código y el video de cómo usarlo.
+      if(MODO==='real') fetch('/api/correo-codigo',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({orden:o.id})}).then(r=>{if(!r.ok) toast('Aprobado, pero el correo no salió. Mándale el código por WhatsApp.');}).catch(()=>{});
       if(o.whatsapp) window.open(waCodigo({...o,codigo:id}),'_blank','noopener');}
     catch(e){b.disabled=false;toast('No se pudo aprobar: '+(e.message||'revisa la conexión'));}});
   document.querySelectorAll('[data-pmno]').forEach(b=>b.onclick=async()=>{const o=S.ordenes.find(x=>x.id===b.dataset.pmno); if(!o||!confirm('¿Rechazar el pago de '+o.nombre+'? La web le dirá que te escriba por WhatsApp.')) return;
@@ -935,6 +954,7 @@ function bind(){
       cNuevo=null;
       await guardar('costos',{id:'s'+Date.now().toString(36),nombre:n.nombre.trim(),desc:n.desc.trim(),lineas,precio:n.precio===''?null:+n.precio,orden:50+S.costos.length},'Servicio creado');};
   }
+  const vs=document.querySelector('[data-vidsave]'); if(vs) vs.onclick=guardarVID;
   const cb=$('#cod-buscar'); if(cb) cb.oninput=()=>{const q=cb.value.trim().toLowerCase(); document.querySelectorAll('[data-q]').forEach(r=>{r.style.display=!q||r.dataset.q.includes(q)?'':'none';});};
   const cf=$('#cod-new'); if(cf) cf.onsubmit=async e=>{e.preventDefault();const id=nuevoCodigo();
     if(await guardar('codigos',{id,tipo:$('#cod-tipo').value,vence:venceDe($('#cod-tipo').value),max:Math.max(1,Math.round(+$('#cod-max').value||1)),usos:0,cliente:$('#cod-cli').value.trim()},'Código '+id+' creado')){const ok=await copiar(id); if(ok) toast('Código '+id+' copiado');}};

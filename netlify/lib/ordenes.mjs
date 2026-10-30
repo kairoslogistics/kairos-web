@@ -34,7 +34,8 @@ export async function completar(ruta, origen = 'NOWPayments') {
 
 // Con la asesoría va también la lista de requisitos de su caso (Elise, 25 oct. 2026): en el correo y como hoja para imprimir.
 export async function correoCliente(o) {
-  const m = correoCodigo({ ...o, dias: diasDe(o.producto), dispositivos: MAX_DISPOSITIVOS });
+  const videos = (await leer('publico/videos').catch(() => null))?.datos || {};
+  const m = correoCodigo({ ...o, dias: diasDe(o.producto), dispositivos: MAX_DISPOSITIVOS, videos });
   if (o.producto !== 'asesoria' && o.producto !== 'plan') return m;
   const sel = deSim(o.sim, o.pais); if (o.producto === 'plan') sel.v = 'tierra';
   const secs = filtrar(await cargarLista(), sel);
