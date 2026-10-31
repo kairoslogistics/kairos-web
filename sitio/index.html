@@ -671,7 +671,7 @@ footer a{color:var(--hero-muted)}
           <label class="km-it">¿Cuántos kilómetros quieres manejar por día?<select id="v-kmdia-it"><option value="500">500 km (muy tranquilo)</option><option value="600">600 km (tranquilo)</option><option value="700">700 km</option><option value="800">800 km</option><option value="900">900 km</option><option value="1000">1.000 km (lo recomendado: unos 8 días hasta la frontera)</option><option value="1100">1.100 km (rápido)</option></select></label>
           <div class="route-list" id="v-tramos"></div>
           <div class="v-recs" id="v-recs"></div>
-          <div class="cta-box" id="v-gastos-box"><b>Registra tus gastos en el camino · 15 USD</b><p class="note">Anota combustible, comida, hospedaje y peajes en la moneda de cada país. Te suma todo en dólares, día por día, y funciona sin señal. Ya viene incluido en la asesoría 1 a 1.</p><button class="btn primary" type="button" data-pagar="gastos">Comprar mi registrador de gastos · 15 USD</button> <a class="btn ghost" id="v-gastos" href="/gastos/">Ya lo tengo: abrir mi registro</a></div>
+          <div class="cta-box" id="v-gastos-box"><b>Registra tus gastos en el camino · 20 USD</b><p class="note">Anota combustible, comida, hospedaje y peajes en la moneda de cada país. Te suma todo en dólares, día por día, y funciona sin señal. Ya viene incluido en la asesoría 1 a 1.</p><button class="btn primary" type="button" data-pagar="gastos">Comprar mi registrador de gastos · 20 USD</button> <a class="btn ghost" id="v-gastos" href="/gastos/">Ya lo tengo: abrir mi registro</a></div>
           </div>
     </div>
   </div>
@@ -1000,9 +1000,9 @@ footer a{color:var(--hero-muted)}
       <div class="tier"><h3>Itinerario de viaje día por día</h3><div class="price">30 USD</div>
         <ul class="clean muted small"><li>Para traer tu vehículo por tierra a Venezuela</li><li>Dónde dormir cada noche, según los kilómetros que quieras manejar por día</li><li>Hoteles recomendados en el camino, donde ya nos quedamos en más de 15 viajes</li><li>Mapa con las paradas y la ruta en Google Maps por tramos</li><li>Fronteras y paradas obligatorias del recorrido</li><li>Recomendaciones para el viaje y tu lista de requisitos</li><li>Pagas por Hotmart en la moneda de tu país: ahí ves un video de 1 minuto de cómo usarlo y tu código llega a tu correo</li><li>Ya viene incluido en la asesoría completa</li></ul>
         <button class="btn primary" type="button" data-pagar="plan">Comprar mi itinerario · 30 USD</button><p class="ya-codigo"><a href="#vehiculo" data-go="vehiculo" data-ya>Ya tengo mi código</a></p></div>
-      <div class="tier"><h3>Registrador de gastos del viaje</h3><div class="price">15 USD</div>
+      <div class="tier"><h3>Registrador de gastos del viaje</h3><div class="price">20 USD</div>
         <ul class="clean muted small"><li>Para el viaje por tierra hasta Venezuela</li><li>Anotas combustible, comida, hospedaje y peajes en la moneda de cada país</li><li>Te suma todo en dólares, día por día, y funciona sin señal</li><li>Lo agregas a la pantalla de inicio de tu teléfono</li><li>Pagas por Hotmart en la moneda de tu país: ahí ves un video de 1 minuto de cómo usarlo y tu código llega a tu correo</li><li>Ya viene incluido en la asesoría 1 a 1 en vivo</li></ul>
-        <button class="btn primary" type="button" data-pagar="gastos">Comprar mi registrador · 15 USD</button><p class="ya-codigo"><a href="#vehiculo" data-go="vehiculo" data-ya>Ya tengo mi código</a></p></div>
+        <button class="btn primary" type="button" data-pagar="gastos">Comprar mi registrador · 20 USD</button><p class="ya-codigo"><a href="#vehiculo" data-go="vehiculo" data-ya>Ya tengo mi código</a></p></div>
     </div>
     <div class="box traslado" id="traslado" style="margin-top:20px">
       <span class="chip sim" style="justify-self:start">Nuevo</span>
@@ -1727,7 +1727,7 @@ d.querySelector('b').append(e.pausa?'Nacionalización en Santa Elena de Uairén'
   const PAGO={asesoria:{t:'Asesoría para importar tu vehículo a Venezuela',p:45,inc:'Incluye el detalle de cada gasto, tu resumen en una hoja, el video completo de la asesoría, y tu plan de viaje día por día. Pagas por Hotmart en la moneda de tu país; tu código llega a tu correo.'},
     extra:{t:'Cálculo de otro vehículo',p:20,inc:'Incluye el detalle de cada gasto y tu resumen en una hoja para un vehículo más. Pagas por Hotmart en la moneda de tu país; tu código llega a tu correo con un video corto de cómo abrir tu cálculo.'},
     plan:{t:'Itinerario de viaje día por día',p:30,inc:'Incluye tu itinerario con dónde dormir, el mapa con las paradas, la ruta en Google Maps por tramos, recomendaciones para el viaje y tu lista de requisitos. Pagas por Hotmart en la moneda de tu país; ahí ves un video de 1 minuto de cómo usarlo y tu código llega a tu correo.'},
-    gastos:{t:'Registrador de gastos del viaje',p:15,inc:'Anotas en el camino lo que gastas en cada país y te lo suma en dólares, aunque no tengas señal. Pagas por Hotmart en la moneda de tu país; ahí ves un video de 1 minuto de cómo usarlo y tu código llega a tu correo.'}};
+    gastos:{t:'Registrador de gastos del viaje',p:20,inc:'Anotas en el camino lo que gastas en cada país y te lo suma en dólares, aunque no tengas señal. Pagas por Hotmart en la moneda de tu país; ahí ves un video de 1 minuto de cómo usarlo y tu código llega a tu correo.'}};
   // Video completo de la asesoría por país: 'yt:ID' o 'vimeo:ID'. Vacío: aún no está grabado.
   const VIDEO_COMPLETO={cl:'',ar:'',br:'',us:'',pa:''};
   function pintarVideo(){

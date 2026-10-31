@@ -566,8 +566,8 @@ function vReferidos(){
 
 /* Códigos para la web (Elise, 22 oct. 2026): la página pública ya no trae códigos escritos. Cada código se crea aquí, se manda al cliente
    cuando paga y el servidor lo marca al usarse. La web solo puede leer un código que ya conoce y sumarle un uso (ver firestore.rules). */
-// Elise (30 oct. 2026): el registrador de gastos va aparte (15 USD) y solo viene con la asesoría 1 a 1 (150 USD, se vende por WhatsApp).
-const COD_TIPOS=[['unoauno','Asesoría 1 a 1 150 USD: desglose, video, itinerario y registrador'],['asesoria','Asesoría 45 USD: desglose, video e itinerario'],['calculo','Otro vehículo 20 USD: desglose'],['plan','Itinerario de viaje 30 USD'],['gastos','Registrador de gastos 15 USD']];
+// Elise (30 oct. 2026): el registrador de gastos va aparte (20 USD) y solo viene con la asesoría 1 a 1 (150 USD, se vende por WhatsApp).
+const COD_TIPOS=[['unoauno','Asesoría 1 a 1 150 USD: desglose, video, itinerario y registrador'],['asesoria','Asesoría 45 USD: desglose, video e itinerario'],['calculo','Otro vehículo 20 USD: desglose'],['plan','Itinerario de viaje 30 USD'],['gastos','Registrador de gastos 20 USD']];
 // Un vehículo extra (20 USD) es un código de tipo «calculo» con un vehículo.
 // Elise (26 oct. 2026): itinerario y asesoría duran 60 días (el itinerario se abre en hasta 3 dispositivos); otro vehículo, 30.
 const venceDe=t=>new Date(Date.now()+(['plan','asesoria','unoauno','gastos'].includes(t)?60:30)*864e5);
@@ -608,7 +608,7 @@ function vGastos(){
         '<div style="display:grid;gap:8px;padding:8px 0"><div class="meta">'+tabla(g.L,G_CATS,'cat')+'</div><div class="meta">'+tabla(g.L,G_PAIS,'pais')+'</div>'+
         '<div style="overflow-x:auto"><table class="g-tab"><thead><tr><th>Fecha</th><th>Tipo</th><th>Descripción</th><th>País</th><th>Monto</th><th>USD</th></tr></thead><tbody>'+
         [...g.L].sort((a,b)=>a.fecha-b.fecha).map(x=>'<tr><td>'+esc(new Date(+x.fecha).toLocaleString('es-CL',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}))+'</td><td>'+esc(G_CATS[x.cat]||'Otros')+'</td><td>'+esc(x.desc||'')+'</td><td>'+esc(G_PAIS[x.pais]||'')+'</td><td>'+esc((+x.monto).toLocaleString('es-CL')+' '+x.moneda)+'</td><td>'+(x.usd==null?'—':usd(x.usd))+'</td></tr>').join('')+
-        '</tbody></table></div></div></details>';}).join('')+'</div>':'<p class="sub">Todavía ningún cliente anotó gastos. El registrador se vende aparte (15 USD) y viene con la asesoría 1 a 1; el enlace les llega en el correo del código.</p>');
+        '</tbody></table></div></div></details>';}).join('')+'</div>':'<p class="sub">Todavía ningún cliente anotó gastos. El registrador se vende aparte (20 USD) y viene con la asesoría 1 a 1; el enlace les llega en el correo del código.</p>');
 }
 function vCodigos(){
   const L=S.codigos.slice().sort((a,b)=>(b.created_at||0)-(a.created_at||0));
@@ -784,7 +784,7 @@ async function cargarPMC(){if(PMC) return PMC; PMC={tasa_euro:'',fecha:'',banco:
 async function guardarPMC(){PMC.fecha=new Date().toLocaleDateString('es-VE');
   try{ if(MODO==='real') await db.collection('publico').doc('pagomovil').set({...PMC,tasa_euro:+PMC.tasa_euro||0,actualizado:Date.now()}); else pref.set('pagomovil',JSON.stringify(PMC)); toast('Datos de Pago Móvil publicados'); render(); }
   catch(e){toast('No se pudo guardar: '+(e.message||'revisa la conexión'));}}
-const PROD_TXT={asesoria:'Asesoría (45 USD)',calculo:'Cálculo completo (ya no se vende)',extra:'Otro vehículo (20 USD)',plan:'Itinerario de viaje (30 USD)',gastos:'Registrador de gastos (15 USD)'};
+const PROD_TXT={asesoria:'Asesoría (45 USD)',calculo:'Cálculo completo (ya no se vende)',extra:'Otro vehículo (20 USD)',plan:'Itinerario de viaje (30 USD)',gastos:'Registrador de gastos (20 USD)'};
 const PROD_TIPO={asesoria:'asesoria',calculo:'calculo',extra:'calculo',plan:'plan',gastos:'gastos'};
 const bsTxt=v=>'Bs '+(+v||0).toLocaleString('es-VE',{minimumFractionDigits:2,maximumFractionDigits:2});
 function vPagos(){
