@@ -69,6 +69,8 @@ header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;backgroun
 .flag:hover{border-color:var(--line)}
 .flag[aria-pressed="true"]{border-color:var(--accent);background:var(--soft)}
 .menu-btn{display:none;font:inherit;font-weight:600;background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:7px 12px;cursor:pointer}
+.ya-codigo{margin:10px 0 0;text-align:center;font-size:14px}
+.ya-codigo a{color:var(--brand);font-weight:700}
 .top-ases{display:none;font:inherit;font-weight:800;text-decoration:none;color:var(--accent-ink);background:var(--accent);border-radius:8px;padding:8px 14px;white-space:nowrap;box-shadow:0 3px 10px rgba(217,151,26,.45)}
 nav.main{display:flex;flex-wrap:wrap;gap:4px;padding-bottom:10px}
 nav.main a{font-size:15px;font-weight:600;text-decoration:none;color:var(--muted);padding:6px 10px;border-radius:6px}
@@ -991,16 +993,16 @@ footer a{color:var(--hero-muted)}
     <div class="ladder cuatro">
       <div class="tier feat"><span class="chip sim" style="justify-self:start">Empieza aquí</span><h3>Asesoría para importar tu vehículo a Venezuela</h3><div class="price">45 USD <small id="curso-local"></small></div>
         <ul class="clean muted small"><li>La plataforma personaliza tu caso</li><li>¿Tu vehículo califica? Régimen de equipaje u ordinario</li><li>Ruta recomendada: vía marítima o terrestre</li><li>Documentos que necesitas, con los requisitos del certificado de uso</li><li>1 código de la Calculadora Kairos con el costo detallado de tu vehículo: cada gasto por separado y tu resumen en una hoja</li><li>El video completo de la asesoría</li><li>Si vas por tierra: itinerario de viaje día por día con hoteles recomendados</li></ul>
-        <button class="btn primary" type="button" data-pagar="asesoria">Comprar mi asesoría · 45 USD</button></div>
+        <button class="btn primary" type="button" data-pagar="asesoria">Comprar mi asesoría · 45 USD</button><p class="ya-codigo"><a href="#vehiculo" data-go="vehiculo" data-ya>Ya tengo mi código</a></p></div>
       <div class="tier"><h3>Cálculo de otro vehículo</h3><div class="price">15 USD</div>
         <ul class="clean muted small"><li>Para calcular un vehículo más, además del de tu asesoría</li><li>Cada gasto por separado: impuestos, trámites, ruta y servicios</li><li>Tu resumen en una hoja, con los impuestos en bolívares</li><li>Pagas por Hotmart en la moneda de tu país: tu código llega a tu correo con un video corto de cómo abrir tu cálculo</li><li>Cada código sirve para un vehículo: revisa el país, la marca, el modelo y el año antes de usarlo</li></ul>
-        <button class="btn primary" type="button" data-pagar="extra">Comprar otro cálculo · 15 USD</button></div>
+        <button class="btn primary" type="button" data-pagar="extra">Comprar otro cálculo · 15 USD</button><p class="ya-codigo"><a href="#vehiculo" data-go="vehiculo" data-ya>Ya tengo mi código</a></p></div>
       <div class="tier"><h3>Itinerario de viaje día por día</h3><div class="price">30 USD</div>
         <ul class="clean muted small"><li>Para traer tu vehículo por tierra a Venezuela</li><li>Dónde dormir cada noche, según los kilómetros que quieras manejar por día</li><li>Hoteles recomendados en el camino, donde ya nos quedamos en más de 15 viajes</li><li>Mapa con las paradas y la ruta en Google Maps por tramos</li><li>Fronteras y paradas obligatorias del recorrido</li><li>Recomendaciones para el viaje y tu lista de requisitos</li><li>Pagas por Hotmart en la moneda de tu país: ahí ves un video de 1 minuto de cómo usarlo y tu código llega a tu correo</li><li>Ya viene incluido en la asesoría completa</li></ul>
-        <button class="btn primary" type="button" data-pagar="plan">Comprar mi itinerario · 30 USD</button></div>
+        <button class="btn primary" type="button" data-pagar="plan">Comprar mi itinerario · 30 USD</button><p class="ya-codigo"><a href="#vehiculo" data-go="vehiculo" data-ya>Ya tengo mi código</a></p></div>
       <div class="tier"><h3>Registrador de gastos del viaje</h3><div class="price">15 USD</div>
         <ul class="clean muted small"><li>Para el viaje por tierra hasta Venezuela</li><li>Anotas combustible, comida, hospedaje y peajes en la moneda de cada país</li><li>Te suma todo en dólares, día por día, y funciona sin señal</li><li>Lo agregas a la pantalla de inicio de tu teléfono</li><li>Pagas por Hotmart en la moneda de tu país: ahí ves un video de 1 minuto de cómo usarlo y tu código llega a tu correo</li><li>Ya viene incluido en la asesoría 1 a 1 en vivo</li></ul>
-        <button class="btn primary" type="button" data-pagar="gastos">Comprar mi registrador · 15 USD</button></div>
+        <button class="btn primary" type="button" data-pagar="gastos">Comprar mi registrador · 15 USD</button><p class="ya-codigo"><a href="#vehiculo" data-go="vehiculo" data-ya>Ya tengo mi código</a></p></div>
     </div>
     <div class="box traslado" id="traslado" style="margin-top:20px">
       <span class="chip sim" style="justify-self:start">Nuevo</span>
@@ -1108,6 +1110,7 @@ footer a{color:var(--hero-muted)}
     <label class="check"><input type="checkbox" id="pay-ok"> Acepto que el código de acceso se enviará a mi correo</label>
     <div class="status err" id="pay-err" role="alert"></div>
     <button class="btn primary" type="submit" id="pay-btn">Pagar 45 USD</button>
+    <p class="ya-codigo"><a href="#vehiculo" data-go="vehiculo" data-ya>Ya tengo mi código</a></p>
     <small>Puedes pagar con tarjeta, con cripto (USDT, BTC y otras) desde tu cuenta de Binance y, si vives en Venezuela, por Pago Móvil en bolívares. Guardamos los datos de tu simulación para que el detalle corresponda a ella.</small>
   </form>
 </div>
@@ -1236,6 +1239,12 @@ footer a{color:var(--hero-muted)}
     e.preventDefault(); const id=a.dataset.go;
     try{history.replaceState(null,'','#'+id)}catch(err){}
     show(id);
+  });
+  document.addEventListener('click',e=>{
+    if(!e.target.closest('[data-ya]')) return;
+    // Elise (31 oct. 2026): «Ya tengo mi código» cierra el pago y lleva a la casilla donde se pone el código.
+    $('pay-wrap').hidden=true;
+    setTimeout(()=>{const c=$('v-code'); c.scrollIntoView({block:'center'}); c.focus();},80);
   });
   window.addEventListener('hashchange',()=>show(location.hash.slice(1)));
   $('menu-btn').addEventListener('click',()=>{const o=$('nav').classList.toggle('open');$('menu-btn').setAttribute('aria-expanded',String(o));});
