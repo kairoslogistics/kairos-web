@@ -158,10 +158,8 @@ button{font:inherit;cursor:pointer}
     }catch(e){}
     enviando=false; estado(); pintar();
   }
-  function estado(){
-    const n=gastos.filter(g=>g.pend).length, t=+ls.get('kg-sync')||0;
-    $('sync').textContent=!navigator.onLine?(n?n+' sin enviar · sin señal':'Sin señal · guardado en el teléfono'):enviando?'Enviando…':n?n+' por enviar':t?'Todo enviado':'';
-  }
+  // Elise (31 oct. 2026): no se muestra ningún texto de sincronización; los gastos se envían solos.
+  function estado(){ $('sync').textContent=''; }
 
   function pintar(){
     const L=vivos(), total=L.reduce((a,g)=>a+(+g.usd||0),0), hoy=hoyISO();
