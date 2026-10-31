@@ -645,7 +645,7 @@ footer a{color:var(--hero-muted)}
           <div class="status" id="v-status" role="status">Con tu código ves cada gasto por separado y descargas tu resumen en una hoja, con impuestos en bolívares. Cada código sirve para un vehículo: revisa el país, el modelo y el año antes de escribirlo, porque después no se pueden cambiar.</div>
           <button class="btn primary" type="button" id="v-sheet-btn" hidden>Ver mi resumen en una hoja</button>
         </div>
-        <div class="cta-box" id="v-extra" hidden><b>¿Quieres el detalle de otro vehículo?</b><p class="note">Cambia los datos arriba y paga 15 USD por cada vehículo extra.</p><button class="btn primary" type="button" data-pagar="extra">Cálculo de otro vehículo · 15 USD</button></div>
+        <div class="cta-box" id="v-extra" hidden><b>¿Quieres el detalle de otro vehículo?</b><p class="note">Cambia los datos arriba y paga 15 USD por cada vehículo extra.</p><button class="btn primary" type="button" data-pagar="extra">Cálculo de otro vehículo · 15 USD</button><p class="ya-codigo"><a href="#vehiculo" data-go="vehiculo" data-ya>Ya tengo mi código</a></p></div>
         <div class="cta-box v-video" id="v-video" hidden><div class="tag">Tu video completo</div><div id="v-video-in"></div></div>
         <div class="row" style="display:flex;flex-wrap:wrap;gap:8px">
           <button class="btn ghost" type="button" id="v-wa">Pedir cotización formal</button>
@@ -1615,7 +1615,10 @@ footer a{color:var(--hero-muted)}
     const el=$(target); el.innerHTML='';
     rows.forEach(([k,v,l,cls])=>{const d=document.createElement('div');d.className='line'+(l===2?' sub':'')+(cls?' '+cls:'');d.innerHTML='<span></span><span></span>';d.children[0].textContent=k;d.children[1].textContent=(typeof v==='string'?v:usd(v));el.appendChild(d);});
   }
+  // Elise (31 oct. 2026): el vehículo se guarda mientras se edita, pero solo después de volver a cargar lo guardado.
+  let simListo=false;
   function vCalc(full){
+    if(simListo&&!abiertos.desglose) guardarSim();
     const c=vCompute(), r=c.r;
     const p=$('v-pais').value;
     $('v-terr-note').hidden=r!=='terr'; $('v-land').hidden=r!=='terr'; $('v-plan-box').hidden=r!=='terr';
@@ -1864,9 +1867,11 @@ d.querySelector('b').append(e.pausa?'Nacionalización en Santa Elena de Uairén'
   }
   // Al volver de NOWPayments (?pago=ok o ?pago=cancelado) o desde el enlace del correo (?codigo=XXXXXXXX).
   function alVolver(){
+    simListo=true;
     let q; try{q=new URLSearchParams(location.search)}catch(e){return}
     const pago=q.get('pago'), cod=(q.get('codigo')||'').trim().toUpperCase(), itn=(q.get('itinerario')||'').trim().toUpperCase();
     if(itn){ restaurarSim(); try{history.replaceState(null,'',location.pathname+'#vehiculo')}catch(e){} if(!$('v-terr').disabled){$('v-terr').checked=true;} vCalc(); itinEnlace=true; $('v-plan-code').value=itn; $('v-plan-open').click(); setTimeout(()=>$('v-plan-box').scrollIntoView({block:'start'}),60); return; }
+    if(!pago&&!cod) restaurarSim(); // vuelve el vehículo que dejó editado; el itinerario solo aparece con código o pago
     if(!pago&&!cod){ let o=null; try{o=JSON.parse(ss.get('kairos-orden')||'null')}catch(e){} if(o&&o.pm){ restaurarSim(); const m=$('v-pago-msg'); m.hidden=false; m.className='pago-msg ok'; m.textContent='Estamos verificando tu Pago Móvil. Apenas lo confirmemos, tu código aparece aquí.'; esperarCodigo(); } return; }
     restaurarSim();
     const msg=$('v-pago-msg');
