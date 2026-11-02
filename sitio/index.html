@@ -398,6 +398,8 @@ footer a{color:var(--hero-muted)}
 @media (max-width:380px){.fields.three{grid-template-columns:minmax(0,1fr)}.seg{grid-template-columns:minmax(0,1fr)}}
 .line.ref{color:var(--muted);font-size:14px}
 .line.bs span:last-child{color:var(--muted);font-size:13px}
+.line.legal-row{font-size:11px;line-height:1.45;border-bottom:0;padding-top:2px}
+.legal{font-size:11px;line-height:1.45;color:var(--muted);margin:12px 0 0}
 .route-list .tr.day b small{font-family:var(--mono);font-weight:500;font-size:11px;color:var(--accent-text);letter-spacing:.06em;display:block}
 .bcv-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:14px}
 .bcv-row input{width:120px;font-family:var(--mono)}
@@ -637,6 +639,7 @@ footer a{color:var(--hero-muted)}
         <div id="v-lines"></div>
         <div class="total"><b id="v-total-l">Costo para traerlo</b><span id="v-total">—</span></div>
         <p class="note" id="v-total-note"></p>
+        <p class="legal" data-legal></p>
         <div class="cta-box" id="v-cta">
           <b id="v-cta-t">¿Quieres el detalle de cada gasto y la asesoría para tu caso?</b>
           <p class="note" id="v-cta-p">Te decimos si tu vehículo califica, cada gasto por separado y tu resumen en una hoja, con impuestos en bolívares. Si vas por tierra, te damos todo: la ruta, los hoteles y hasta el gasto más mínimo, para que sepas realmente cuánto te costará.</p>
@@ -683,6 +686,7 @@ footer a{color:var(--hero-muted)}
           <label class="km-it">¿Cuántos kilómetros quieres manejar por día?<select id="v-kmdia-it"><option value="500">500 km (muy tranquilo)</option><option value="600">600 km (tranquilo)</option><option value="700">700 km</option><option value="800">800 km</option><option value="900">900 km</option><option value="1000">1.000 km (lo recomendado: unos 8 días hasta la frontera)</option><option value="1100">1.100 km (rápido)</option></select></label>
           <div class="route-list" id="v-tramos"></div>
           <div class="v-recs" id="v-recs"></div>
+          <p class="legal" data-legal></p>
           <div class="cta-box" id="v-gastos-box"><b>Registra tus gastos en el camino · 20 USD</b><p class="note">Anota combustible, comida, hospedaje y peajes en la moneda de cada país. Te suma todo en dólares, día por día, y funciona sin señal. Ya viene incluido en la asesoría 1 a 1.</p><button class="btn primary" type="button" data-pagar="gastos">Comprar mi registrador de gastos · 20 USD</button> <a class="btn ghost" id="v-gastos" href="/gastos/">Ya lo tengo: abrir mi registro</a></div>
           </div>
     </div>
@@ -1154,7 +1158,12 @@ footer a{color:var(--hero-muted)}
   const MAR_VE_AGENCIA=[['Agenciamiento aduanal',1000]];
   // Flete marítimo por vehículo hasta La Guaira. EE. UU., Dubái y China: valores de Elise (14 oct. 2026). Argentina y Brasil: estimados, por confirmar.
   const MAR_FLETE={us:{n:'Estados Unidos',f:2500},ae:{n:'Dubái',f:1000},cn:{n:'China',f:2500},ar:{n:'Argentina',f:2200,est:1},br:{n:'Brasil',f:2000,est:1}};
-  const VEH={equiPct:1, equiTope:20000, seguro:1, fleteTierra:1000, lujo:15, lujoTope:40000, adv:20, motorExtra:20, iva:16, tasa:1, homolog:700, titulo:800, sencamer:600 /* Jesús (27 oct. 2026): cobro al cliente; el costo es 500 con impuesto y habilitación */, ageTierra:1650, desinc:600, desincExp:400, caravana:300, gnb:500, gestionMar:400 /* Elise (26 oct. 2026): línea del desglose marítimo, no es un producto de la web */} /* desinc: servicio opcional Kairos en Chile, solo por tierra (Elise, 25 oct. 2026: exportación + baja 600, solo exportación 400) */;
+  // Elise (2 nov. 2026): aviso legal en letra pequeña. Un solo texto para el simulador, el itinerario y la hoja de resumen.
+  const AVISO_LEGAL='Aviso legal: la información de este sitio, incluidos los cálculos, los itinerarios y los hoteles recomendados, es orientativa y se basa en la experiencia propia de Kairos Logistics en viajes e importaciones anteriores. No constituye una cotización formal ni asesoría legal o aduanera; los montos, requisitos y tarifas pueden cambiar sin aviso y deben confirmarse con las autoridades y con el agente de aduanas. Kairos Logistics no tiene relación comercial, convenio ni acuerdo de comisiones con los hoteles, proveedores ni demás entidades mencionadas, y no recibe pago por publicidad de ningún hotel. Esas menciones se hacen solo como referencia.';
+  // Elise (2 nov. 2026): nota bajo homologación, título y placas, SENCAMER y agenciamiento aduanal.
+  const AVISO_TRAMITES='Precios referenciales: homologación, título y placas, SENCAMER y agenciamiento aduanal incluyen impuestos y honorarios profesionales estimados, que pueden variar según el caso y la fecha del trámite.';
+  document.querySelectorAll('[data-legal]').forEach(e=>{e.textContent=AVISO_LEGAL;});
+  const VEH={gnb:500, equiPct:1, equiTope:20000, seguro:1, fleteTierra:1000, lujo:15, lujoTope:40000, adv:20, motorExtra:20, iva:16, tasa:1, homolog:700, titulo:800, sencamer:600 /* Jesús (27 oct. 2026): cobro al cliente; el costo es 500 con impuesto y habilitación */, ageTierra:1650, desinc:600, desincExp:400, caravana:300, gnb:500, gestionMar:400 /* Elise (26 oct. 2026): línea del desglose marítimo, no es un producto de la web */} /* desinc: servicio opcional Kairos en Chile, solo por tierra (Elise, 25 oct. 2026: exportación + baja 600, solo exportación 400) */;
   // Ruta terrestre. Combustible en USD por litro: Chile 1,36 (GlobalPetrolPrices, ene. 2026); Argentina 2.052 ARS (YPF Mendoza, may. 2026) a 1.420 ARS por USD (Banco Nación, mar. 2026);
   // Brasil R$ 6,90 promedio de la ruta (ANP, jul. 2026: Cuiabá 6,72, Porto Velho 7,49, Manaos 7,05, Boa Vista 7,58) a 5,4 BRL por USD; Venezuela 0,50 (precio internacional PDVSA).
   const TIERRA={
@@ -1610,8 +1619,8 @@ footer a{color:var(--hero-muted)}
       taxRows.push(['IVA '+VEH.iva+' %',iva,2],['Tasa aduanera '+VEH.tasa+' %',ts,2]);
       if(lujo) taxRows.push(['Impuesto al lujo '+VEH.lujo+' % (CIF mayor a 40.000 USD)',lujo,2]);
     }
-    // La revisión de la Guardia Nacional ya no va en el desglose público (Jesús, 27 oct. 2026); está en el panel.
-    const venRows=r==='terr'?[['Agente de aduanas en Santa Elena de Uairén',VEH.ageTierra]]:[...MAR_VE_AGENCIA,...MAR_VE_PUERTO];
+    // Elise (2 nov. 2026): la segunda revisión de la Guardia Nacional en Puerto Ordaz vuelve a sumarse en el cálculo por tierra (500 USD).
+    const venRows=r==='terr'?[['Agente de aduanas en Santa Elena de Uairén',VEH.ageTierra],['Segunda revisión de la Guardia Nacional en Puerto Ordaz',VEH.gnb]]:[...MAR_VE_AGENCIA,...MAR_VE_PUERTO];
     venRows.push(['Homologación',VEH.homolog],['Título y placas',VEH.titulo]);
     if(reg==='ord') venRows.push(['SENCAMER',VEH.sencamer]); // Elise: el régimen de equipaje no lleva SENCAMER.
     // Elise (22 oct. 2026): el certificado de uso solo aparece en el desglose con código, y solo en régimen de equipaje. 550 USD tramitado por Kairos, cualquier país (25 oct. 2026; antes 500 y 350).
@@ -1621,7 +1630,7 @@ footer a{color:var(--hero-muted)}
     // Elise (12 oct. 2026): sin honorario de Kairos ni imprevistos en el desglose.
     const enCl=p==='cl'&&r==='terr', expOk=enCl&&$('v-exp').checked, bajaOk=expOk&&$('v-baja').checked, desinc=bajaOk?VEH.desinc:expOk?VEH.desincExp:0, noSum=v=>usd(v)+' (no sumado al total)';
     const sub=log+tax+ven+cer+desinc+(r==='mar'?VEH.gestionMar:0)+(r==='terr'&&p==='cl'&&$('v-caravana').checked?VEH.caravana:0);
-    return {r,reg,d,val,land,tax,base,total:sub,fleteVar:r==='mar'&&p!=='cl'&&!MAR_FLETE[p],rows:[[r==='mar'?(p==='cl'?'Gastos en Chile y flete':'Logística hasta Venezuela'):'Viaje por tierra hasta '+(land?land.zona:''),log,1],...logRows.map(x=>[x[0],x[1],2]),...taxRows,['Trámites en Venezuela',ven,1],...venRows.map(x=>[x[0],x[1],2]),...(reg==='equi'?[['Certificado de uso emitido por la embajada o el consulado (Kairos), incluye el envío a Venezuela','Precio a consultar',1]]:[]),...(reg==='equi'&&r==='mar'&&p==='cl'?[['Plazo del certificado: llega a Caracas desde el pago','Unos 15 días hábiles',2]]:[]),...(r==='mar'?[['Traslado del puerto a tu ciudad','A consultar',2],['Gestión Kairos Logistics',VEH.gestionMar,1]]:[]),...(r==='terr'&&$('v-caravana').checked?[['Viaje en caravana con Kairos',p==='cl'?VEH.caravana:'A consultar',1]]:[]),...(enCl?[['Certificado de exportación ante la Aduana de Chile (Kairos)',expOk?VEH.desincExp:noSum(VEH.desincExp),1],['Baja del vehículo ante el Registro Civil (Kairos), incluye el envío de las patentes de Venezuela a Chile',bajaOk?VEH.desinc-VEH.desincExp:noSum(VEH.desinc-VEH.desincExp)+(expOk?'':', va con el certificado de exportación'),1]]:[])]};
+    return {r,reg,d,val,land,tax,base,total:sub,fleteVar:r==='mar'&&p!=='cl'&&!MAR_FLETE[p],rows:[[r==='mar'?(p==='cl'?'Gastos en Chile y flete':'Logística hasta Venezuela'):'Viaje por tierra hasta '+(land?land.zona:''),log,1],...logRows.map(x=>[x[0],x[1],2]),...taxRows,['Trámites en Venezuela',ven,1],...venRows.map(x=>[x[0],x[1],2]),[AVISO_TRAMITES,'',2,'legal-row'],...(reg==='equi'?[['Certificado de uso emitido por la embajada o el consulado (Kairos), incluye el envío a Venezuela','Precio a consultar',1]]:[]),...(reg==='equi'&&r==='mar'&&p==='cl'?[['Plazo del certificado: llega a Caracas desde el pago','Unos 15 días hábiles',2]]:[]),...(r==='mar'?[['Traslado del puerto a tu ciudad','A consultar',2],['Gestión Kairos Logistics',VEH.gestionMar,1]]:[]),...(r==='terr'&&$('v-caravana').checked?[['Viaje en caravana con Kairos',p==='cl'?VEH.caravana:'A consultar',1]]:[]),...(enCl?[['Certificado de exportación ante la Aduana de Chile (Kairos)',expOk?VEH.desincExp:noSum(VEH.desincExp),1],['Baja del vehículo ante el Registro Civil (Kairos), incluye el envío de las patentes de Venezuela a Chile',bajaOk?VEH.desinc-VEH.desincExp:noSum(VEH.desinc-VEH.desincExp)+(expOk?'':', va con el certificado de exportación'),1]]:[])]};
   }
   function lines(target,rows,locked){
     const el=$(target); el.innerHTML='';
@@ -1908,7 +1917,7 @@ d.querySelector('b').append(e.pausa?'Nacionalización en Santa Elena de Uairén'
       h+='<tr class="'+(l===2?'sub':'g')+'"><td>'+esc(k)+'</td><td class="n">'+(typeof v==='string'?esc(v):usd(v))+'</td><td class="n">'+(isTax?bs(v*bcv):'')+'</td></tr>';});
     h+='<tr class="tot"><td>Costo total para traerlo</td><td class="n">'+usd(c.total)+'</td><td class="n">'+bs(c.total*bcv)+'</td></tr></tbody></table></div>';
     if(c.land&&planOk) h+='<div class="sh-notes"><p><b>Itinerario:</b> '+c.land.itin.map(e=>esc(e.pausa?'Nacionalización en Santa Elena de Uairén (el vehículo queda en aduana)':e.d+': '+e.de+' → '+e.a+(e.ferry?' (ferry)':' ('+e.km.toLocaleString('es-CL')+' km)')+(e.ctl||[]).filter(k=>k.c!=='Puerto Ordaz').map(k=>', '+k.t.replace('Parada obligatoria: ','').toLowerCase()).join(''))).join(' · ')+'</p></div>';
-    h+='<div class="sh-notes"><p>No incluye el valor del vehículo. Los impuestos se pagan en bolívares a la tasa oficial del BCV del día del pago; la tasa usada fue '+bs(bcv)+' por dólar ('+BCV_FECHA+'). Impuestos según la experiencia de Kairos, por confirmar con el agente de aduanas. Tarifas de ejemplo de este prototipo.</p><p>Estimado de la web. Kairos lo confirma en la cotización formal. Kairos Logistics · WhatsApp +'+WA.ve+'</p></div>';
+    h+='<div class="sh-notes"><p>No incluye el valor del vehículo. Los impuestos se pagan en bolívares a la tasa oficial del BCV del día del pago; la tasa usada fue '+bs(bcv)+' por dólar ('+BCV_FECHA+'). Impuestos según la experiencia de Kairos, por confirmar con el agente de aduanas. Tarifas de ejemplo de este prototipo.</p><p>Estimado de la web. Kairos lo confirma en la cotización formal. Kairos Logistics · WhatsApp +'+WA.ve+'</p><p>'+esc(AVISO_LEGAL)+'</p></div>';
     $('v-sheet').innerHTML=h;
   }
   const fmtBcv=v=>v.toLocaleString('es-VE',{minimumFractionDigits:2,maximumFractionDigits:2});
