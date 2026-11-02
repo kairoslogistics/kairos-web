@@ -399,6 +399,7 @@ footer a{color:var(--hero-muted)}
 .line.ref{color:var(--muted);font-size:14px}
 .line.bs span:last-child{color:var(--muted);font-size:13px}
 .line.legal-row{font-size:11px;line-height:1.45;border-bottom:0;padding-top:2px}
+.legal-check{font-size:13px;margin:8px 0}
 .legal{font-size:11px;line-height:1.45;color:var(--muted);margin:12px 0 0}
 .route-list .tr.day b small{font-family:var(--mono);font-weight:500;font-size:11px;color:var(--accent-text);letter-spacing:.06em;display:block}
 .bcv-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:14px}
@@ -626,7 +627,7 @@ footer a{color:var(--hero-muted)}
             <label id="v-nveh-l" hidden>Vehículos que comparten el contenedor<select id="v-nveh"><option>2</option><option selected>3</option><option>4</option></select></label>
           </div>
           <!-- Jesús (26 oct. 2026): casillas sin precio; si no se marcan, el desglose muestra el valor sin sumarlo. -->
-          <div id="v-desinc-l"><label class="check"><input type="checkbox" id="v-exp"> Quiero que Kairos tramite el certificado de exportación ante la Aduana de Chile</label>
+          <div id="v-desinc-l"><label class="check"><input type="checkbox" id="v-exp"> Quiero que Kairos coordine el certificado de exportación ante la Aduana de Chile</label>
           <label class="check v-sub"><input type="checkbox" id="v-baja"> y la baja del vehículo ante el Registro Civil</label></div>
           <p class="note" id="v-val-usd"></p>
         </fieldset>
@@ -656,6 +657,7 @@ footer a{color:var(--hero-muted)}
         <div class="access">
           <div class="tag">¿Ya tienes tu código?</div>
           <div class="access-row"><input id="v-nombre" type="text" placeholder="Tu nombre" autocomplete="name" aria-label="Tu nombre"><input id="v-correo" type="email" placeholder="Tu correo" autocomplete="email" inputmode="email" aria-label="Tu correo"></div>
+          <label class="check legal-check"><input type="checkbox" data-acepta id="v-legal"> <span>Leí y acepto el aviso legal de Kairos Logistics.</span></label>
           <div class="access-row"><input id="v-code" type="text" placeholder="KAI-XXXXXX" autocomplete="off" aria-label="Código de acceso"><button class="btn dark" type="button" id="v-calc">Ver desglose</button></div>
           <div class="status" id="v-status" role="status">Con tu código ves cada gasto por separado y descargas tu resumen en una hoja, con impuestos en bolívares. Cada código sirve para un vehículo: revisa el país, el modelo y el año antes de escribirlo, porque después no se pueden cambiar.</div>
           <button class="btn primary" type="button" id="v-sheet-btn" hidden>Ver mi resumen en una hoja</button>
@@ -675,6 +677,8 @@ footer a{color:var(--hero-muted)}
             <b>Itinerario de viaje día por día · 30 USD</b>
             <p class="note">Tu itinerario con dónde dormir cada noche, el mapa con las paradas y la ruta en Google Maps por tramos. Ya viene incluido en la asesoría completa de 45 USD. Si tienes tu código de asesoría o del itinerario, escríbelo aquí.</p>
             <div class="access-row"><input id="v-plan-code" type="text" placeholder="KAI-XXXXXX" autocomplete="off" aria-label="Código del plan de viaje"><button class="btn dark" type="button" id="v-plan-open">Abrir mi plan</button></div>
+            <p class="legal" data-legal></p>
+            <label class="check legal-check"><input type="checkbox" data-acepta id="v-plan-legal"> <span>Leí y acepto el aviso legal de Kairos Logistics.</span></label>
             <div class="status" id="v-plan-status" role="status"></div>
             <button class="btn primary" type="button" id="v-plan-buy" data-pagar="plan">Comprar mi itinerario de viaje</button>
             <div id="v-plan-msg"></div>
@@ -1124,6 +1128,8 @@ footer a{color:var(--hero-muted)}
       <label>Teléfono desde el que pagaste<input id="pm-tel" type="tel" inputmode="tel" autocomplete="tel" placeholder="0414 123 4567"></label>
     </div>
     <label class="check"><input type="checkbox" id="pay-ok"> Acepto que el código de acceso se enviará a mi correo</label>
+    <label class="check legal-check"><input type="checkbox" data-acepta id="pay-legal"> <span>Leí y acepto el aviso legal de Kairos Logistics.</span></label>
+    <p class="legal" data-legal></p>
     <div class="status err" id="pay-err" role="alert"></div>
     <button class="btn primary" type="submit" id="pay-btn">Pagar 45 USD</button>
     <p class="ya-codigo"><a href="#vehiculo" data-go="vehiculo" data-ya>Ya tengo mi código</a></p>
@@ -1159,7 +1165,12 @@ footer a{color:var(--hero-muted)}
   // Flete marítimo por vehículo hasta La Guaira. EE. UU., Dubái y China: valores de Elise (14 oct. 2026). Argentina y Brasil: estimados, por confirmar.
   const MAR_FLETE={us:{n:'Estados Unidos',f:2500},ae:{n:'Dubái',f:1000},cn:{n:'China',f:2500},ar:{n:'Argentina',f:2200,est:1},br:{n:'Brasil',f:2000,est:1}};
   // Elise (2 nov. 2026): aviso legal en letra pequeña. Un solo texto para el simulador, el itinerario y la hoja de resumen.
-  const AVISO_LEGAL='Aviso legal: la información de este sitio, incluidos los cálculos, los itinerarios y los hoteles recomendados, es orientativa y se basa en la experiencia propia de Kairos Logistics en viajes e importaciones anteriores. No constituye una cotización formal ni asesoría legal o aduanera; los montos, requisitos y tarifas pueden cambiar sin aviso y deben confirmarse con las autoridades y con el agente de aduanas. Kairos Logistics no tiene relación comercial, convenio ni acuerdo de comisiones con los hoteles, proveedores ni demás entidades mencionadas, y no recibe pago por publicidad de ningún hotel. Esas menciones se hacen solo como referencia.';
+  // Elise (2 nov. 2026): rol de Kairos y autorización para actuar con la agencia aduanal. PENDIENTE: revisión de un abogado venezolano.
+  const AVISO_LEGAL='Aviso legal: Kairos Logistics es una empresa logística internacional y de acompañamiento en importación. Asesoramos y coordinamos toda tu importación junto con agencias aduanales y proveedores independientes. Al contratar nuestros servicios, el cliente autoriza a Kairos Logistics, mediante el poder o la autorización que corresponda, para actuar en conjunto con la agencia aduanal en su importación. La información de este sitio, incluidos los cálculos, los itinerarios y los hoteles recomendados, es orientativa y se basa en la experiencia propia de Kairos Logistics en viajes e importaciones anteriores. No constituye una cotización formal ni asesoría legal o aduanera; los montos, requisitos y tarifas pueden cambiar sin aviso y deben confirmarse con las autoridades y con la agencia aduanal. Kairos Logistics no tiene relación comercial, convenio ni acuerdo de comisiones con los hoteles, proveedores ni demás entidades mencionadas, y no recibe pago por publicidad de ningún hotel. Esas menciones se hacen solo como referencia.';
+  // Elise (2 nov. 2026): casilla de aceptación (solo tildar) antes de ver el cálculo, el itinerario y antes de pagar. Se recuerda en este navegador.
+  const legalOk=()=>{try{return localStorage.getItem('kairos-legal')==='1'}catch(e){return false}};
+  document.querySelectorAll('[data-acepta]').forEach(c=>{c.checked=legalOk(); c.addEventListener('change',()=>{try{localStorage.setItem('kairos-legal',c.checked?'1':'')}catch(e){} document.querySelectorAll('[data-acepta]').forEach(o=>{o.checked=c.checked;});});});
+  const legalMarcado=()=>[...document.querySelectorAll('[data-acepta]')].some(c=>c.checked);
   // Elise (2 nov. 2026): nota bajo homologación, título y placas, SENCAMER y agenciamiento aduanal.
   const AVISO_TRAMITES='Precios referenciales: homologación, título y placas, SENCAMER y agenciamiento aduanal incluyen impuestos y honorarios profesionales estimados, que pueden variar según el caso y la fecha del trámite.';
   document.querySelectorAll('[data-legal]').forEach(e=>{e.textContent=AVISO_LEGAL;});
@@ -1623,14 +1634,14 @@ footer a{color:var(--hero-muted)}
     const venRows=r==='terr'?[['Agente de aduanas en Santa Elena de Uairén',VEH.ageTierra],['Segunda revisión de la Guardia Nacional en Puerto Ordaz',VEH.gnb]]:[...MAR_VE_AGENCIA,...MAR_VE_PUERTO];
     venRows.push(['Homologación',VEH.homolog],['Título y placas',VEH.titulo]);
     if(reg==='ord') venRows.push(['SENCAMER',VEH.sencamer]); // Elise: el régimen de equipaje no lleva SENCAMER.
-    // Elise (22 oct. 2026): el certificado de uso solo aparece en el desglose con código, y solo en régimen de equipaje. 550 USD tramitado por Kairos, cualquier país (25 oct. 2026; antes 500 y 350).
+    // Elise (22 oct. 2026): el certificado de uso solo aparece en el desglose con código, y solo en régimen de equipaje. 550 USD coordinado por Kairos, cualquier país (25 oct. 2026; antes 500 y 350).
     const cer=0; // Jesús (27 oct. 2026): el certificado de uso sale «a consultar», sin sumar
     const ven=venRows.reduce((a,x)=>a+x[1],0);
     // El total no incluye el valor del vehículo: el cliente ya lo tiene. El valor solo sirve de base para los impuestos.
     // Elise (12 oct. 2026): sin honorario de Kairos ni imprevistos en el desglose.
     const enCl=p==='cl'&&r==='terr', expOk=enCl&&$('v-exp').checked, bajaOk=expOk&&$('v-baja').checked, desinc=bajaOk?VEH.desinc:expOk?VEH.desincExp:0, noSum=v=>usd(v)+' (no sumado al total)';
     const sub=log+tax+ven+cer+desinc+(r==='mar'?VEH.gestionMar:0)+(r==='terr'&&p==='cl'&&$('v-caravana').checked?VEH.caravana:0);
-    return {r,reg,d,val,land,tax,base,total:sub,fleteVar:r==='mar'&&p!=='cl'&&!MAR_FLETE[p],rows:[[r==='mar'?(p==='cl'?'Gastos en Chile y flete':'Logística hasta Venezuela'):'Viaje por tierra hasta '+(land?land.zona:''),log,1],...logRows.map(x=>[x[0],x[1],2]),...taxRows,['Trámites en Venezuela',ven,1],...venRows.map(x=>[x[0],x[1],2]),[AVISO_TRAMITES,'',2,'legal-row'],...(reg==='equi'?[['Certificado de uso emitido por la embajada o el consulado (Kairos), incluye el envío a Venezuela','Precio a consultar',1]]:[]),...(reg==='equi'&&r==='mar'&&p==='cl'?[['Plazo del certificado: llega a Caracas desde el pago','Unos 15 días hábiles',2]]:[]),...(r==='mar'?[['Traslado del puerto a tu ciudad','A consultar',2],['Gestión Kairos Logistics',VEH.gestionMar,1]]:[]),...(r==='terr'&&$('v-caravana').checked?[['Viaje en caravana con Kairos',p==='cl'?VEH.caravana:'A consultar',1]]:[]),...(enCl?[['Certificado de exportación ante la Aduana de Chile (Kairos)',expOk?VEH.desincExp:noSum(VEH.desincExp),1],['Baja del vehículo ante el Registro Civil (Kairos), incluye el envío de las patentes de Venezuela a Chile',bajaOk?VEH.desinc-VEH.desincExp:noSum(VEH.desinc-VEH.desincExp)+(expOk?'':', va con el certificado de exportación'),1]]:[])]};
+    return {r,reg,d,val,land,tax,base,total:sub,fleteVar:r==='mar'&&p!=='cl'&&!MAR_FLETE[p],rows:[[r==='mar'?(p==='cl'?'Gastos en Chile y flete':'Logística hasta Venezuela'):'Viaje por tierra hasta '+(land?land.zona:''),log,1],...logRows.map(x=>[x[0],x[1],2]),...taxRows,['Trámites en Venezuela',ven,1],...venRows.map(x=>[x[0],x[1],2]),[AVISO_TRAMITES,'',2,'legal-row'],...(reg==='equi'?[['Certificado de uso emitido por la embajada o el consulado (Kairos), incluye el envío a Venezuela','Precio a consultar',1]]:[]),...(reg==='equi'&&r==='mar'&&p==='cl'?[['Plazo del certificado: llega a Caracas desde el pago','Unos 15 días hábiles',2]]:[]),...(r==='mar'?[['Traslado del puerto a tu ciudad','A consultar',2],['Coordinación Kairos Logistics',VEH.gestionMar,1]]:[]),...(r==='terr'&&$('v-caravana').checked?[['Viaje en caravana con Kairos',p==='cl'?VEH.caravana:'A consultar',1]]:[]),...(enCl?[['Certificado de exportación ante la Aduana de Chile (Kairos)',expOk?VEH.desincExp:noSum(VEH.desincExp),1],['Baja del vehículo ante el Registro Civil (Kairos), incluye el envío de las patentes de Venezuela a Chile',bajaOk?VEH.desinc-VEH.desincExp:noSum(VEH.desinc-VEH.desincExp)+(expOk?'':', va con el certificado de exportación'),1]]:[])]};
   }
   function lines(target,rows,locked){
     const el=$(target); el.innerHTML='';
@@ -1704,8 +1715,9 @@ d.querySelector('b').append(e.pausa?'Nacionalización en Santa Elena de Uairén'
   $('v-kmdia-it').addEventListener('change',e=>{$('v-kmdia').value=e.target.value; vCalc();});
   if(RECOMENDACIONES.length) $('v-recs').innerHTML='<div class="tag">Recomendaciones para el viaje</div><ul>'+RECOMENDACIONES.map(t=>'<li>'+esc(t)+'</li>').join('')+'</ul>';
   $('v-pais').addEventListener('change',applyVPais);
-  $('v-calc').addEventListener('click',async()=>{
+  $('v-calc').addEventListener('click',async(ev)=>{
     const code=$('v-code').value.trim().toUpperCase(); const st=$('v-status'), btn=$('v-calc');
+    if(ev.isTrusted&&!legalMarcado()){st.textContent='Marca la casilla para aceptar el aviso legal.'; st.className='status err'; $('v-legal').focus(); return;}
     if(unlockCode===code&&unlockKey===vKey()){vCalc();return;}
     btn.disabled=true; st.textContent='Revisando tu código…'; st.className='status';
     const r=await canjear(code,'desglose'); btn.disabled=false;
@@ -1729,8 +1741,9 @@ d.querySelector('b').append(e.pausa?'Nacionalización en Santa Elena de Uairén'
     catch(e){return {error:COD_ERR.red,motivo:'red'};}
   }
   let itinEnlace=false;
-  $('v-plan-open').addEventListener('click',async()=>{
+  $('v-plan-open').addEventListener('click',async(ev)=>{
     const code=$('v-plan-code').value.trim().toUpperCase(), st=$('v-plan-status'), btn=$('v-plan-open');
+    if(ev.isTrusted&&!legalMarcado()){st.textContent='Marca la casilla para aceptar el aviso legal.'; st.className='status err'; $('v-plan-legal').focus(); return;}
     btn.disabled=true; st.textContent='Revisando tu código…'; st.className='status';
     const it=await abrirItin(code);
     if(it.error){btn.disabled=false; st.textContent=it.error; st.className='status err'; return;}
@@ -1834,6 +1847,7 @@ d.querySelector('b').append(e.pausa?'Nacionalización en Santa Elena de Uairén'
     if(m1!==m2) return falla('Los dos correos no coinciden.','pay-mail2'),null;
     if(!/^\+\d[\d\s-]{6,}$/.test(wa)) return falla('Escribe tu WhatsApp con el código de país, por ejemplo +56 9 1234 5678.','pay-wa'),null;
     if(!$('pay-ok').checked) return falla('Marca la casilla para aceptar que el código llegará a tu correo.','pay-ok'),null;
+    if(!$('pay-legal').checked) return falla('Marca la casilla para aceptar el aviso legal.','pay-legal'),null;
     return {nom,m1,m2,wa};
   }
   $('pay-form').addEventListener('submit',async e=>{
