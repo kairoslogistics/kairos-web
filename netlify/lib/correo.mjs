@@ -14,7 +14,7 @@ export function enviar(msg) {
 }
 
 const wa = 'https://wa.me/' + WHATSAPP.replace(/\D/g, '');
-const marco = cuerpo => `<!doctype html><html lang="es"><body style="margin:0;background:#0E3B43;font-family:Arial,Helvetica,sans-serif;color:#ffffff">
+export const marco = cuerpo => `<!doctype html><html lang="es"><body style="margin:0;background:#0E3B43;font-family:Arial,Helvetica,sans-serif;color:#ffffff">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#0E3B43"><tr><td align="center" style="padding:28px 16px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px">
 <tr><td style="font-size:20px;font-weight:bold;letter-spacing:2px;padding-bottom:4px">KAIROS <span style="color:#E0A526">LOGISTICS</span></td></tr>

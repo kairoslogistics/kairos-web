@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0E3B43">
+<title>Agenda tu asesoría 1 a 1 · Kairos Logistics</title>
+<meta name="description" content="Elige el día y la hora de tu asesoría 1 a 1 en vivo para importar tu vehículo a Venezuela.">
+<meta property="og:title" content="Agenda tu asesoría 1 a 1 · Kairos Logistics">
+<meta property="og:description" content="Elige el día y la hora de tu asesoría 1 a 1 en vivo para importar tu vehículo a Venezuela.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* Agenda de la asesoría 1 a 1 en vivo (Elise, 2 nov. 2026). Los horarios vienen de /api/agenda. Fuente: web/agendar.html */
+:root{--pet:#0E3B43;--pet2:#0B2F36;--amb:#D9971A;--amb2:#F0B443;--tin:#16262B;--nie:#E3ECEE;--hm:#A9C3C7;--gris:#56696E;--ok:#1F7A4D;--err:#B42318}
+*{box-sizing:border-box;margin:0;padding:0}
+body{min-height:100vh;background:linear-gradient(180deg,var(--pet) 0%,var(--pet2) 100%);color:#fff;font-family:"Source Sans 3","Segoe UI",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.franja{display:flex;height:5px}.franja i{flex:1}.franja i:nth-child(1){background:#FFC72C}.franja i:nth-child(2){background:#2457B8}.franja i:nth-child(3){background:#D52B1E}
+main{max-width:560px;margin:0 auto;padding:28px 16px 48px}
+header{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+.logo{width:58px;height:58px;flex:none;background:#fff;border-radius:16px;padding:7px;box-shadow:0 0 0 3px var(--amb)}
+.logo svg{width:100%;height:100%;display:block}
+.marca{font-family:Sora,sans-serif;font-weight:700;font-size:18px;letter-spacing:.06em;line-height:1.1}.marca span{display:block;font-weight:500;font-size:11px;letter-spacing:.4em;color:var(--amb2);margin-top:4px}
+h1{font-family:Sora,sans-serif;font-weight:700;font-size:26px;line-height:1.2}
+.lead{color:var(--nie);font-size:17px;line-height:1.45;margin:8px 0 14px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}.chips span{font-size:13px;font-weight:600;color:var(--hm);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:4px 12px}
+.card{background:#fff;color:var(--tin);border-radius:18px;padding:18px 16px;margin-bottom:14px}
+.paso{display:flex;align-items:center;gap:10px;font-family:Sora,sans-serif;font-weight:600;font-size:17px;margin-bottom:12px}
+.paso b{width:28px;height:28px;flex:none;border-radius:50%;background:var(--pet);color:var(--amb2);display:grid;place-items:center;font-size:14px}
+.nota{font-size:14px;color:var(--gris);line-height:1.4}
+.dias{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 8px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
+.dia{flex:none;scroll-snap-align:start;width:76px;border:2px solid #D5E0E2;background:#fff;border-radius:14px;padding:8px 4px;text-align:center;cursor:pointer;font:inherit;color:var(--tin)}
+.dia small{display:block;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--gris)}
+.dia strong{display:block;font-family:Sora,sans-serif;font-size:22px;line-height:1.2}
+.dia em{display:block;font-style:normal;font-size:12px;color:var(--ok);font-weight:600}
+.dia[aria-pressed="true"]{border-color:var(--pet);background:var(--pet);color:#fff}.dia[aria-pressed="true"] small{color:var(--hm)}.dia[aria-pressed="true"] em{color:var(--amb2)}
+.dia:disabled{opacity:.45;cursor:default}.dia:disabled em{color:var(--gris)}
+.horas{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:8px;margin-top:4px}
+.hora{border:2px solid var(--pet);background:#fff;color:var(--pet);border-radius:12px;padding:10px 6px;font:inherit;font-family:Sora,sans-serif;font-weight:600;font-size:17px;cursor:pointer;text-align:center}
+.hora small{display:block;font-family:"Source Sans 3",sans-serif;font-weight:400;font-size:12px;color:var(--gris)}
+.hora[aria-pressed="true"]{background:var(--amb2);border-color:var(--amb2)}
+.hora:disabled{border-color:#E1E7E8;background:#F2F5F5;color:#9AAAAE;cursor:default;text-decoration:line-through}.hora:disabled small{text-decoration:none;color:#9AAAAE}
+label{display:block;font-weight:600;font-size:15px;margin:12px 0 4px}
+label span{font-weight:400;color:var(--gris)}
+input,select,textarea{width:100%;font:inherit;font-size:16px;color:var(--tin);border:1.5px solid #C5D3D6;border-radius:10px;padding:11px 12px;background:#fff}
+textarea{min-height:76px;resize:vertical}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--pet);box-shadow:0 0 0 3px rgba(14,59,67,.15)}
+.elegida{background:#FFF6DF;border:1.5px solid var(--amb2);border-radius:12px;padding:10px 12px;font-size:15px;line-height:1.4;margin-bottom:4px}
+.elegida b{font-family:Sora,sans-serif}
+.btn{display:block;width:100%;border:0;border-radius:14px;padding:15px;font:inherit;font-family:Sora,sans-serif;font-weight:700;font-size:17px;cursor:pointer;text-align:center;text-decoration:none;margin-top:16px}
+.btn.primario{background:var(--amb2);color:var(--pet)}.btn.primario:disabled{opacity:.6;cursor:wait}
+.btn.wa{background:#25D366;color:#063B1E}
+.btn.sec{background:transparent;color:var(--pet);border:2px solid var(--pet)}
+.error{color:var(--err);font-weight:600;font-size:15px;margin-top:10px}
+.trampa{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.cargando{padding:18px 0;text-align:center;color:var(--gris)}
+.listo{text-align:center}.listo .ok{width:60px;height:60px;border-radius:50%;background:var(--ok);color:#fff;display:grid;place-items:center;margin:4px auto 10px;font-size:32px}
+.listo h2{font-family:Sora,sans-serif;font-size:22px}.listo .cuando{font-family:Sora,sans-serif;font-weight:700;font-size:19px;color:var(--pet);margin:10px 0 4px}
+.pie{text-align:center;font-size:14px;color:var(--hm);margin-top:20px}.pie a{color:var(--amb2)}
+[hidden]{display:none!important}
+</style>
+<link rel="icon" href="/img/icono/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/img/icono/icono-32.png" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="/img/icono/icono-180.png">
+<meta property="og:image" content="https://kairoslogistics.net/img/icono/compartir.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:site_name" content="Kairos Logistics">
+<meta name="twitter:card" content="summary_large_image">
+<script>(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window,document,"clarity","script","z418yw2alx");</script>
+</head>
+<body>
+<div class="franja"><i></i><i></i><i></i></div>
+<main>
+  <header>
+    <div class="logo" aria-hidden="true"><svg viewBox="0 0 100 100"><defs><clipPath id="kv"><polygon points="23.2,52.4 65.2,12.9 60,10 88,4 82,32 74.8,23.1 32.8,62.6"/></clipPath></defs><path d="M26 46 L80 90" stroke="#0E3B43" stroke-width="16" fill="none"/><g clip-path="url(#kv)"><g transform="translate(56 33) rotate(-43.25)"><rect x="-60" y="-40" width="120" height="37.7" fill="#FFC72C"/><rect x="-60" y="-2.4" width="120" height="4.8" fill="#2457B8"/><rect x="-60" y="2.3" width="120" height="40" fill="#D52B1E"/></g></g><rect x="14" y="10" width="17" height="80" rx="2" fill="#0E3B43"/></svg></div>
+    <a href="/" style="color:inherit;text-decoration:none"><div class="marca">KAIROS<span>LOGISTICS</span></div></a>
+  </header>
+
+  <section id="agenda">
+    <h1>Agenda tu asesoría 1 a 1 en vivo</h1>
+    <p class="lead">Elige el día y la hora que te queden mejor. Hablamos de tu vehículo, tu ruta y cada gasto, en vivo y solo contigo.</p>
+    <div class="chips"><span>150 USD</span><span>1 h a 1 h 30 min</span><span>Por videollamada</span></div>
+
+    <div class="card">
+      <div class="paso"><b>1</b>Elige el día</div>
+      <div id="dias" class="dias" role="group" aria-label="Días disponibles"><p class="cargando">Cargando horarios…</p></div>
+    </div>
+
+    <div class="card" id="c-horas" hidden>
+      <div class="paso"><b>2</b>Elige la hora</div>
+      <p class="nota" id="zona-nota"></p>
+      <div id="horas" class="horas" role="group" aria-label="Horas"></div>
+    </div>
+
+    <form class="card" id="c-datos" hidden novalidate>
+      <div class="paso"><b>3</b>Tus datos</div>
+      <div class="elegida" id="elegida"></div>
+      <label for="f-nombre">Nombre y apellido</label>
+      <input id="f-nombre" autocomplete="name" required>
+      <label for="f-whatsapp">WhatsApp <span>(con código de país)</span></label>
+      <input id="f-whatsapp" type="tel" autocomplete="tel" placeholder="+56 9 1234 5678" required>
+      <label for="f-correo">Correo</label>
+      <input id="f-correo" type="email" autocomplete="email" required>
+      <label for="f-pais">País donde vives</label>
+      <select id="f-pais" required><option value="">Elige…</option><option>Chile</option><option>Argentina</option><option>Brasil</option><option>Estados Unidos</option><option>Panamá</option><option>Venezuela</option><option>Otro</option></select>
+      <label for="f-vehiculo">Tu vehículo <span>(opcional: marca, modelo y año)</span></label>
+      <input id="f-vehiculo" placeholder="Ej.: Toyota Hilux 2019">
+      <label for="f-notas">¿Qué quieres resolver? <span>(opcional)</span></label>
+      <textarea id="f-notas"></textarea>
+      <div class="trampa" aria-hidden="true"><label for="f-web">No llenar</label><input id="f-web" tabindex="-1" autocomplete="off"></div>
+      <p class="error" id="error" role="alert" hidden></p>
+      <button class="btn primario" id="enviar" type="submit">Pedir esta hora</button>
+      <p class="nota" style="margin-top:10px">Tu hora queda reservada cuando confirmamos tu pago de 150 USD (transferencia, dólares o Binance). Te escribimos por WhatsApp.</p>
+    </form>
+  </section>
+
+  <section class="card listo" id="listo" hidden>
+    <div class="ok" aria-hidden="true">✓</div>
+    <h2>¡Recibimos tu solicitud!</h2>
+    <p class="cuando" id="l-cuando"></p>
+    <p class="nota" id="l-ve"></p>
+    <p style="margin-top:12px;line-height:1.45">Para reservar la hora, paga los <b>150 USD</b>. Escríbenos por WhatsApp y te enviamos los datos de pago. Te mandamos también un correo con tu solicitud.</p>
+    <a class="btn wa" id="l-wa" href="#" target="_blank" rel="noopener">Pagar y reservar por WhatsApp</a>
+  </section>
+
+  <p class="pie">¿Dudas? Escríbenos por <a href="https://wa.me/584227010497" target="_blank" rel="noopener">WhatsApp</a> · <a href="/">kairoslogistics.net</a></p>
+</main>
+<script>
+(function(){
+  var $=function(s){return document.getElementById(s)};
+  var ZONA_VE='America/Caracas', WA='584227010497';
+  var zona; try{zona=Intl.DateTimeFormat().resolvedOptions().timeZone||ZONA_VE}catch(e){zona=ZONA_VE}
+  var mismaZona=function(){ // ¿el cliente está en la misma hora que Venezuela ahora mismo?
+    var t=Date.now(); return hm(t,zona)===hm(t,ZONA_VE);
+  };
+  function fmt(ms,z,o){return new Intl.DateTimeFormat('es',Object.assign({timeZone:z},o)).format(new Date(ms))}
+  function hm(ms,z){return fmt(ms,z,{hour:'2-digit',minute:'2-digit',hourCycle:'h23'})}
+  function claveDia(ms){return fmt(ms,zona,{year:'numeric',month:'2-digit',day:'2-digit'})}
+  function largo(ms,z){var s=fmt(ms,z,{weekday:'long',day:'numeric',month:'long'});return s.charAt(0).toUpperCase()+s.slice(1)+', '+hm(ms,z)}
+  var ciudad=zona.split('/').pop().replace(/_/g,' ');
+  var igual=mismaZona();
+  var horarios=[], diaSel=null, horaSel=null;
+
+  function cargar(){
+    $('dias').innerHTML='<p class="cargando">Cargando horarios…</p>';
+    fetch('/api/agenda',{cache:'no-store'}).then(function(r){return r.json()}).then(function(j){
+      horarios=j.horarios||[]; pintarDias();
+    }).catch(function(){
+      $('dias').innerHTML='<p class="cargando">No pudimos cargar los horarios. <a href="https://wa.me/'+WA+'?text='+encodeURIComponent('Hola, quiero agendar la asesoría 1 a 1')+'">Escríbenos por WhatsApp</a>.</p>';
+    });
+  }
+  function pintarDias(){
+    var grupos={}, orden=[];
+    horarios.forEach(function(h){var k=claveDia(h.inicio); if(!grupos[k]){grupos[k]=[];orden.push(k)} grupos[k].push(h)});
+    var cont=$('dias'); cont.innerHTML='';
+    if(!orden.length){cont.innerHTML='<p class="cargando">No hay horarios por ahora. Escríbenos por WhatsApp.</p>';return}
+    var primero=null;
+    orden.forEach(function(k){
+      var hs=grupos[k], libres=hs.filter(function(h){return h.libre}).length, t=hs[0].inicio;
+      var b=document.createElement('button'); b.type='button'; b.className='dia'; b.setAttribute('aria-pressed','false');
+      b.innerHTML='<small>'+fmt(t,zona,{weekday:'short'}).replace('.','')+'</small><strong>'+fmt(t,zona,{day:'numeric'})+'</strong><small>'+fmt(t,zona,{month:'short'}).replace('.','')+'</small><em>'+(libres?libres+(libres>1?' libres':' libre'):'Lleno')+'</em>';
+      b.disabled=!libres;
+      b.onclick=function(){elegirDia(k,hs,b)};
+      cont.appendChild(b);
+      if(libres&&!primero) primero=[k,hs,b];
+    });
+    if(diaSel&&grupos[diaSel]){var bs=cont.querySelectorAll('.dia');orden.forEach(function(k,i){if(k===diaSel&&!bs[i].disabled)elegirDia(k,grupos[k],bs[i])})}
+    else if(primero) elegirDia(primero[0],primero[1],primero[2],true);
+  }
+  function elegirDia(k,hs,boton,auto){
+    diaSel=k; horaSel=null; $('c-datos').hidden=true;
+    Array.prototype.forEach.call(document.querySelectorAll('.dia'),function(b){b.setAttribute('aria-pressed',String(b===boton))});
+    $('c-horas').hidden=false;
+    $('zona-nota').textContent=igual?'Horas en hora de Venezuela.':'Horas en tu hora local ('+ciudad+'). Abajo, la hora de Venezuela.';
+    var cont=$('horas'); cont.innerHTML='';
+    hs.forEach(function(h){
+      var b=document.createElement('button'); b.type='button'; b.className='hora'; b.setAttribute('aria-pressed','false');
+      b.innerHTML=hm(h.inicio,zona)+'<small>'+(h.libre?(igual?'Libre':'Venezuela '+hm(h.inicio,ZONA_VE)):'Reservado')+'</small>';
+      b.disabled=!h.libre;
+      b.onclick=function(){elegirHora(h,b)};
+      cont.appendChild(b);
+    });
+    if(!auto) $('c-horas').scrollIntoView({behavior:'smooth',block:'start'});
+  }
+  function elegirHora(h,boton){
+    horaSel=h;
+    Array.prototype.forEach.call(document.querySelectorAll('.hora'),function(b){b.setAttribute('aria-pressed',String(b===boton))});
+    $('elegida').innerHTML='Elegiste: <b>'+largo(h.inicio,zona)+'</b>'+(igual?' (hora Venezuela)':'<br><span class="nota">Hora Venezuela: '+largo(h.inicio,ZONA_VE)+'</span>');
+    $('c-datos').hidden=false; $('error').hidden=true;
+    $('c-datos').scrollIntoView({behavior:'smooth',block:'start'});
+  }
+  // País por la zona horaria, para ahorrarle un paso.
+  var PAIS={'America/Santiago':'Chile','America/Punta_Arenas':'Chile','America/Caracas':'Venezuela','America/Panama':'Panamá','America/Sao_Paulo':'Brasil','America/Manaus':'Brasil','America/Boa_Vista':'Brasil','America/Fortaleza':'Brasil','America/Recife':'Brasil','America/Bahia':'Brasil'};
+  if(PAIS[zona]) $('f-pais').value=PAIS[zona]; else if(/^America\/Argentina/.test(zona)) $('f-pais').value='Argentina'; else if(/^America\/(New_York|Chicago|Denver|Los_Angeles|Phoenix|Detroit|Indiana|Kentucky|Anchorage)/.test(zona)) $('f-pais').value='Estados Unidos';
+
+  function error(t){$('error').textContent=t;$('error').hidden=false}
+  $('c-datos').onsubmit=function(e){
+    e.preventDefault(); if(!horaSel) return;
+    var d={inicio:horaSel.inicio,zona:zona,nombre:$('f-nombre').value.trim(),whatsapp:$('f-whatsapp').value.trim(),correo:$('f-correo').value.trim(),pais:$('f-pais').value,vehiculo:$('f-vehiculo').value.trim(),notas:$('f-notas').value.trim(),web:$('f-web').value};
+    if(d.nombre.split(/\s+/).length<2) return error('Escribe tu nombre y apellido.');
+    if(!/^\+?\d[\d\s-]{6,}$/.test(d.whatsapp)) return error('Escribe tu WhatsApp con el código de país, por ejemplo +56 9 1234 5678.');
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(d.correo)) return error('Revisa tu correo.');
+    if(!d.pais) return error('Elige el país donde vives.');
+    $('enviar').disabled=true; $('enviar').textContent='Enviando…'; $('error').hidden=true;
+    fetch('/api/agenda',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)}).then(function(r){return r.json().then(function(j){return{ok:r.ok,j:j}})}).then(function(x){
+      $('enviar').disabled=false; $('enviar').textContent='Pedir esta hora';
+      if(!x.ok){ error(x.j.error||'No pudimos guardar tu solicitud.'); if(x.j.ocupada){horaSel=null;cargar()} return }
+      try{window.clarity&&clarity('event','agenda_1a1')}catch(e){}
+      $('agenda').hidden=true; $('listo').hidden=false;
+      $('l-cuando').textContent=largo(d.inicio,zona);
+      $('l-ve').textContent=igual?'Hora de Venezuela':'Hora Venezuela: '+largo(d.inicio,ZONA_VE);
+      $('l-wa').href='https://wa.me/'+WA+'?text='+encodeURIComponent('Hola, soy '+d.nombre+'. Pedí la asesoría 1 a 1 para el '+largo(d.inicio,ZONA_VE)+' (hora Venezuela). Quiero pagar los 150 USD para reservarla. Solicitud '+x.j.id);
+      window.scrollTo({top:0,behavior:'smooth'});
+    }).catch(function(){$('enviar').disabled=false;$('enviar').textContent='Pedir esta hora';error('No hay conexión. Inténtalo de nuevo.')});
+  };
+  cargar();
+})();
+</script>
+</body>
+</html>
