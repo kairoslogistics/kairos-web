@@ -23,11 +23,11 @@ export function correoNuevaCita(c) {
   return {
     to: process.env.AVISOS_A || process.env.ZOHO_SMTP_USER, replyTo: c.correo,
     subject: 'Asesoría 1 a 1 pedida: ' + c.nombre + ' · ' + fechaVE(c.inicio),
-    text: 'Nueva solicitud de asesoría 1 a 1 (falta confirmar el pago de ' + PRECIO_1A1 + ' USD).\n\n' + Object.entries(d).map(([k, v]) => k + ': ' + v).join('\n') + '\n\nConfirma el pago en ' + sitio() + '/admin/agenda/',
-    html: marco(`<p><b>Nueva solicitud de asesoría 1 a 1</b><br>La hora todavía no está reservada: se reserva cuando confirmes el pago de ${PRECIO_1A1} USD.</p><table style="font-size:14px">${filas(d)}</table>${boton(sitio() + '/admin/agenda/', 'Abrir la agenda')}`),
+    text: 'Nueva solicitud de asesoría 1 a 1 (falta confirmar el pago de ' + PRECIO_1A1 + ' USD).\n\n' + Object.entries(d).map(([k, v]) => k + ': ' + v).join('\n') + '\n\nConfirma el pago en ' + sitio() + '/admin/#agenda',
+    html: marco(`<p><b>Nueva solicitud de asesoría 1 a 1</b><br>La hora todavía no está reservada: se reserva cuando confirmes el pago de ${PRECIO_1A1} USD.</p><table style="font-size:14px">${filas(d)}</table>${boton(sitio() + '/admin/#agenda', 'Abrir la agenda')}`),
   };
 }
-export const whatsNuevaCita = c => `Kairos: asesoría 1 a 1 pedida\n${fechaVE(c.inicio)} (hora Venezuela)\n${c.nombre} · ${c.whatsapp} · ${c.pais}${c.vehiculo ? '\n' + c.vehiculo : ''}\nFalta confirmar el pago: ${sitio()}/admin/agenda/`;
+export const whatsNuevaCita = c => `Kairos: asesoría 1 a 1 pedida\n${fechaVE(c.inicio)} (hora Venezuela)\n${c.nombre} · ${c.whatsapp} · ${c.pais}${c.vehiculo ? '\n' + c.vehiculo : ''}\nFalta confirmar el pago: ${sitio()}/admin/#agenda`;
 
 // Al cliente: recibimos tu solicitud; la hora queda tuya cuando pagues.
 export function correoSolicitud(c) {

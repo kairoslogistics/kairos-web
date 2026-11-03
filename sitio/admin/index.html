@@ -44,9 +44,27 @@ button,input,select,textarea{font:inherit;color:inherit}
 .brand b{font-family:var(--display);letter-spacing:.06em;font-size:17px}
 .brand small{font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.8}
 .mode{font-family:var(--mono);font-size:12px;padding:3px 8px;border-radius:999px;border:1px solid currentColor;opacity:.9}
-.tabs{display:flex;gap:4px;overflow-x:auto;width:100%;scrollbar-width:none}
-.tabs button{background:transparent;border:0;color:var(--brand-ink);opacity:.75;padding:8px 12px;border-radius:8px 8px 0 0;cursor:pointer;white-space:nowrap;font-weight:600}
-.tabs button[aria-selected="true"]{opacity:1;background:var(--bg);color:var(--ink)}
+/* Menú vertical a la izquierda (Elise, 3 nov. 2026). En el teléfono se abre con el botón «Menú». */
+.lay{display:grid;grid-template-columns:220px minmax(0,1fr);align-items:start}
+.lat{position:sticky;top:calc(env(safe-area-inset-top,0px) + 56px);max-height:calc(100vh - 56px);overflow-y:auto;background:var(--surface);border-right:1px solid var(--line);padding:12px 8px;min-height:calc(100vh - 56px)}
+.tabs{display:flex;flex-direction:column;gap:2px}
+.tabs button{display:flex;align-items:center;justify-content:space-between;gap:8px;text-align:left;background:transparent;border:0;color:var(--ink);opacity:.85;padding:10px 12px;border-radius:8px;cursor:pointer;font-weight:600}
+.tabs button:hover{background:var(--soft);opacity:1}
+.tabs button[aria-selected="true"]{opacity:1;background:var(--brand);color:var(--brand-ink)}
+.tabs .nb{background:var(--accent);color:var(--brand);border-radius:999px;font-size:12px;font-weight:700;padding:1px 7px}
+.menu-btn{display:none;width:100%;align-items:center;gap:8px;background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-weight:700;cursor:pointer;color:var(--ink)}
+@media (max-width:760px){.lay{grid-template-columns:minmax(0,1fr)}.lat{position:static;max-height:none;min-height:0;border-right:0;border-bottom:1px solid var(--line)}.menu-btn{display:flex}.lat .tabs{display:none;margin-top:8px}.lat.abierto .tabs{display:flex}}
+/* Agenda de la asesoría 1 a 1 (pestaña Agenda 1 a 1) */
+.ag-sub{display:flex;gap:6px;flex-wrap:wrap}
+.ag-cita{background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--line);border-radius:10px;padding:14px}
+.ag-cita.pendiente{border-left-color:var(--accent)}.ag-cita.confirmada{border-left-color:#1F7A4D}.ag-cita.cancelada{opacity:.65}
+.ag-cita h3{font-size:17px}.ag-cuando{font-weight:700;color:var(--brand);margin:4px 0}
+.ag-acc{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.ag-acc a.btn{text-decoration:none;display:inline-block}
+.ag-err{color:var(--warn);font-weight:600}
+#view>p.sub,.ag-cita .sub{color:var(--muted);font-size:14px;margin:0}
+.ag-cita .cdat{margin-top:8px}
+.ag-bloq{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;align-items:end}
 main .wrap{padding-block:18px 60px;display:grid;gap:16px}
 .cdat{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;font-size:14px;margin:0}
 .cdat dt{color:var(--muted)}.cdat dd{margin:0;min-width:0;overflow-wrap:anywhere;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
@@ -422,9 +440,11 @@ const pref={get(k){try{return localStorage.getItem('kairos-admin-'+k)}catch(e){r
 
 /* ===== Pantallas ===== */
 function shell(){
-  const T=[['aliados','Aliados por país'],['alianzas','Posibles alianzas'],['contactos','Contactos y negociación'],['cargas','Cargas'],['referidos','Referidos'],['costos','Costos y precios'],['cotizacion','Cotización'],['pagos','Pagos'],['codigos','Códigos'],['gastos','Gastos de viaje'],['requisitos','Requisitos']];
+  const T=[['agenda','Agenda 1 a 1'],['aliados','Aliados por país'],['alianzas','Posibles alianzas'],['contactos','Contactos y negociación'],['cargas','Cargas'],['referidos','Referidos'],['costos','Costos y precios'],['cotizacion','Cotización'],['pagos','Pagos'],['codigos','Códigos'],['gastos','Gastos de viaje'],['requisitos','Requisitos']];
   $('#app').innerHTML='<header class="top"><div class="wrap"><div class="brand"><b>KAIROS LOGISTICS</b><small>Administración</small></div><span class="mode">'+(MODO==='demo'?'Demostración':'Conectado')+'</span>'+(MODO==='real'?'<button class="btn ghost sm" id="salir" style="color:var(--brand-ink);border-color:var(--brand-ink)">Salir</button>':'')+
-    '<nav class="tabs" role="tablist">'+T.map(([k,l])=>'<button role="tab" data-tab="'+k+'" aria-selected="'+(tab===k)+'">'+l+'</button>').join('')+'</nav></div></header><main><div class="wrap" id="view"></div></main>';
+    '</div></header><div class="lay"><aside class="lat" id="lat"><button type="button" class="menu-btn" id="menu-btn" aria-expanded="false">☰ Menú · '+esc((T.find(t=>t[0]===tab)||T[1])[1])+'</button>'+
+    '<nav class="tabs" role="tablist" aria-orientation="vertical">'+T.map(([k,l])=>'<button role="tab" data-tab="'+k+'" aria-selected="'+(tab===k)+'"><span>'+l+'</span>'+(k==='agenda'&&agPendientes()?'<span class="nb">'+agPendientes()+'</span>':'')+'</button>').join('')+'</nav></aside><main><div class="wrap" id="view"></div></main></div>';
+  const mb=$('#menu-btn'); if(mb) mb.onclick=()=>{const a=$('#lat').classList.toggle('abierto');mb.setAttribute('aria-expanded',String(a));};
   document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;allyOpen=null;pref.set('tab',tab);try{history.replaceState(null,'','#'+tab)}catch(e){};shell();});
   const s=$('#salir'); if(s) s.onclick=async()=>{await auth.signOut();location.reload();};
   render();
@@ -432,8 +452,8 @@ function shell(){
 function render(){
   const v=$('#view');
   const demo=MODO==='demo'?'<div class="demo-note">Modo demostración: los datos son de ejemplo y se guardan solo en este navegador. Cuando conectemos la base de datos, entrarás con tu correo y clave y todo quedará guardado en línea.</div>':'';
-  v.innerHTML=demo+({aliados:vAliados,alianzas:vAlianzas,contactos:vContactos,cargas:vCargas,referidos:vReferidos,costos:vCostos,cotizacion:vCotizacion,pagos:vPagos,codigos:vCodigos,gastos:vGastos,requisitos:vRequisitos}[tab]||vAliados)();
-  bind();
+  v.innerHTML=demo+({agenda:vAgenda,aliados:vAliados,alianzas:vAlianzas,contactos:vContactos,cargas:vCargas,referidos:vReferidos,costos:vCostos,cotizacion:vCotizacion,pagos:vPagos,codigos:vCodigos,gastos:vGastos,requisitos:vRequisitos}[tab]||vAliados)();
+  bind(); if(tab==='agenda') bindAgenda();
 }
 function paisChips(lista){
   const cnt=p=>lista.filter(x=>p==='todos'||x.pais===p).length;
@@ -1103,12 +1123,97 @@ function loginView(msg){
   $('#lf').onsubmit=async e=>{e.preventDefault();$('#lerr').textContent='';
     try{await auth.signInWithEmailAndPassword($('#le').value.trim(),$('#lp').value);}catch(err){$('#lerr').textContent='Correo o clave incorrectos. Revisa e intenta de nuevo.';return;} start();};
 }
+/* ===== Agenda de la asesoría 1 a 1 (Elise, 2-3 nov. 2026) =====
+   Los clientes piden hora en /agendar/ (netlify/functions/agenda.mjs guarda citas/{id} «pendiente» y avisa por correo).
+   La solicitud no bloquea la hora: se bloquea al confirmar el pago aquí (publico/agenda.ocupadas, sin datos del cliente).
+   Aquí también van los bloqueos a mano (publico/agenda.bloqueos). Todas las horas son de Venezuela (UTC-4). */
+const AGV='America/Caracas', AGDUR=90*60000;
+const AG={citas:[],ocupadas:[],bloqueos:[],sub:'pendiente',listo:false,err:''};
+let agEscuchando=false;
+const agPendientes=()=>AG.citas.filter(c=>c.estado==='pendiente'&&c.inicio>Date.now()).length;
+function agFecha(ms,z){const s=new Intl.DateTimeFormat('es',{timeZone:z||AGV,weekday:'long',day:'numeric',month:'long',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date(ms));return s.charAt(0).toUpperCase()+s.slice(1);}
+const agHora=ms=>new Intl.DateTimeFormat('es',{timeZone:AGV,hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date(ms));
+const agGcal=ms=>new Date(ms).toISOString().replace(/[-:]/g,'').replace(/\.\d+/,'');
+const agWa=(c,t)=>'https://wa.me/'+String(c.whatsapp).replace(/\D/g,'')+'?text='+encodeURIComponent(t);
+const agCliente=c=>c.zona&&c.zona!==AGV?agFecha(c.inicio,c.zona)+' (su hora)':'';
+const agNombre=c=>String(c.nombre||'').split(' ')[0];
+function agCalendar(c){return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent('Asesoría 1 a 1 · '+c.nombre)+'&dates='+agGcal(c.inicio)+'/'+agGcal(c.fin||c.inicio+AGDUR)+'&ctz='+AGV+
+  '&details='+encodeURIComponent('WhatsApp: '+c.whatsapp+'\nCorreo: '+c.correo+'\nPaís: '+c.pais+(c.vehiculo?'\nVehículo: '+c.vehiculo:'')+(c.notas?'\nNotas: '+c.notas:'')+'\nSolicitud: '+c.id);}
+function escucharAgenda(){
+  if(MODO!=='real'||!db||agEscuchando) return; agEscuchando=true;
+  const refrescar=()=>{AG.listo=true; if(tab==='agenda') render(); const b=document.querySelector('[data-tab="agenda"]'); if(b){const n=agPendientes();b.innerHTML='<span>Agenda 1 a 1</span>'+(n?'<span class="nb">'+n+'</span>':'');}};
+  db.collection('citas').orderBy('created_at','desc').limit(300).onSnapshot(s=>{AG.citas=s.docs.map(d=>d.data());refrescar();},e=>{AG.err=e.message;refrescar();});
+  db.collection('publico').doc('agenda').onSnapshot(d=>{const a=d.exists?d.data():{};AG.ocupadas=a.ocupadas||[];AG.bloqueos=a.bloqueos||[];refrescar();});
+}
+function agChoca(c){const fin=c.fin||c.inicio+AGDUR;return AG.ocupadas.concat(AG.bloqueos).filter(o=>o.id!==c.id&&o.inicio<fin&&o.fin>c.inicio);}
+function vAgenda(){
+  const head='<div class="head"><div><h2>Agenda 1 a 1</h2><p>Las solicitudes no bloquean la hora. Cuando el cliente pague los 150 USD, presiona <b>Confirmar pago</b>: la hora se reserva y deja de verse en la web. Todas las horas son de Venezuela.</p></div><a class="btn ghost" href="/agendar/" target="_blank" rel="noopener" style="text-decoration:none">Ver la página del cliente</a></div>';
+  if(MODO!=='real') return head+'<p class="sub">La agenda funciona solo con la base de datos conectada.</p>';
+  if(AG.err) return head+'<p class="ag-err">No se pudo leer la agenda: '+esc(AG.err)+'</p>';
+  if(!AG.listo) return head+'<p class="sub">Cargando…</p>';
+  const ahora=Date.now(), S2=[['pendiente','Por confirmar',agPendientes()],['confirmada','Confirmadas'],['otras','Pasadas y canceladas'],['bloqueos','Bloquear horas']];
+  const sub='<div class="ag-sub">'+S2.map(([k,l,n])=>'<button class="chip" data-agsub="'+k+'" aria-pressed="'+(AG.sub===k)+'">'+l+(n?'<span class="n">'+n+'</span>':'')+'</button>').join('')+'</div>';
+  if(AG.sub==='bloqueos'){
+    const l=AG.bloqueos.filter(o=>o.fin>ahora).sort((a,b)=>a.inicio-b.inicio);
+    return head+sub+'<form class="card" id="ag-fbloq"><h3>Bloquear un horario a mano</h3><p class="sub">Por ejemplo, un día libre o una cita tuya. Hora de Venezuela.</p><div class="ag-bloq">'+
+      '<label class="fld">Día<input id="ag-dia" type="date" required></label><label class="fld">Desde<input id="ag-desde" type="time" value="09:00" required></label><label class="fld">Hasta<input id="ag-hasta" type="time" value="21:00" required></label><label class="fld">Nota<input id="ag-nota" maxlength="80"></label><button class="btn">Bloquear</button></div></form>'+
+      (l.length?l.map(o=>'<div class="ag-cita"><p class="ag-cuando">'+esc(agFecha(o.inicio))+' a '+esc(agHora(o.fin))+'</p>'+(o.nota?'<p class="sub">'+esc(o.nota)+'</p>':'')+'<div class="ag-acc"><button class="btn danger sm" data-agquitar="'+o.inicio+'">Quitar bloqueo</button></div></div>').join(''):'<p class="sub">No hay bloqueos a mano.</p>');
+  }
+  const L=AG.sub==='pendiente'?AG.citas.filter(c=>c.estado==='pendiente'&&c.inicio>ahora).sort((a,b)=>a.inicio-b.inicio)
+    :AG.sub==='confirmada'?AG.citas.filter(c=>c.estado==='confirmada'&&c.inicio+AGDUR>ahora).sort((a,b)=>a.inicio-b.inicio)
+    :AG.citas.filter(c=>c.estado==='cancelada'||c.inicio+AGDUR<=ahora).sort((a,b)=>b.inicio-a.inicio);
+  if(!L.length) return head+sub+'<p class="sub">'+(AG.sub==='pendiente'?'No hay solicitudes por confirmar.':'Nada por aquí.')+'</p>';
+  return head+sub+L.map(c=>{
+    const ch=c.estado==='pendiente'?agChoca(c):[], hc=agCliente(c);
+    return '<div class="ag-cita '+esc(c.estado)+'"><h3>'+esc(c.nombre)+' <span class="pill'+(c.estado==='confirmada'?' done':c.estado==='pendiente'?' mid':' off')+'">'+(c.estado==='pendiente'?'Falta el pago':c.estado==='confirmada'?'Pagada':'Cancelada')+'</span></h3>'+
+      '<p class="ag-cuando">'+esc(agFecha(c.inicio))+' · hora Venezuela</p>'+(hc?'<p class="sub">'+esc(hc)+'</p>':'')+
+      (ch.length?'<p class="ag-err">Ojo: ya hay otra asesoría pagada o un bloqueo en ese horario.</p>':'')+
+      '<dl class="cdat"><dt>WhatsApp</dt><dd>'+esc(c.whatsapp)+'</dd><dt>Correo</dt><dd>'+esc(c.correo)+'</dd><dt>País</dt><dd>'+esc(c.pais)+'</dd>'+
+      (c.vehiculo?'<dt>Vehículo</dt><dd>'+esc(c.vehiculo)+'</dd>':'')+(c.notas?'<dt>Quiere resolver</dt><dd>'+esc(c.notas)+'</dd>':'')+
+      '<dt>Pidió el</dt><dd>'+esc(agFecha(c.created_at))+'</dd><dt>Solicitud</dt><dd>'+esc(c.id)+'</dd></dl><div class="ag-acc">'+
+      (c.estado==='pendiente'?'<button class="btn" data-agconf="'+esc(c.id)+'">Confirmar pago y reservar</button><a class="btn ghost" target="_blank" rel="noopener" href="'+esc(agWa(c,'Hola '+agNombre(c)+', recibimos tu solicitud de asesoría 1 a 1 para el '+agFecha(c.inicio)+' (hora Venezuela). Para reservarla, el pago es de 150 USD. ¿Cómo prefieres pagar: transferencia, dólares o Binance?'))+'">Escribirle por WhatsApp</a>':'')+
+      (c.estado==='confirmada'?'<a class="btn" target="_blank" rel="noopener" href="'+esc(agCalendar(c))+'">Agregar a mi Google Calendar</a><a class="btn ghost" target="_blank" rel="noopener" href="'+esc(agWa(c,'Hola '+agNombre(c)+', confirmamos tu pago. Tu asesoría 1 a 1 queda reservada para el '+agFecha(c.inicio)+' (hora Venezuela)'+(hc?', '+hc:'')+'. Antes de la hora te enviamos el enlace de la videollamada.'))+'">Confirmarle por WhatsApp</a>':'')+
+      (c.estado!=='cancelada'&&c.inicio>ahora?'<button class="btn danger sm" data-agcanc="'+esc(c.id)+'">Cancelar</button>':'')+'</div></div>';
+  }).join('');
+}
+function agTx(fn){const ref=db.collection('publico').doc('agenda');return db.runTransaction(t=>t.get(ref).then(d=>fn(t,ref,d.exists?d.data():{})));}
+function bindAgenda(){
+  document.querySelectorAll('[data-agsub]').forEach(b=>b.onclick=()=>{AG.sub=b.dataset.agsub;render();});
+  document.querySelectorAll('[data-agconf]').forEach(b=>b.onclick=()=>{
+    const c=AG.citas.find(x=>x.id===b.dataset.agconf); if(!c) return;
+    if(agChoca(c).length&&!confirm('Ya hay otra asesoría pagada o un bloqueo en ese horario. ¿Confirmar igual?')) return;
+    if(!confirm('¿Confirmas que '+c.nombre+' pagó los 150 USD? La hora del '+agFecha(c.inicio)+' queda reservada.')) return;
+    b.disabled=true;
+    agTx((t,ref,a)=>{let oc=(a.ocupadas||[]).filter(o=>o.id!==c.id);oc.push({id:c.id,inicio:c.inicio,fin:c.fin||c.inicio+AGDUR});oc=oc.filter(o=>o.fin>Date.now()-7*864e5);
+      t.set(ref,{ocupadas:oc},{merge:true});t.update(db.collection('citas').doc(c.id),{estado:'confirmada',confirmada_el:Date.now()});})
+      .then(()=>{AG.sub='confirmada';render();alert('Listo, la hora quedó reservada. Ahora agrégala a tu Google Calendar (te avisa en el teléfono) y confírmale al cliente por WhatsApp.');})
+      .catch(e=>{b.disabled=false;alert('No se pudo confirmar: '+e.message);});
+  });
+  document.querySelectorAll('[data-agcanc]').forEach(b=>b.onclick=()=>{
+    const c=AG.citas.find(x=>x.id===b.dataset.agcanc); if(!c) return;
+    if(!confirm('¿Cancelar la asesoría de '+c.nombre+'? Si estaba pagada, la hora vuelve a quedar libre en la web.')) return;
+    b.disabled=true;
+    agTx((t,ref,a)=>{t.set(ref,{ocupadas:(a.ocupadas||[]).filter(o=>o.id!==c.id)},{merge:true});t.update(db.collection('citas').doc(c.id),{estado:'cancelada',cancelada_el:Date.now()});})
+      .then(()=>toast('Asesoría cancelada')).catch(e=>{b.disabled=false;alert('No se pudo cancelar: '+e.message);});
+  });
+  document.querySelectorAll('[data-agquitar]').forEach(b=>b.onclick=()=>{const ini=+b.dataset.agquitar;
+    agTx((t,ref,a)=>t.set(ref,{bloqueos:(a.bloqueos||[]).filter(o=>o.inicio!==ini)},{merge:true})).then(()=>toast('Bloqueo quitado')).catch(e=>alert(e.message));});
+  const f=$('#ag-fbloq'); if(f) f.onsubmit=e=>{e.preventDefault();
+    // Hora de Venezuela (UTC-4 todo el año) → milisegundos.
+    const ms=(dia,h)=>{const d=dia.split('-').map(Number),x=h.split(':').map(Number);return Date.UTC(d[0],d[1]-1,d[2],x[0]+4,x[1]);};
+    const ini=ms($('#ag-dia').value,$('#ag-desde').value), fin=ms($('#ag-dia').value,$('#ag-hasta').value);
+    if(!(fin>ini)) return alert('La hora «hasta» debe ser después de «desde».');
+    const nota=$('#ag-nota').value.trim();
+    agTx((t,ref,a)=>{const bl=(a.bloqueos||[]).filter(o=>o.fin>Date.now());bl.push({inicio:ini,fin:fin,nota:nota});t.set(ref,{bloqueos:bl},{merge:true});}).then(()=>toast('Horario bloqueado')).catch(e=>alert(e.message));
+  };
+}
+
 async function start(){
   try{await DB.load();}catch(e){if(MODO==='real'){loginView('Tu usuario no tiene permiso de administrador o la base de datos no responde.');return;}}
-  shell();
+  shell(); escucharAgenda();
 }
 (function boot(){
-  const h=(location.hash||'').slice(1); tab=['aliados','alianzas','contactos','cargas','referidos','costos','cotizacion','pagos','codigos'].includes(h)?h:(pref.get('tab')||'aliados');
+  const h=(location.hash||'').slice(1); tab=['agenda','aliados','alianzas','contactos','cargas','referidos','costos','cotizacion','pagos','codigos','gastos','requisitos'].includes(h)?h:(pref.get('tab')||'aliados');
   if(MODO==='demo'){start();return;}
   const base='https://cdn.jsdelivr.net/npm/firebase@10.12.2/';
   const cargar=f=>new Promise((ok,mal)=>{const s=document.createElement('script');s.src=base+f;s.onload=ok;s.onerror=mal;document.head.appendChild(s);});
