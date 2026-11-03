@@ -286,7 +286,9 @@ textarea{min-height:80px;resize:vertical}
 .stamp{display:inline-block;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;border:1px solid currentColor;padding:2px 6px;border-radius:3px}
 .stamp.example{color:var(--accent-text)} .stamp.real{color:var(--ok)}
 .line{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px dashed var(--line);font-size:15px}
+.line span:first-child{flex:1;min-width:0;overflow-wrap:anywhere}
 .line span:last-child{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.line.txt span:last-child{font-family:inherit;font-size:14px;white-space:normal;text-align:right;max-width:55%;overflow-wrap:anywhere}
 .line.sub{color:var(--muted);font-size:14px;padding-left:12px}
 .line.locked span:last-child{letter-spacing:.2em;color:var(--muted)}
 .total{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding-top:10px;border-top:2px solid var(--ink);flex-wrap:wrap}
@@ -597,9 +599,9 @@ footer a{color:var(--hero-muted)}
           </div>
           <div class="fields">
             <label>Llegada en Venezuela<select id="v-dest"><option value="ccs">Zona central (Caracas)</option><option value="mcy">Zona central (Maracay)</option><option value="val">Zona central (Valencia)</option><option value="plc">Oriente (Puerto La Cruz)</option><option value="bqm">Occidente (Barquisimeto)</option><option value="mar">Occidente (Maracaibo)</option><option value="sc">Los Andes (San Cristóbal)</option></select></label>
-            <label>Adultos que viajan<select id="v-pax"><option value="1">1 adulto</option><option value="2" selected>2 adultos</option><option value="3">3 adultos</option><option value="4">4 adultos</option></select></label>
+            <label>Adultos que viajan<select id="v-pax"><option value="1" selected>1 adulto</option><option value="2">2 adultos</option><option value="3">3 adultos</option><option value="4">4 adultos</option></select></label>
             <label>Kilómetros por día<select id="v-kmdia"><option value="500">500 km (muy tranquilo)</option><option value="600">600 km (tranquilo)</option><option value="700">700 km</option><option value="800">800 km</option><option value="900">900 km</option><option value="1000" selected>1.000 km (lo recomendado: unos 8 días hasta la frontera)</option><option value="1100">1.100 km (rápido)</option></select></label>
-            <label>Rendimiento del vehículo<select id="v-kml"><option value="6">6 km por litro (camioneta grande)</option><option value="8">8 km por litro</option><option value="10" selected>10 km por litro</option><option value="12">12 km por litro</option><option value="14">14 km por litro</option><option value="16">16 km por litro (auto pequeño)</option></select></label>
+            <label>Rendimiento del vehículo<select id="v-kml"><option value="6">6 km por litro (camioneta grande)</option><option value="8">8 km por litro</option><option value="10">10 km por litro</option><option value="12">12 km por litro</option><option value="14" selected>14 km por litro</option><option value="16">16 km por litro (auto pequeño)</option></select></label>
             <label>Mientras se nacionaliza el vehículo<select id="v-espera"><option value="queda">Me quedo en Santa Elena (unos 10 días)</option><option value="bus">Vuelvo en bus a Puerto Ordaz</option></select></label>
           </div>
           <p class="note" id="v-km-total"></p>
@@ -622,7 +624,7 @@ footer a{color:var(--hero-muted)}
             <label>Cilindrada del motor (litros)<input id="v-cil" type="text" value="1.8" inputmode="decimal" autocomplete="off" placeholder="Ej.: 1.6, 2.4 o 4.0"></label>
             <label>Marca y modelo<input id="v-modelo" type="text" value="Toyota Corolla"></label>
             <label>Año<input id="v-anio" type="number" value="2018" min="1980" max="2027" inputmode="numeric"></label>
-            <label><span id="v-val-l">Valor del vehículo (pesos chilenos)</span><input id="v-val" type="text" value="7.600.000" inputmode="numeric" autocomplete="off"></label>
+            <label><span id="v-val-l">Valor del vehículo (pesos chilenos)</span><input id="v-val" type="text" value="10.000.000" inputmode="numeric" autocomplete="off"></label>
             <label id="v-nveh-l" hidden>Vehículos que comparten el contenedor<select id="v-nveh"><option>2</option><option selected>3</option><option>4</option></select></label>
           </div>
           <!-- Jesús (26 oct. 2026): casillas sin precio; si no se marcan, el desglose muestra el valor sin sumarlo. -->
@@ -1582,10 +1584,12 @@ footer a{color:var(--hero-muted)}
   }
   function lines(target,rows,locked){
     const el=$(target); el.innerHTML='';
-    rows.forEach(([k,v,l,cls])=>{const d=document.createElement('div');d.className='line'+(l===2?' sub':'')+(cls?' '+cls:'');d.innerHTML='<span></span><span></span>';d.children[0].textContent=k;d.children[1].textContent=(typeof v==='string'?v:usd(v));el.appendChild(d);});
+    rows.forEach(([k,v,l,cls])=>{const d=document.createElement('div');d.className='line'+(l===2?' sub':'')+(typeof v==='string'?' txt':'')+(cls?' '+cls:'');d.innerHTML='<span></span><span></span>';d.children[0].textContent=k;d.children[1].textContent=(typeof v==='string'?v:usd(v));el.appendChild(d);});
   }
   // Elise (31 oct. 2026): el vehículo se guarda mientras se edita, pero solo después de volver a cargar lo guardado.
   let simListo=false;
+  // Elise (3 nov. 2026): el total solo se calcula cuando la persona empieza a poner sus datos; antes queda en cero.
+  let vActivo=false;
   function vCalc(full){
     if(simListo&&!abiertos.desglose) guardarSim();
     const c=vCompute(), r=c.r;
@@ -1628,12 +1632,14 @@ d.querySelector('b').append(e.pausa?'Nacionalización en Santa Elena de Uairén'
     const ti=rows.findIndex(x=>/^Impuestos/.test(x[0]));
     if(ti>=0) rows.splice(ti+1,0,['Pagas los impuestos en bolívares a tasa BCV: '+bs(c.tax*bcv),'',undefined,'bs']);
     lines('v-lines',rows,false); $('v-lines').hidden=!ok;
-    $('v-total-l').textContent=ok?'Costo para traerlo':'Costo estimado para traerlo'; $('v-total').textContent=usd(c.total);
+    $('v-total-l').textContent=ok?'Costo para traerlo':'Costo estimado para traerlo'; $('v-total').textContent=vActivo||abiertos.desglose?usd(c.total):usd(0);
+    $('v-total-note').hidden=!(vActivo||abiertos.desglose);
     // Régimen ordinario con un vehículo de más de 5 años: no se calcula (Elise, 25 oct. 2026).
     const anio=+$('v-anio').value||0, viejo=c.reg==='ord'&&anio&&anio<ORD_MIN;
     $('v-ord-alerta').hidden=!viejo; $('v-ord-alerta').textContent=viejo?'Tu vehículo '+anio+' tiene más de 5 años: no puede importarse por régimen ordinario. En '+ANIO_ACTUAL+' solo se aceptan vehículos de '+ORD_MIN+' en adelante. Revisa si calificas para el régimen de equipaje.':'';
     $('v-calc').disabled=viejo;
     if(viejo){ $('v-lines').hidden=true; $('v-total').textContent='—'; }
+    $('v-lines').hidden=viejo||!(vActivo||abiertos.desglose);
     $('v-total-note').textContent=viejo?'No se puede calcular por régimen ordinario con un vehículo de '+anio+'.':'No incluye el valor de tu vehículo ('+(p==='cl'?clp(vVal()):usd(c.val))+').'+(c.fleteVar?' Tampoco el flete desde '+c.d.name+': va por contenedor y su valor es variable.':'')+' Es un estimado: Kairos lo confirma en la cotización formal.';
     $('v-cta').hidden=ok||viejo; // Elise (25 oct. 2026): ya no hay «cálculo completo» aparte; todos ven la asesoría de 45 USD.
     // Quien ya pagó un vehículo ve la opción de 20 USD por otro, en vez de volver a comprar la asesoría.
@@ -1648,7 +1654,8 @@ d.querySelector('b').append(e.pausa?'Nacionalización en Santa Elena de Uairén'
   let unlockKey=(abiertos.desglose||{}).key||null, unlockCode=(abiertos.desglose||{}).code||null;
   const vKey=()=>[$('v-pais').value,($('v-modelo').value||'').trim().toLowerCase(),$('v-anio').value].join('|');
   $('v-val').addEventListener('input',e=>{const el=e.target, fromEnd=el.value.length-el.selectionStart; el.value=fmtMiles(vVal()); try{const pos=Math.max(0,el.value.length-fromEnd);el.setSelectionRange(pos,pos);}catch(err){}});
-  $('vf').addEventListener('input',()=>vCalc());
+  $('vf').addEventListener('input',()=>{vActivo=true;vCalc();});
+  $('vf').addEventListener('change',()=>{vActivo=true;vCalc();});
   $('v-kmdia-it').addEventListener('change',e=>{$('v-kmdia').value=e.target.value; vCalc();});
   if(RECOMENDACIONES.length) $('v-recs').innerHTML='<div class="tag">Recomendaciones para el viaje</div><ul>'+RECOMENDACIONES.map(t=>'<li>'+esc(t)+'</li>').join('')+'</ul>';
   $('v-pais').addEventListener('change',applyVPais);
@@ -1661,7 +1668,7 @@ d.querySelector('b').append(e.pausa?'Nacionalización en Santa Elena de Uairén'
     if(r.err==='tipo'&&r.tipo==='plan'&&!$('v-terr').disabled){ $('v-terr').checked=true; vCalc(); $('v-plan-code').value=code; st.textContent=''; $('v-plan-open').click(); $('v-plan-lock').scrollIntoView({block:'center'}); return; }
     if(r.err==='tipo'&&r.tipo==='gastos'){location.href='/gastos/?codigo='+encodeURIComponent(code);return;}
     if(r.err){st.textContent=r.err==='tipo'?'Ese código es del plan de viaje. Escríbelo en el recuadro «Plan de viaje».':COD_ERR[r.err];st.className='status err';return;}
-    unlockKey=vKey(); unlockCode=code; abiertos.desglose={code,key:unlockKey};
+    vActivo=true; unlockKey=vKey(); unlockCode=code; abiertos.desglose={code,key:unlockKey};
     if(r.tipo==='unoauno') abiertos.gastos=code;
     if(r.tipo==='asesoria'||r.tipo==='unoauno'){abiertos.video=code; const it=await abrirItin(code); if(!it.error){abiertos.plan=code; planOk=true;} else if(it.motivo!=='red'){ $('v-plan-status').textContent=it.error; $('v-plan-status').className='status err'; }}
     guardarAbiertos();
