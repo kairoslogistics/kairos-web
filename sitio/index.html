@@ -1113,7 +1113,7 @@ footer a{color:var(--hero-muted)}
   // Elise (2 nov. 2026): nota bajo homologación, título y placas, SENCAMER y agenciamiento aduanal.
   const AVISO_TRAMITES='Precios referenciales: homologación, título y placas, SENCAMER y agenciamiento aduanal incluyen impuestos y honorarios profesionales estimados, que pueden variar según el caso y la fecha del trámite.';
   document.querySelectorAll('[data-legal]').forEach(e=>{e.textContent=AVISO_LEGAL;});
-  const VEH={gnb:500, equiPct:1, equiTope:20000, seguro:1, fleteTierra:1000, lujo:15, lujoTope:40000, adv:20, motorExtra:20, iva:16, tasa:1, homolog:700, titulo:800, sencamer:600 /* Jesús (27 oct. 2026): cobro al cliente; el costo es 500 con impuesto y habilitación */, ageTierra:1650, desinc:600, desincExp:400, caravana:300, gnb:500, gestionMar:400 /* Elise (26 oct. 2026): línea del desglose marítimo, no es un producto de la web */} /* desinc: servicio opcional Kairos en Chile, solo por tierra (Elise, 25 oct. 2026: exportación + baja 600, solo exportación 400) */;
+  const VEH={gnb:500, equiPct:1, equiTope:20000, seguro:1, alcaldia:0.12, fleteTierra:1000, lujo:15, lujoTope:40000, adv:20, motorExtra:20, iva:16, tasa:1, homolog:700, titulo:800, sencamer:600 /* Jesús (27 oct. 2026): cobro al cliente; el costo es 500 con impuesto y habilitación */, ageTierra:1650, desinc:600, desincExp:400, caravana:300, gnb:500, gestionMar:400 /* Elise (26 oct. 2026): línea del desglose marítimo, no es un producto de la web */} /* desinc: servicio opcional Kairos en Chile, solo por tierra (Elise, 25 oct. 2026: exportación + baja 600, solo exportación 400) */;
   // Ruta terrestre. Combustible en USD por litro: Chile 1,36 (GlobalPetrolPrices, ene. 2026); Argentina 2.052 ARS (YPF Mendoza, may. 2026) a 1.420 ARS por USD (Banco Nación, mar. 2026);
   // Brasil R$ 6,90 promedio de la ruta (ANP, jul. 2026: Cuiabá 6,72, Porto Velho 7,49, Manaos 7,05, Boa Vista 7,58) a 5,4 BRL por USD; Venezuela 0,50 (precio internacional PDVSA).
   const TIERRA={
@@ -1570,6 +1570,8 @@ footer a{color:var(--hero-muted)}
       if(lujo) taxRows.push(['Impuesto al lujo '+VEH.lujo+' % (CIF mayor a 40.000 USD)',lujo,2]);
     }
     // Elise (2 nov. 2026): la segunda revisión de la Guardia Nacional en Puerto Ordaz vuelve a sumarse en el cálculo por tierra (500 USD).
+    // Elise (3 nov. 2026): alcaldía 0,12 % sobre el CIF (costo, seguro y flete), en los dos regímenes.
+    const alc=base*VEH.alcaldia/100; tax+=alc; taxRows[0][1]=tax; taxRows.push(['Alcaldía '+VEH.alcaldia+' % (sobre el CIF)',alc,2]);
     const venRows=r==='terr'?[['Agente de aduanas en Santa Elena de Uairén (gastos a terceros)',VEH.ageTierra],['Segunda revisión de la Guardia Nacional en Puerto Ordaz',VEH.gnb]]:[...MAR_VE_AGENCIA,...MAR_VE_PUERTO];
     venRows.push(['Homologación (gastos a terceros)',VEH.homolog],['Título y placas (gastos a terceros)',VEH.titulo]);
     if(reg==='ord') venRows.push(['SENCAMER (gastos a terceros)',VEH.sencamer]); // Elise: el régimen de equipaje no lleva SENCAMER.
