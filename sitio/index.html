@@ -18,7 +18,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <script>(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window,document,"clarity","script","z418yw2alx");</script>
 <title>Kairos Logistics</title>
-<meta name="description" content="Asesoría para importar tu vehículo, mudanza, encomiendas y envíos puerta a puerta desde Miami y China a Venezuela.">
+<meta name="description" content="Asesoría para importar tu vehículo, encomiendas y envíos puerta a puerta desde Miami y China a Venezuela.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -476,7 +476,6 @@ footer a{color:var(--hero-muted)}
     <nav class="main" id="nav" aria-label="Secciones">
       <a href="#inicio" data-go="inicio">Inicio</a>
       <a href="#vehiculo" data-go="vehiculo">Traer mi vehículo</a>
-      <a href="#mudanza" data-go="mudanza">Mudanza completa</a>
       <div class="nav-dd"><a href="#calculadora" data-go="calculadora">Calculadora de envíos</a><div class="nav-sub" aria-label="Calculadora de envíos desde">
         <a href="#encomiendas" data-go="encomiendas">Desde Chile</a><a href="#china" data-go="china">Desde China</a><a href="#miami" data-go="miami">Desde Estados Unidos</a><a href="#panama" data-go="panama">Desde Panamá</a></div></div>
       <a href="#comprar" data-go="comprar">Comprar afuera</a>
@@ -526,7 +525,7 @@ footer a{color:var(--hero-muted)}
   </div>
   <div class="wrap stack" style="padding-top:36px">
     <div class="page-head" style="margin-bottom:0"><h2>¿Qué necesitas?</h2><p class="muted" id="home-pais-note" hidden>Estás viendo precios y rutas para Chile.</p>
-      <label class="need-tipo">¿Qué necesitas traer?<select id="need-tipo"><option value="">Todos los servicios</option><option value="vehiculo">Vehículo</option><option value="mercancia">Mercancía</option><option value="encomienda">Encomienda</option><option value="cbm">Carga consolidada por CBM</option><option value="mudanza">Mudanza</option><option value="compras">Compras afuera (Shein, Amazon, China)</option><option value="asesoria">Asesoría para importar tu vehículo</option></select></label>
+      <label class="need-tipo">¿Qué necesitas traer?<select id="need-tipo"><option value="">Todos los servicios</option><option value="vehiculo">Vehículo</option><option value="mercancia">Mercancía</option><option value="encomienda">Encomienda</option><option value="cbm">Carga consolidada por CBM</option><option value="compras">Compras afuera (Shein, Amazon, China)</option><option value="asesoria">Asesoría para importar tu vehículo</option></select></label>
       <div class="ruta-pick" id="ruta-pick">
         <div class="rp"><span class="rp-l" id="rp-desde-l">Desde</span><button type="button" class="rp-btn" id="rp-desde" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="rp-desde-l rp-desde"></button><ul class="rp-list" id="rp-desde-list" role="listbox" aria-labelledby="rp-desde-l" hidden></ul></div>
         <span class="rp-arrow" aria-hidden="true">→</span>
@@ -536,7 +535,6 @@ footer a{color:var(--hero-muted)}
     <div class="need-grid" id="need-grid" hidden>
       <a class="need" href="#intro" data-go="intro"><span class="chip gratis">Gratis</span><b>Introducción a la importación de vehículos a Venezuela</b><span>Elige tu país y mira un video corto con lo que necesitas saber antes de empezar.</span></a>
       <a class="need" href="#vehiculo" data-go="vehiculo"><span class="chip sim">Simulador</span><b>Traer mi vehículo</b><span>Ruta marítima o terrestre, costo total con impuestos.</span></a>
-      <a class="need" href="#mudanza" data-go="mudanza"><span class="chip sim">Simulador</span><b>Mudanza completa</b><span>Contenedor exclusivo con tu vehículo y tus cosas.</span></a>
       <a class="need" href="#encomiendas" data-go="encomiendas"><span class="chip sim">Simulador</span><b>Enviar encomiendas</b><span>Aéreo o cajas de encomienda vía marítima (puerta a puerta) desde Santiago, con retiro de cajas a domicilio.</span></a>
       <a class="need" href="#china" data-go="china"><span class="chip sim">Simulador</span><b>Carga por CBM (metro cúbico)</b><span>Desde China, Estados Unidos y Panamá, puerta a puerta en Venezuela.</span></a>
       <a class="need" href="#miami" data-go="miami"><span class="chip sim">Simulador</span><b>Recibir mis compras de Miami</b><span>Compra en Amazon, Shein o Walmart y recíbelo en tu puerta en Venezuela.</span></a>
@@ -692,65 +690,6 @@ footer a{color:var(--hero-muted)}
           <div class="v-recs" id="v-recs"></div>
           <div class="cta-box" id="v-gastos-box"><b>Registra tus gastos en el camino · 20 USD</b><p class="note">Anota combustible, comida, hospedaje y peajes en la moneda de cada país. Te suma todo en dólares, día por día, y funciona sin señal. Ya viene incluido en la asesoría 1 a 1.</p><button class="btn primary" type="button" data-pagar="gastos">Comprar mi registrador de gastos · 20 USD</button> <a class="btn ghost" id="v-gastos" href="/gastos/">Ya lo tengo: abrir mi registro</a></div>
           </div>
-    </div>
-  </div>
-</section>
-
-<!-- MUDANZA -->
-<section class="page" id="p-mudanza" data-page="mudanza" hidden>
-  <div class="wrap">
-    <div class="page-head has-img"><div class="ph-text">
-      <div class="eyebrow">Mudanza completa</div>
-      <h2>Tu vehículo y tu casa en un mismo contenedor</h2>
-      <p class="lead">Contenedor exclusivo de 20 o 40 pies con embalaje, retiro en tu casa y entrega a domicilio en Venezuela. Simula el costo y después envíanos tu inventario.</p>
-    </div><img class="ph-img" src="data:image/jpeg;base64,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" alt="Camión transportando un contenedor por carretera" width="275" height="183" loading="lazy"></div>
-    <div class="cols" style="margin-bottom:24px">
-      <div class="box"><h3>Qué no paga arancel</h3><p class="muted">Según la Resolución 924 (régimen de equipaje), los enseres usados de quien regresa a vivir a Venezuela, con 6 meses o más de uso afuera. Se piden certificado de uso, factura o equivalente y pasaporte.</p></div>
-      <div class="box"><h3>Qué sí paga</h3><p class="muted">El vehículo paga arancel, tasa e IVA. Los enseres nuevos pagan como importación ordinaria. Si los usados quedan libres también de IVA y tasa, el plazo de llegada y el monto máximo los confirma el agente de aduanas.</p></div>
-    </div>
-    <div class="sim">
-      <form class="f" id="mf" novalidate>
-        <fieldset>
-          <legend>Contenedor</legend>
-          <div class="fields">
-            <label>País de salida<select id="m-pais"><option value="cl">Chile</option><option value="ar">Argentina</option></select></label>
-            <label>Tamaño del contenedor<select id="m-ctipo"><option value="20">20 pies (unos 33 m³)</option><option value="40" selected>40 pies (unos 67 m³)</option></select></label>
-          </div>
-        </fieldset>
-        <fieldset>
-          <legend>Lo que llevas</legend>
-          <div class="fields">
-            <label>Valor del vehículo (USD)<input id="m-val" type="number" value="8000" min="0" step="100" inputmode="decimal"></label>
-            <label>Tamaño del hogar<select id="m-hab"><option value="10">Estudio (unos 10 m³)</option><option value="18">1 habitación (unos 18 m³)</option><option value="28" selected>2 habitaciones (unos 28 m³)</option><option value="40">3 habitaciones (unos 40 m³)</option><option value="50">4 o más (unos 50 m³)</option></select></label>
-            <label>Volumen de enseres (m³)<input id="m-m3" type="number" value="28" min="0" step="1" inputmode="decimal"></label>
-            <label>Enseres usados, 6 meses o más (USD)<input id="m-vu" type="number" value="3500" min="0" step="100" inputmode="decimal"></label>
-            <label>Enseres nuevos (USD)<input id="m-vn" type="number" value="500" min="0" step="100" inputmode="decimal"></label>
-          </div>
-          <div class="alert" id="m-cap" role="status"></div>
-          <label class="check"><input type="checkbox" id="m-exiva"> Calcular los enseres usados también sin IVA ni tasa (solo si el agente de aduanas lo confirma)</label>
-        </fieldset>
-        <p class="note">El vehículo ocupa unos 15 m³. Valores de ejemplo: flete 20 pies 3.800 USD, 40 pies 6.000 USD desde Chile; embalaje 25 USD por m³; retiro y carga 350 USD; entrega a domicilio 450 USD.</p>
-      </form>
-      <aside class="slip" id="m-slip" aria-live="polite">
-        <div class="slip-head"><h3>Mudanza completa</h3><span class="stamp example">Ejemplo</span></div>
-        <div class="tag" id="m-route">Desde Chile · contenedor de 40 pies</div>
-        <div id="m-lines"></div>
-        <div class="total"><b>Total estimado</b><span id="m-total">—</span></div>
-        <p class="note">Estimación referencial en USD. La cotización formal se hace con tu inventario.</p>
-      </aside>
-    </div>
-    <div class="cols" style="margin-top:28px">
-      <form class="box" id="m-inv" novalidate>
-        <h3>Envíanos tu inventario</h3>
-        <p class="muted small">Llena lo básico y te llega como mensaje de WhatsApp listo para enviar.</p>
-        <label>Nombre<input id="mi-nom" type="text" autocomplete="name"></label>
-        <label>Ciudad donde vives ahora<input id="mi-ciu" type="text"></label>
-        <label>Ciudad de destino en Venezuela<input id="mi-dest" type="text"></label>
-        <label>Fecha aproximada de viaje<input id="mi-fecha" type="month"></label>
-        <label>Lista de muebles y cajas<textarea id="mi-lista" placeholder="Ej.: 1 refrigerador, 1 lavadora, 1 juego de comedor de 6 sillas, 2 camas matrimoniales, 15 cajas medianas"></textarea></label>
-        <button class="btn dark" type="submit">Preparar mensaje</button>
-      </form>
-      <div id="m-msg"></div>
     </div>
   </div>
 </section>
@@ -1312,11 +1251,11 @@ footer a{color:var(--hero-muted)}
   /* ---------- País global ---------- */
   // Lo que cambia en el inicio según dónde vive el visitante.
   const HOME={
-    ve:{h1:'Lo que compras afuera, <em>en tu puerta en Venezuela.</em>',lead:'Casillero en Miami, carga desde China y agentes para comprar tu vehículo afuera. Te decimos cuánto cuesta antes de pagar.',c1:['Envíos desde Miami','miami'],c2:['Carga desde China','china'],orden:['miami','china','comprar','vehiculo','curso','mudanza','encomiendas'],rc:'Compras afuera'},
-    cl:{h1:'Tu vehículo a Venezuela, <em>en el momento justo.</em>',lead:'Te decimos si tu caso es viable, cuánto cuesta de verdad y lo hacemos contigo. Vehículos, mudanzas y encomiendas desde Chile.',c1:['Calcular mi importación','vehiculo'],c2:['Enviar una encomienda','encomiendas'],orden:['vehiculo','mudanza','encomiendas','curso','miami','china','comprar']},
-    ar:{h1:'Tu vehículo a Venezuela, <em>en el momento justo.</em>',lead:'Asesoría para importar tu vehículo (vía terrestre) desde Buenos Aires, Rosario, Córdoba, Mendoza o Tucumán. Te decimos si tu caso es viable y cuánto cuesta de verdad.',c1:['Calcular mi importación','vehiculo'],c2:['Mudanza completa','mudanza'],orden:['vehiculo','mudanza','curso','miami','china','comprar','encomiendas']},
-    br:{h1:'Tu vehículo a Venezuela, <em>en el momento justo.</em>',lead:'La ruta más corta: por tierra, por Boa Vista y Pacaraima. Te decimos si tu caso es viable y cuánto cuesta de verdad.',c1:['Calcular mi importación','vehiculo'],c2:['Mudanza completa','mudanza'],orden:['vehiculo','mudanza','curso','miami','china','comprar','encomiendas']},
-    us:{h1:'Desde Estados Unidos, <em>directo a tu familia en Venezuela.</em>',lead:'Manda tus compras por aéreo o marítimo desde Miami, puerta a puerta. ¿Vuelves a Venezuela? Tu vehículo puede ir por régimen de equipaje si calificas.',c1:['Envíos desde Miami','miami'],c2:['Comprar un vehículo','comprar'],orden:['miami','comprar','china','vehiculo','curso','mudanza','encomiendas'],rc:'Estados Unidos'}
+    ve:{h1:'Lo que compras afuera, <em>en tu puerta en Venezuela.</em>',lead:'Casillero en Miami, carga desde China y agentes para comprar tu vehículo afuera. Te decimos cuánto cuesta antes de pagar.',c1:['Envíos desde Miami','miami'],c2:['Carga desde China','china'],orden:['miami','china','comprar','vehiculo','curso','encomiendas'],rc:'Compras afuera'},
+    cl:{h1:'Tu vehículo a Venezuela, <em>en el momento justo.</em>',lead:'Te decimos si tu caso es viable, cuánto cuesta de verdad y lo hacemos contigo. Vehículos y encomiendas desde Chile.',c1:['Calcular mi importación','vehiculo'],c2:['Enviar una encomienda','encomiendas'],orden:['vehiculo','encomiendas','curso','miami','china','comprar']},
+    ar:{h1:'Tu vehículo a Venezuela, <em>en el momento justo.</em>',lead:'Asesoría para importar tu vehículo (vía terrestre) desde Buenos Aires, Rosario, Córdoba, Mendoza o Tucumán. Te decimos si tu caso es viable y cuánto cuesta de verdad.',c1:['Calcular mi importación','vehiculo'],orden:['vehiculo','curso','miami','china','comprar','encomiendas']},
+    br:{h1:'Tu vehículo a Venezuela, <em>en el momento justo.</em>',lead:'La ruta más corta: por tierra, por Boa Vista y Pacaraima. Te decimos si tu caso es viable y cuánto cuesta de verdad.',c1:['Calcular mi importación','vehiculo'],orden:['vehiculo','curso','miami','china','comprar','encomiendas']},
+    us:{h1:'Desde Estados Unidos, <em>directo a tu familia en Venezuela.</em>',lead:'Manda tus compras por aéreo o marítimo desde Miami, puerta a puerta. ¿Vuelves a Venezuela? Tu vehículo puede ir por régimen de equipaje si calificas.',c1:['Envíos desde Miami','miami'],c2:['Comprar un vehículo','comprar'],orden:['miami','comprar','china','vehiculo','curso','encomiendas'],rc:'Estados Unidos'}
   };
   // Elise (25 oct. 2026): al entrar no hay país marcado («Escoge tu país»); el sitio usa Chile por dentro hasta que la persona elija.
   let paisElegido=!!ss.get('kairos-pais');
@@ -1331,7 +1270,7 @@ footer a{color:var(--hero-muted)}
     $('home-pais-note').textContent=p==='ve'?'Vives en Venezuela: primero lo que puedes traer de afuera.':p==='us'?'Vives en Estados Unidos: primero los envíos desde Miami.':'Estás viendo precios y rutas desde '+d.name+'.';
     if(p==='ve') vSetPais($('v-pais').value,'ve');
     if(p==='us') vSetPais('us');
-    if(p==='cl'||p==='ar'||p==='br'){ vSetPais(p,'fuera'); if(p!=='br') $('m-pais').value=p; mCalc(); }
+    if(p==='cl'||p==='ar'||p==='br'){ vSetPais(p,'fuera'); }
     $('home-miami-line').hidden=(p==='ve'||p==='us');
     pintarLocal=()=>$('curso-local').textContent=p==='cl'?'(≈ '+(45*RATES.clpUsd).toLocaleString('es-CL')+' CLP)':p==='br'?'(≈ R$ '+Math.round(45*RATES.brlUsd)+')':''; pintarLocal();
   }
@@ -1351,7 +1290,7 @@ footer a{color:var(--hero-muted)}
     const HACIA=[['ve','Venezuela']];
     const ic=k=>SVG[k]||flag(k);
     // Qué servicios hay desde cada país (Venezuela: todos) y cómo se describen ahí.
-    const OFRECE={cl:['intro','vehiculo','mudanza','encomiendas','curso'],ar:['intro','vehiculo','curso'],pa:['intro','china','vehiculo','curso'],br:['intro','vehiculo','curso'],
+    const OFRECE={cl:['intro','vehiculo','encomiendas','curso'],ar:['intro','vehiculo','curso'],pa:['intro','china','vehiculo','curso'],br:['intro','vehiculo','curso'],
       us:['intro','miami','calculadora','vehiculo','comprar','curso'],cn:['intro','china','calculadora','vehiculo','comprar'],ae:['intro','comprar','vehiculo']};
     const TXT={
       vehiculo:{cl:'Ruta marítima o terrestre, costo total con impuestos.',ar:'Ruta terrestre hasta Santa Elena de Uairén, costo total con impuestos.',br:'Ruta terrestre por Boa Vista hasta Santa Elena de Uairén, costo total con impuestos.',
@@ -1362,7 +1301,7 @@ footer a{color:var(--hero-muted)}
     const grid0=$('need-grid'), ORIG={};
     grid0.querySelectorAll('.need').forEach(c=>{ORIG[c.dataset.go]=c.querySelector('b+span').textContent;});
     // «¿Qué necesitas traer?» (Elise, 25 oct. 2026): filtra los servicios; el primero es el simulador que corresponde.
-    const TIPOS={vehiculo:['vehiculo','intro','curso'],mercancia:['china','miami','comprar'],encomienda:['encomiendas','miami'],cbm:['china'],mudanza:['mudanza'],compras:['comprar','miami'],asesoria:['curso','intro']};
+    const TIPOS={vehiculo:['vehiculo','intro','curso'],mercancia:['china','miami','comprar'],encomienda:['encomiendas','miami'],cbm:['china'],compras:['comprar','miami'],asesoria:['curso','intro']};
     let desde='cl';
     const NOMBRE=Object.fromEntries([...DESDE,['ve','Venezuela']]);
     function filtrar(k){
@@ -1943,7 +1882,7 @@ d.querySelector('b').append(e.pausa?'Nacionalización en Santa Elena de Uairén'
   cargarTasas().then(t=>{
     if(t.clp>0) RATES.clpUsd=Math.round(t.clp); if(t.brl>0) RATES.brlUsd=t.brl;
     if(t.bcv_usd>0){ BCV_REF=t.bcv_usd; BCV_FECHA=hoyTxt(); if(!bcvMano){ bcv=BCV_REF; $('v-bcv').value=fmtBcv(bcv); } }
-    pintarLocal(); vCalc(); mCalc(); eCalc();
+    pintarLocal(); vCalc(); eCalc();
   });
   $('v-sheet-btn').addEventListener('click',()=>{renderSheet(vCompute()); $('v-sheet-wrap').hidden=false; $('v-sheet-close').focus();});
   $('v-sheet-close').addEventListener('click',()=>{$('v-sheet-wrap').hidden=true; $('v-sheet-btn').focus();});
@@ -1952,29 +1891,6 @@ d.querySelector('b').append(e.pausa?'Nacionalización en Santa Elena de Uairén'
   $('v-wa').addEventListener('click',()=>{
     const c=vCompute();
     msgBox('v-msg','Hola Kairos, quiero una cotización formal para traer mi vehículo.\n\nVehículo: '+TIPO[$('v-tipo').value]+', '+($('v-modelo').value||'')+' '+($('v-anio').value||'')+'\nValor: '+($('v-pais').value==='cl'?clp(vVal())+' (≈ '+usd(c.val)+')':usd(c.val))+'\nDesde: '+(c.land?vSalida().n+', ':'')+c.d.name+'\nRuta: '+(c.r==='mar'?'marítima':'terrestre')+'\nCilindrada: '+(cilTxt())+(c.land?'\nRuta en Brasil: '+(c.land.br==='stm'?'ferry Santarém':'Porto Velho')+'\nDestino: '+c.land.dest+' ('+c.land.zona+')'+(planOk?'\nMapa de la ruta: '+[...$('v-gmaps').querySelectorAll('a')].map(a=>'\n'+a.textContent+': '+a.href).join(''):'')+'\nViajan: '+$('v-pax').value+' adultos, unos '+c.land.dias+' días ('+$('v-kmdia').value+' km diarios)':'')+'\nRégimen: '+(c.reg==='equi'?'equipaje':'ordinario')+'\nCosto estimado para traerlo (sin el valor del vehículo): '+$('v-total').textContent);
-  });
-
-  /* ---------- Simulador de mudanza ---------- */
-  function mCalc(){
-    const d=PAIS[$('m-pais').value], size=$('m-ctipo').value, cap=size==='20'?33:67, m3=n('m-m3'), libre=cap-15;
-    const ca=$('m-cap'); ca.className='alert'+(m3>libre?' warn':'');
-    ca.textContent=m3>libre?'Tus enseres no caben: el contenedor de '+size+' pies deja unos '+libre+' m³ libres con el vehículo. Elige 40 pies o reduce el volumen.':'Espacio usado: vehículo 15 m³ + enseres '+m3+' m³, de unos '+cap+' m³.';
-    const flete=size==='20'?d.c20:d.c40, val=n('m-val'), vU=n('m-vu'), vN=n('m-vn'), vens=vU+vN, shareV=15/(15+m3);
-    const fV=flete*shareV, fE=flete-fV, segV=(val+fV)*RATES.segp/100, segE=(vens+fE)*RATES.segp/100;
-    const cifV=val+fV+segV, cifE=vens+fE+segE, kU=vens>0?vU/vens:0, cifU=cifE*kU, cifN=cifE-cifU;
-    const ar=cifV*RATES.arp/100, ts=cifV*RATES.tsp/100, iv=(cifV+ar+ts)*RATES.ivp/100;
-    const ex=$('m-exiva').checked, tsU=ex?0:cifU*RATES.tsp/100, ivU=ex?0:(cifU+tsU)*RATES.ivp/100;
-    const arN=cifN*0.20, tsN=cifN*RATES.tsp/100, ivN=(cifN+arN+tsN)*RATES.ivp/100, tU=tsU+ivU, tN=arN+tsN+ivN;
-    const emb=25*m3, ret=350, est=250, log=d.org+flete+segV+segE+emb+ret+est;
-    const nac=RATES.age+RATES.cer+450+RATES.pla+RATES.pto, sub=val+log+ar+ts+iv+tU+tN+nac+RATES.hon, impr=sub*RATES.impr/100;
-    $('m-route').textContent='Desde '+d.name+' · contenedor de '+size+' pies';
-    lines('m-lines',[['Valor del vehículo',val],['Logística de la mudanza',log,1],['Flete del contenedor',flete,2],['Embalaje ('+m3+' m³)',emb,2],['Retiro, carga, estiba y seguro',d.org+ret+est+segV+segE,2],['Impuestos del vehículo',ar+ts+iv,1],['Impuestos de los enseres',tU+tN,1],['Usados: sin arancel'+(ex?', sin IVA ni tasa':' (IVA y tasa por confirmar)'),tU,2],['Nuevos: arancel, tasa e IVA',tN,2],['Nacionalización y entrega a domicilio',nac,1],['Documentos del régimen de equipaje',RATES.cer,2],['Honorario Kairos Logistics',RATES.hon,1],['Imprevistos (5 %)',impr,1]],false);
-    $('m-total').textContent=usd(sub+impr);
-  }
-  $('m-hab').addEventListener('change',()=>{$('m-m3').value=$('m-hab').value;mCalc();});
-  $('mf').addEventListener('input',mCalc); $('mf').addEventListener('change',mCalc);
-  $('m-inv').addEventListener('submit',e=>{e.preventDefault();
-    msgBox('m-msg','Hola Kairos, quiero cotizar una mudanza completa a Venezuela.\n\nNombre: '+$('mi-nom').value+'\nVivo en: '+$('mi-ciu').value+'\nDestino: '+$('mi-dest').value+'\nFecha aproximada: '+$('mi-fecha').value+'\nContenedor simulado: '+$('m-ctipo').value+' pies, '+$('m-m3').value+' m³ de enseres\nEstimado de la web: '+$('m-total').textContent+'\n\nInventario:\n'+$('mi-lista').value);
   });
 
   /* ---------- Simulador de encomiendas ---------- */
@@ -2179,14 +2095,14 @@ d.querySelector('b').append(e.pausa?'Nacionalización en Santa Elena de Uairén'
   })();
 
   /* ---------- Barra inferior móvil ---------- */
-  const SIM={vehiculo:['v-total','v-total-l','v-slip'],mudanza:['m-total',null,'m-slip']};
+  const SIM={vehiculo:['v-total','v-total-l','v-slip']};
   const simDe=c=>c==='calculadora'?({cl:['e-total',null,'e-slip'],us:['k-total',null,'k-slip'],cn:['k-total',null,'k-slip']})[window.kDesdeVal?kDesdeVal():'cl']:SIM[c];
   mbar=function(){
     const k=simDe(cur); $('mb-sum').hidden=!k; $('mb-go').hidden=!k;
     if(k){$('mb-total').textContent=$(k[0]).textContent; $('mb-label').textContent=k[1]?$(k[1]).textContent:'Total estimado';}
   };
   $('mb-go').addEventListener('click',()=>{const k=simDe(cur); if(k) $(k[2]).scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});});
-  ['vf','mf','ef','kf'].forEach(f=>{$(f).addEventListener('input',()=>setTimeout(mbar));$(f).addEventListener('change',()=>setTimeout(mbar));});
+  ['vf','ef','kf'].forEach(f=>{$(f).addEventListener('input',()=>setTimeout(mbar));$(f).addEventListener('change',()=>setTimeout(mbar));});
   $('v-calc').addEventListener('click',()=>setTimeout(mbar));
   ['ve'].forEach(o=>{$('mb-wa-'+o).href=waUrl('Hola Kairos, quiero hacer una consulta.',o);});
 
@@ -2196,7 +2112,7 @@ d.querySelector('b').append(e.pausa?'Nacionalización en Santa Elena de Uairén'
   // Si este navegador ya tenía el itinerario abierto, se vuelve a revisar: vencido, anulado o sin cupo de dispositivos, se cierra.
   if(abiertos.plan&&!/[?&]itinerario=/.test(location.search)) abrirItin(abiertos.plan).then(it=>{if(it.error&&it.motivo!=='red'){delete abiertos.plan; planOk=false; guardarAbiertos(); $('v-plan-status').textContent=it.error; $('v-plan-status').className='status err'; vCalc();}});
   alVolver();
-  vCalc(); mCalc(); eCalc();
+  vCalc(); eCalc();
   show(location.hash.slice(1)||'inicio',false); mbar();
 })();
 
@@ -2214,9 +2130,6 @@ const close=()=>{lb.hidden=true;im.removeAttribute('src');};lb.addEventListener(
     {v:1,src:'img/banner/01.jpg',alt:'Camioneta cargada en contenedor',
      eb:'Importación de vehículos a Venezuela vía marítima desde Chile',h1:'Tu vehículo a Venezuela, <em>en el momento justo.</em>',
      lead:'En contenedor desde Valparaíso hasta el puerto de La Guaira, con agente de aduanas en Chile y en Venezuela. Régimen ordinario o de equipaje.',c1:['Calcular mi importación','vehiculo'],rc:['Chile','VALPARAÍSO']},
-    {v:1,src:'img/banner/02.jpg',alt:'Sedán entrando a un contenedor',
-     eb:'Importación de vehículos a Venezuela vía marítima desde Chile',h1:'Tu vehículo y tus cosas, <em>en un solo contenedor.</em>',
-     lead:'Mudanza completa en contenedor exclusivo, con entrega en Venezuela.',c1:['Simular mi mudanza','mudanza'],rc:['Chile','VALPARAÍSO']},
     {src:U('photo-1605745341112-85968b19335b'),alt:'Buque portacontenedores en alta mar',
      eb:'Encomiendas desde Chile',h1:'Tus encomiendas, <em>puerta a puerta.</em>',
      lead:'Cajas por vía marítima y envíos aéreos desde Santiago, con retiro a domicilio.',c1:['Enviar una encomienda','encomiendas'],rc:['Santiago','CHILE']},
