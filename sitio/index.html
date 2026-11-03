@@ -1100,7 +1100,7 @@ footer a{color:var(--hero-muted)}
   const MAR_CL=[['Flete internacional Valparaíso → La Guaira',2400],['Agencia de aduanas en Chile',800],['Agenciamiento de carga',500],['Estiba del vehículo',600]];
   const MAR_VE_PUERTO=[['Almacenaje en puerto',1000],['Manejo del contenedor en La Guaira',200],['Naviera en destino',104.40],['Emisión del BL',46.40],['Orden de elevador (GONAVI)',487.20]];
   // Elise (14 oct. 2026): en todos los casos marítimos el agenciamiento aduanal vale 1.000 USD en total.
-  const MAR_VE_AGENCIA=[['Agenciamiento aduanal',1000]];
+  const MAR_VE_AGENCIA=[['Agenciamiento aduanal (gastos a terceros)',1000]];
   // Flete marítimo por vehículo hasta La Guaira. EE. UU., Dubái y China: valores de Elise (14 oct. 2026). Argentina y Brasil: estimados, por confirmar.
   const MAR_FLETE={us:{n:'Estados Unidos',f:2500},ae:{n:'Dubái',f:1000},cn:{n:'China',f:2500},ar:{n:'Argentina',f:2200,est:1},br:{n:'Brasil',f:2000,est:1}};
   // Elise (2 nov. 2026): aviso legal en letra pequeña. Un solo texto para el simulador, el itinerario y la hoja de resumen.
@@ -1570,9 +1570,9 @@ footer a{color:var(--hero-muted)}
       if(lujo) taxRows.push(['Impuesto al lujo '+VEH.lujo+' % (CIF mayor a 40.000 USD)',lujo,2]);
     }
     // Elise (2 nov. 2026): la segunda revisión de la Guardia Nacional en Puerto Ordaz vuelve a sumarse en el cálculo por tierra (500 USD).
-    const venRows=r==='terr'?[['Agente de aduanas en Santa Elena de Uairén',VEH.ageTierra],['Segunda revisión de la Guardia Nacional en Puerto Ordaz',VEH.gnb]]:[...MAR_VE_AGENCIA,...MAR_VE_PUERTO];
-    venRows.push(['Homologación',VEH.homolog],['Título y placas',VEH.titulo]);
-    if(reg==='ord') venRows.push(['SENCAMER',VEH.sencamer]); // Elise: el régimen de equipaje no lleva SENCAMER.
+    const venRows=r==='terr'?[['Agente de aduanas en Santa Elena de Uairén (gastos a terceros)',VEH.ageTierra],['Segunda revisión de la Guardia Nacional en Puerto Ordaz',VEH.gnb]]:[...MAR_VE_AGENCIA,...MAR_VE_PUERTO];
+    venRows.push(['Homologación (gastos a terceros)',VEH.homolog],['Título y placas (gastos a terceros)',VEH.titulo]);
+    if(reg==='ord') venRows.push(['SENCAMER (gastos a terceros)',VEH.sencamer]); // Elise: el régimen de equipaje no lleva SENCAMER.
     // Elise (22 oct. 2026): el certificado de uso solo aparece en el desglose con código, y solo en régimen de equipaje. 550 USD coordinado por Kairos, cualquier país (25 oct. 2026; antes 500 y 350).
     const cer=0; // Jesús (27 oct. 2026): el certificado de uso sale «a consultar», sin sumar
     const ven=venRows.reduce((a,x)=>a+x[1],0);
