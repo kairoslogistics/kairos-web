@@ -400,6 +400,7 @@ footer a{color:var(--hero-muted)}
 .line.bs span:last-child{color:var(--muted);font-size:13px}
 .line.legal-row{font-size:11px;line-height:1.45;border-bottom:0;padding-top:2px}
 .legal-check{font-size:13px;margin:8px 0}
+.legal-box{margin:8px 0;font-size:13px;color:var(--muted)}.legal-box summary{cursor:pointer;font-weight:600;color:var(--ink)}.legal-box .legal{margin:8px 0 0}
 .legal{font-size:11px;line-height:1.45;color:var(--muted);margin:12px 0 0}
 .route-list .tr.day b small{font-family:var(--mono);font-weight:500;font-size:11px;color:var(--accent-text);letter-spacing:.06em;display:block}
 .bcv-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:14px}
@@ -640,7 +641,6 @@ footer a{color:var(--hero-muted)}
         <div id="v-lines"></div>
         <div class="total"><b id="v-total-l">Costo para traerlo</b><span id="v-total">—</span></div>
         <p class="note" id="v-total-note"></p>
-        <p class="legal" data-legal></p>
         <div class="cta-box" id="v-cta">
           <b id="v-cta-t">¿Quieres el detalle de cada gasto y la asesoría para tu caso?</b>
           <p class="note" id="v-cta-p">Te decimos si tu vehículo califica, cada gasto por separado y tu resumen en una hoja, con impuestos en bolívares. Si vas por tierra, te damos todo: la ruta, los hoteles y hasta el gasto más mínimo, para que sepas realmente cuánto te costará.</p>
@@ -657,6 +657,7 @@ footer a{color:var(--hero-muted)}
         <div class="access">
           <div class="tag">¿Ya tienes tu código?</div>
           <div class="access-row"><input id="v-nombre" type="text" placeholder="Tu nombre" autocomplete="name" aria-label="Tu nombre"><input id="v-correo" type="email" placeholder="Tu correo" autocomplete="email" inputmode="email" aria-label="Tu correo"></div>
+          <details class="legal-box"><summary>Aviso legal</summary><p class="legal" data-legal></p></details>
           <label class="check legal-check"><input type="checkbox" data-acepta id="v-legal"> <span>Leí y acepto el aviso legal de Kairos Logistics.</span></label>
           <div class="access-row"><input id="v-code" type="text" placeholder="KAI-XXXXXX" autocomplete="off" aria-label="Código de acceso"><button class="btn dark" type="button" id="v-calc">Ver desglose</button></div>
           <div class="status" id="v-status" role="status">Con tu código ves cada gasto por separado y descargas tu resumen en una hoja, con impuestos en bolívares. Cada código sirve para un vehículo: revisa el país, el modelo y el año antes de escribirlo, porque después no se pueden cambiar.</div>
@@ -677,7 +678,6 @@ footer a{color:var(--hero-muted)}
             <b>Itinerario de viaje día por día · 30 USD</b>
             <p class="note">Tu itinerario con dónde dormir cada noche, el mapa con las paradas y la ruta en Google Maps por tramos. Ya viene incluido en la asesoría completa de 45 USD. Si tienes tu código de asesoría o del itinerario, escríbelo aquí.</p>
             <div class="access-row"><input id="v-plan-code" type="text" placeholder="KAI-XXXXXX" autocomplete="off" aria-label="Código del plan de viaje"><button class="btn dark" type="button" id="v-plan-open">Abrir mi plan</button></div>
-            <p class="legal" data-legal></p>
             <label class="check legal-check"><input type="checkbox" data-acepta id="v-plan-legal"> <span>Leí y acepto el aviso legal de Kairos Logistics.</span></label>
             <div class="status" id="v-plan-status" role="status"></div>
             <button class="btn primary" type="button" id="v-plan-buy" data-pagar="plan">Comprar mi itinerario de viaje</button>
@@ -690,7 +690,6 @@ footer a{color:var(--hero-muted)}
           <label class="km-it">¿Cuántos kilómetros quieres manejar por día?<select id="v-kmdia-it"><option value="500">500 km (muy tranquilo)</option><option value="600">600 km (tranquilo)</option><option value="700">700 km</option><option value="800">800 km</option><option value="900">900 km</option><option value="1000">1.000 km (lo recomendado: unos 8 días hasta la frontera)</option><option value="1100">1.100 km (rápido)</option></select></label>
           <div class="route-list" id="v-tramos"></div>
           <div class="v-recs" id="v-recs"></div>
-          <p class="legal" data-legal></p>
           <div class="cta-box" id="v-gastos-box"><b>Registra tus gastos en el camino · 20 USD</b><p class="note">Anota combustible, comida, hospedaje y peajes en la moneda de cada país. Te suma todo en dólares, día por día, y funciona sin señal. Ya viene incluido en la asesoría 1 a 1.</p><button class="btn primary" type="button" data-pagar="gastos">Comprar mi registrador de gastos · 20 USD</button> <a class="btn ghost" id="v-gastos" href="/gastos/">Ya lo tengo: abrir mi registro</a></div>
           </div>
     </div>
@@ -1129,7 +1128,6 @@ footer a{color:var(--hero-muted)}
     </div>
     <label class="check"><input type="checkbox" id="pay-ok"> Acepto que el código de acceso se enviará a mi correo</label>
     <label class="check legal-check"><input type="checkbox" data-acepta id="pay-legal"> <span>Leí y acepto el aviso legal de Kairos Logistics.</span></label>
-    <p class="legal" data-legal></p>
     <div class="status err" id="pay-err" role="alert"></div>
     <button class="btn primary" type="submit" id="pay-btn">Pagar 45 USD</button>
     <p class="ya-codigo"><a href="#vehiculo" data-go="vehiculo" data-ya>Ya tengo mi código</a></p>
