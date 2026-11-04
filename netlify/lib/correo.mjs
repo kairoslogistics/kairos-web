@@ -27,7 +27,7 @@ export const marco = cuerpo => `<!doctype html><html lang="es"><body style="marg
 export function correoCodigo(o) {
   const p = PRODUCTOS[o.producto], cod = encodeURIComponent(o.codigo), v = o.videos || {};
   const plan = o.producto === 'plan', gastos = o.producto === 'gastos', conItin = plan || o.producto === 'asesoria';
-  const enlace = sitio() + (gastos ? '/gastos/?codigo=' : plan ? '/?itinerario=' : '/?codigo=') + cod + (gastos ? '' : '#vehiculo'), itin = sitio() + '/?itinerario=' + cod + '#vehiculo';
+  const enlace = sitio() + (gastos ? '/gastos/?codigo=' : plan ? '/itinerario/?codigo=' : '/?codigo=') + cod + (gastos || plan ? '' : '#vehiculo'), itin = sitio() + '/itinerario/?codigo=' + cod; // Elise (4 nov. 2026): el itinerario tiene su propia página
   // Videos cortos por producto (Elise, 30 oct. 2026): cómo abrir el cálculo (asesoría y otro vehículo), cómo usar el itinerario y el registrador.
   const videos = [[!gastos && !plan, v.calculo, 'Mira cómo abrir tu cálculo'], [conItin, v.itinerario, 'Mira cómo usar tu itinerario'], [gastos, v.gastos, 'Mira cómo usar tu registrador']]
     .filter(([si, url]) => si && /^https:\/\//.test(url || '')).map(([, url, t]) => ({ url, t }));
