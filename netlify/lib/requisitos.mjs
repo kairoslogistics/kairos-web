@@ -11,8 +11,21 @@ export const REGS = { equi: 'Régimen de equipaje', ord: 'Régimen ordinario' };
 // Desde Panamá y Estados Unidos solo hay envío por barco.
 export const soloMar = p => p === 'pa' || p === 'us';
 
+// Secciones nuevas de la lista base (por id) que la lista guardada en el panel todavía no tiene: se agregan en su lugar
+// (Elise, 4 nov. 2026: «Para el certificado de uso» no salía porque había una lista guardada).
+export function sumarNuevas(l, b) {
+  const ids = new Set(l.secciones.map(s => s.id));
+  (b.secciones || []).forEach((s, i) => {
+    if (!s.id || ids.has(s.id)) return;
+    const prev = b.secciones.slice(0, i).reverse().find(x => ids.has(x.id));
+    const at = prev ? l.secciones.findIndex(x => x.id === prev.id) + 1 : 0;
+    l.secciones.splice(at, 0, JSON.parse(JSON.stringify(s))); ids.add(s.id);
+  });
+  return l;
+}
+
 export async function cargarLista() {
-  try { const d = await leer('requisitos/lista'); const l = d?.datos?.json && JSON.parse(d.datos.json); if (l?.secciones?.length) return l; } catch (e) { console.error('requisitos', e.message); }
+  try { const d = await leer('requisitos/lista'); const l = d?.datos?.json && JSON.parse(d.datos.json); if (l?.secciones?.length) return sumarNuevas(l, base()); } catch (e) { console.error('requisitos', e.message); }
   return base();
 }
 

@@ -850,9 +850,16 @@ const RQ_P={cl:'Chile',ar:'Argentina',br:'Brasil',pa:'Panamá',us:'Estados Unido
 const rqSoloMar=p=>p==='pa'||p==='us';
 let REQ=null, reqCambios=false, reqSel={p:'cl',v:'tierra',r:'equi'};
 try{Object.assign(reqSel,JSON.parse(pref.get('req-sel')||'{}'))}catch(e){}
+/* Secciones nuevas de la lista base que la lista guardada todavía no tiene: se agregan en su lugar (Elise, 4 nov. 2026). */
+async function rqSumarNuevas(l){
+  try{ const b=await (await fetch('requisitos-base.json',{cache:'no-store'})).json(); const ids=new Set(l.secciones.map(s=>s.id));
+    (b.secciones||[]).forEach((s,i)=>{ if(!s.id||ids.has(s.id)) return; const prev=b.secciones.slice(0,i).reverse().find(x=>ids.has(x.id));
+      l.secciones.splice(prev?l.secciones.findIndex(x=>x.id===prev.id)+1:0,0,s); ids.add(s.id); }); }catch(e){}
+  return l;
+}
 async function cargarReq(){
-  try{ if(MODO==='real'){const d=await db.collection('requisitos').doc('lista').get(); const l=d.exists&&JSON.parse(d.data().json||'null'); if(l&&l.secciones) return REQ=l;}
-    else {const l=JSON.parse(pref.get('requisitos')||'null'); if(l&&l.secciones) return REQ=l;} }catch(e){}
+  try{ if(MODO==='real'){const d=await db.collection('requisitos').doc('lista').get(); const l=d.exists&&JSON.parse(d.data().json||'null'); if(l&&l.secciones) return REQ=await rqSumarNuevas(l);}
+    else {const l=JSON.parse(pref.get('requisitos')||'null'); if(l&&l.secciones) return REQ=await rqSumarNuevas(l);} }catch(e){}
   try{ REQ=await (await fetch('requisitos-base.json',{cache:'no-store'})).json(); }catch(e){ REQ={secciones:[]}; toast('No se pudo cargar la lista base'); }
   return REQ;
 }
