@@ -276,19 +276,22 @@
       "titulo": "Para el certificado de uso",
       "items": [
         {
+          "t": "Haber vivido al menos 1 año fuera de Venezuela"
+        },
+        {
           "t": "Pasaporte vigente"
         },
         {
-          "t": "Título de propiedad o padrón del vehículo, apostillado"
+          "t": "No haber entrado a Venezuela por más de 3 semanas en los últimos 11 meses y un día (movimiento migratorio)"
+        },
+        {
+          "t": "Factura de compra, apostillada"
         },
         {
           "t": "Certificado de anotaciones vigentes, apostillado"
         },
         {
-          "t": "Factura o contrato de compraventa, apostillado"
-        },
-        {
-          "t": "Documento de residencia del país donde vives"
+          "t": "Padrón del vehículo, apostillado"
         },
         {
           "t": "Registro consular en el consulado de Venezuela"
