@@ -257,7 +257,7 @@
         },
         {
           "t": "Certificado de uso, legalizado por el consulado de Venezuela",
-          "n": "Prueba que usaste el vehículo como dueño al menos 11 meses."
+          "n": "Prueba que usaste el vehículo como dueño al menos 11 meses. Sus requisitos están en la sección «Para el certificado de uso»."
         },
         {
           "t": "Factura de compra autenticada por la autoridad del país de origen"
@@ -267,6 +267,34 @@
         },
         {
           "t": "Un solo vehículo por persona, de uso personal"
+        }
+      ],
+      "r": "equi"
+    },
+    {
+      "id": "certificado-uso",
+      "titulo": "Para el certificado de uso",
+      "items": [
+        {
+          "t": "Pasaporte vigente"
+        },
+        {
+          "t": "Título de propiedad o padrón del vehículo, apostillado"
+        },
+        {
+          "t": "Certificado de anotaciones vigentes, apostillado"
+        },
+        {
+          "t": "Factura o contrato de compraventa, apostillado"
+        },
+        {
+          "t": "Documento de residencia del país donde vives"
+        },
+        {
+          "t": "Registro consular en el consulado de Venezuela"
+        },
+        {
+          "t": "Pago de los aranceles consulares"
         }
       ],
       "r": "equi"
