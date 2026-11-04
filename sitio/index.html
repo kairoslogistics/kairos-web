@@ -1118,7 +1118,7 @@ footer a{color:var(--hero-muted)}
   // Brasil R$ 6,90 promedio de la ruta (ANP, jul. 2026: Cuiabá 6,72, Porto Velho 7,49, Manaos 7,05, Boa Vista 7,58) a 5,4 BRL por USD; Venezuela 0,50 (precio internacional PDVSA).
   const TIERRA={
     fuel:{cl:1.36,ar:1.45,br:1.28,ve:0.50}, seguro:50,
-    // Elise (4 nov. 2026): de la frontera a Puerto Ordaz va el tanque lleno en Brasil más un bidón de 20 litros llenado en Santa Elena (no se cruza la frontera con bidones).
+    // Elise (4 nov. 2026): de la frontera a Puerto Ordaz va el tanque lleno en Brasil más un bidón de 20 litros llenado en Santa Elena (no se cruza la frontera con bidones). En Santa Elena la gasolina se cobra a precio de Brasil.
     tanque:{sedan:50,suv:65,pick:80}, bidones:20, comida:25, hosp:{1:30,2:40,3:50,4:60}, /* Elise (26 oct. 2026): hospedaje en carretera por noche en una habitación juntos (1: 30, 2: 40, 3: 50, +10 por persona); comida 25 a 30 USD por persona al día */
     // Espera de la nacionalización (Elise, 13 oct. 2026): quedarse unos 10 días en Santa Elena, o volver en bus a Puerto Ordaz.
     espera:{dias:10, hosp:{1:20,2:30,3:35,4:40}, comida:20 /* Elise, 26 oct. 2026 */, bus:30, comidaBus:20}, ferryAuto:200, ferryCamarote:50,
@@ -1528,7 +1528,7 @@ footer a{color:var(--hero-muted)}
     let kmPO=0; for(const [c,k] of d[3]){kmPO+=k; if(c==='Puerto Ordaz') break;} km.ve=Math.max(0,km.ve-kmPO);
     const lt=(T.tanque[$('v-tipo').value]||50)+T.bidones;
     const fuel=Object.keys(km).filter(k=>km[k]>0).map(k=>['Combustible en '+PAISN[k]+(k==='ve'?' desde Puerto Ordaz':'')+' ('+km[k].toLocaleString('es-CL')+' km)',km[k]/kml*T.fuel[k]]);
-    const iVe=fuel.findIndex(x=>/Venezuela/.test(x[0])), tq=['Gasolina de la frontera a Puerto Ordaz: tanque lleno en Brasil y 1 bidón de 20 litros en Santa Elena ('+lt+' litros)',(lt-T.bidones)*T.fuel.br+T.bidones*T.fuel.ve];
+    const iVe=fuel.findIndex(x=>/Venezuela/.test(x[0])), tq=['Gasolina de la frontera a Puerto Ordaz: tanque lleno en Brasil y 1 bidón de 20 litros en Santa Elena ('+lt+' litros a precio de Brasil)',lt*T.fuel.br];
     if(iVe>=0) fuel.splice(iVe,0,tq); else fuel.push(tq);
     const rows=[['Seguro internacional del vehículo',T.seguro],...fuel];
     if(br==='stm') rows.push(['Ferry Santarém → Manaos (vehículo y '+pax+' camarote'+(pax>1?'s':'')+')',T.ferryAuto+T.ferryCamarote*pax]);
