@@ -20,8 +20,8 @@ export const abreGastos = c => TIPOS_GASTOS.includes(c.tipo) || (['plan', 'aseso
 export const PAISES = ['Venezuela', 'Chile', 'Argentina', 'Brasil', 'Estados Unidos', 'Panamá', 'Otro'];
 // Cuánto dura el código. Cada código sirve para un vehículo; cada vehículo extra se paga aparte, 20 USD (Elise, 31 oct. 2026; antes 15).
 export const DIAS_CODIGO = +(process.env.CODIGO_DIAS || 30);
-// El itinerario (solo o dentro de la asesoría) dura 60 días y se abre en hasta 3 dispositivos (Elise, 26 oct. 2026).
-export const DIAS_ITINERARIO = 60, MAX_DISPOSITIVOS = 3;
+// El itinerario (solo o dentro de la asesoría) dura 60 días (Elise, 26 oct. 2026) y se abre en hasta 2 dispositivos (Elise, 4 nov. 2026; antes 3).
+export const DIAS_ITINERARIO = 60, MAX_DISPOSITIVOS = 2;
 export const diasDe = producto => (['plan', 'asesoria', 'gastos', 'unoauno'].includes(producto) ? DIAS_ITINERARIO : DIAS_CODIGO);
 export const USOS_CODIGO = 1;
 export const WHATSAPP = '+58 422 701 0497';

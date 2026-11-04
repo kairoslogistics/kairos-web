@@ -609,7 +609,7 @@ const fechaCod=v=>{const d=v&&v.toDate?v.toDate():new Date(v&&v.seconds?v.second
 function verDisp(c){
   if(!['plan','asesoria','unoauno'].includes(c.tipo)) return '';
   const L=Array.isArray(c.dispositivos)?c.dispositivos:[], n=L.length;
-  return '<div class="meta"><span class="pill '+(n>=3?'off':n?'mid':'done')+'">Itinerario: '+n+' de 3 dispositivos</span><span>Abierto '+(+c.aperturas||0)+' '+((+c.aperturas||0)===1?'vez':'veces')+'</span>'+
+  return '<div class="meta"><span class="pill '+(n>=2?'off':n?'mid':'done')+'">Itinerario: '+n+' de 2 dispositivos</span><span>Abierto '+(+c.aperturas||0)+' '+((+c.aperturas||0)===1?'vez':'veces')+'</span>'+
     (+c.rechazos?'<span style="color:var(--danger,#b3261e)">'+c.rechazos+' intento(s) desde otro dispositivo</span>':'')+
     (n?'<button class="btn sm ghost" type="button" data-codlib="'+esc(c.id)+'">Liberar dispositivos</button>':'')+
     (c.anulado?'':'<button class="btn sm ghost" type="button" data-codmas="'+esc(c.id)+'">Dar más días</button>')+'</div>'+
