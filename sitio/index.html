@@ -423,12 +423,19 @@ footer a{color:var(--hero-muted)}
 .sheet tr.tot td{font-weight:700;font-size:15px;border-top:2px solid #111;border-bottom:none}
 .sheet .sh-notes{margin-top:10px;font-size:11px;color:#444}
 .sheet .sh-notes p{margin:3px 0}
+/* Elise, 5 nov. 2026: aviso legal muy pequeño; párrafo "No incluye..." hasta el WhatsApp algo más grande que el aviso. */
+.sheet{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+.sheet .sh-notes .sh-nota{font-size:9.5px;line-height:1.3}
+.sheet .sh-notes .sh-legal{font-size:7px;line-height:1.25;color:#666;margin-top:6px}
 @media (max-width:560px){.sheet{padding:18px 12px;font-size:12px}.sheet td,.sheet th{padding:3px 2px}.sheet td.n{font-size:11px}.sheet .sh-data{grid-template-columns:minmax(0,1fr)}}
 @media print{
   body.printing > *:not(#v-sheet-wrap){display:none!important}
   body.printing #v-sheet-wrap{position:static;background:none;padding:0;overflow:visible}
   body.printing .sheet-tools{display:none!important}
   body.printing .sheet{max-width:none;border-radius:0;padding:0}
+  body.printing{background:#fff!important;min-height:0!important}
+  body.printing .sheet .sh-notes .sh-nota{font-size:8.5px}
+  body.printing .sheet .sh-notes .sh-legal{font-size:6.5px}
   @page{size:A4;margin:12mm}
 }
 .gm-links{display:grid;gap:6px}
@@ -1914,7 +1921,7 @@ d.querySelector('b').append(e.pausa?'Nacionalización en Santa Elena de Uairén'
       h+='<tr class="'+(l===2?'sub':'g')+'"><td>'+esc(k)+'</td><td class="n">'+(typeof v==='string'?esc(v):usd(v))+'</td><td class="n">'+(isTax?bs(v*bcv):'')+'</td></tr>';});
     h+='<tr class="tot"><td>Costo total para traerlo</td><td class="n">'+usd(c.total)+'</td><td class="n">'+bs(c.total*bcv)+'</td></tr></tbody></table></div>';
     if(c.land&&planOk) h+='<div class="sh-notes"><p><b>Itinerario:</b> '+c.land.itin.map(e=>esc(e.pausa?'Nacionalización en Santa Elena de Uairén (el vehículo queda en aduana)':e.d+': '+e.de+' → '+e.a+(e.ferry?' (ferry)':' ('+e.km.toLocaleString('es-CL')+' km)')+(e.ctl||[]).filter(k=>k.c!=='Puerto Ordaz').map(k=>', '+k.t.replace('Parada obligatoria: ','').toLowerCase()).join(''))).join(' · ')+'</p></div>';
-    h+='<div class="sh-notes"><p>No incluye el valor del vehículo. Los impuestos se pagan en bolívares a la tasa oficial del BCV del día del pago; la tasa usada fue '+bs(bcv)+' por dólar ('+BCV_FECHA+'). Impuestos según la experiencia de Kairos, por confirmar con el agente de aduanas. Tarifas de ejemplo de este prototipo.</p><p>Estimado de la web. Kairos lo confirma en la cotización formal. Kairos Logistics · WhatsApp +'+WA.ve+'</p><p>'+esc(AVISO_LEGAL)+'</p></div>';
+    h+='<div class="sh-notes"><p class="sh-nota">No incluye el valor del vehículo. Los impuestos se pagan en bolívares a la tasa oficial del BCV del día del pago; la tasa usada fue '+bs(bcv)+' por dólar ('+BCV_FECHA+'). Impuestos según la experiencia de Kairos, por confirmar con el agente de aduanas. Tarifas de ejemplo de este prototipo.</p><p class="sh-nota">Estimado de la web. Kairos lo confirma en la cotización formal. Kairos Logistics · WhatsApp +'+WA.ve+'</p><p class="sh-legal">'+esc(AVISO_LEGAL)+'</p></div>';
     $('v-sheet').innerHTML=h;
   }
   const fmtBcv=v=>v.toLocaleString('es-VE',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -1930,10 +1937,11 @@ d.querySelector('b').append(e.pausa?'Nacionalización en Santa Elena de Uairén'
     if(t.bcv_usd>0){ BCV_REF=t.bcv_usd; BCV_FECHA=hoyTxt(); if(!bcvMano){ bcv=BCV_REF; $('v-bcv').value=fmtBcv(bcv); } }
     pintarLocal(); vCalc(); eCalc();
   });
-  $('v-sheet-btn').addEventListener('click',()=>{renderSheet(vCompute()); $('v-sheet-wrap').hidden=false; $('v-sheet-close').focus();});
-  $('v-sheet-close').addEventListener('click',()=>{$('v-sheet-wrap').hidden=true; $('v-sheet-btn').focus();});
-  $('v-print').addEventListener('click',()=>{document.body.classList.add('printing'); try{window.print();}catch(e){} setTimeout(()=>document.body.classList.remove('printing'),500);});
-  window.addEventListener('afterprint',()=>document.body.classList.remove('printing'));
+  /* Mientras la hoja está abierta, imprimir (botón o menú del navegador) saca SOLO la hoja.
+     En el teléfono window.print() no espera, por eso la clase no se quita con un temporizador (5 nov. 2026). */
+  $('v-sheet-btn').addEventListener('click',()=>{renderSheet(vCompute()); $('v-sheet-wrap').hidden=false; document.body.classList.add('printing'); $('v-sheet-close').focus();});
+  $('v-sheet-close').addEventListener('click',()=>{$('v-sheet-wrap').hidden=true; document.body.classList.remove('printing'); $('v-sheet-btn').focus();});
+  $('v-print').addEventListener('click',()=>{document.body.classList.add('printing'); try{window.print();}catch(e){}});
   $('v-wa').addEventListener('click',()=>{
     const c=vCompute();
     msgBox('v-msg','Hola Kairos, quiero una cotización formal para traer mi vehículo.\n\nVehículo: '+TIPO[$('v-tipo').value]+', '+($('v-modelo').value||'')+' '+($('v-anio').value||'')+'\nValor: '+($('v-pais').value==='cl'?clp(vVal())+' (≈ '+usd(c.val)+')':usd(c.val))+'\nDesde: '+(c.land?vSalida().n+', ':'')+c.d.name+'\nRuta: '+(c.r==='mar'?'marítima':'terrestre')+'\nCilindrada: '+(cilTxt())+(c.land?'\nRuta en Brasil: '+(c.land.br==='stm'?'ferry Santarém':'Porto Velho')+'\nDestino: '+c.land.dest+' ('+c.land.zona+')'+(planOk?'\nMapa de la ruta: '+[...$('v-gmaps').querySelectorAll('a')].map(a=>'\n'+a.textContent+': '+a.href).join(''):'')+'\nViajan: '+$('v-pax').value+' adultos, unos '+c.land.dias+' días ('+$('v-kmdia').value+' km diarios)':'')+'\nRégimen: '+(c.reg==='equi'?'equipaje':'ordinario')+'\nCosto estimado para traerlo (sin el valor del vehículo): '+$('v-total').textContent);
