@@ -140,6 +140,7 @@ main .wrap{padding-block:18px 60px;display:grid;gap:16px}
 .c-body>input{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:7px 8px;font:inherit}
 .cotiza{background:var(--surface);border:2px solid var(--line);border-radius:12px;padding:14px;display:grid;gap:8px;margin-top:16px}
 .cotiza h3{margin:0;font-size:17px}
+.cn-tab{width:100%;border-collapse:collapse;font-size:14px}.cn-tab th,.cn-tab td{border-bottom:1px solid var(--line);padding:5px 4px;text-align:left}.cn-tab th+th,.cn-tab td+td{text-align:right}
 .g-tab{width:100%;border-collapse:collapse;font-size:13px}.g-tab th,.g-tab td{text-align:left;padding:5px 6px;border-bottom:1px solid var(--line);white-space:nowrap}
 .rq-hoja{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:16px}.rq-hoja h4{margin:14px 0 6px;font-size:15px}.rq-hoja ul{list-style:none;margin:0;padding:0}
 .rq-hoja li{display:flex;gap:10px;padding:6px 0;border-bottom:1px solid var(--line)}.rq-hoja small{color:var(--muted,#5b6b6e)}.rq-b{flex:0 0 18px;height:18px;border:2px solid currentColor;border-radius:3px;margin-top:2px}
@@ -672,12 +673,36 @@ const cAbiertos=new Set();
 let cSel=(()=>{try{return JSON.parse(pref.get('cotiza')||'[]')}catch(e){return []}})();
 const cTot=sv=>sv.lineas.reduce((a,l)=>a+enUsd(l),0);
 const cPrecio=sv=>sv.precio==null||sv.precio===''?null:+sv.precio;
+/* Carga marítima China con DINA 7 Cargo (Elise, 5 nov. 2026): lo mismo que el simulador de la web, más lo que nos cuesta.
+   Venta en USD por CBM según zona y tramo; con litio, tarifa única por zona. 1 CBM no pasa de 600 kg: si pasa, se cobra por peso a 1,5 USD el kilo.
+   Mínimo 0,5 CBM (455 USD carga general, zona 1). Carga especial +20 USD por CBM. Costo DINA 7 Cargo: 690 USD por CBM de carga general. */
+const CN_MAR={zona1:'Caracas, Maracay (Aragua), Carabobo, Lara (Barquisimeto), Portuguesa, Barinas, Táchira, Cojedes',zona2:'Anzoátegui, Mérida, Yaracuy, Bolívar, Trujillo, Zulia',
+  tramos:{1:[[4,910],[11,860],[20,800],[Infinity,770]],2:[[4,1000],[11,960],[20,890],[Infinity,860]]},litio:{1:1010,2:1100},especial:20,kgCbm:600,porKg:1.5,minCbm:0.5,costo:690};
+let cnq=(()=>{try{return {cbm:1,kg:200,zona:'1',tipo:'gen',...JSON.parse(pref.get('cnmar')||'{}')}}catch(e){return {cbm:1,kg:200,zona:'1',tipo:'gen'}}})();
+function cnCalc(q){const z=+q.zona, cbm=Math.max(CN_MAR.minCbm,+q.cbm||0), kg=+q.kg||0, min=(+q.cbm||0)<CN_MAR.minCbm;
+  const rate=q.tipo==='lit'?CN_MAR.litio[z]:CN_MAR.tramos[z].find(([l])=>cbm<l)[1];
+  let venta=cbm*rate, peso=false; if(kg>cbm*CN_MAR.kgCbm&&kg*CN_MAR.porKg>venta){venta=kg*CN_MAR.porKg;peso=true;}
+  if(q.tipo==='esp') venta+=cbm*CN_MAR.especial;
+  const cbmCosto=Math.max(cbm,kg/CN_MAR.kgCbm), costo=cbmCosto*CN_MAR.costo;
+  return {cbm,kg,rate,venta,costo,gan:venta-costo,min,peso};}
+function vChina(){const fmt=v=>usd(Math.round(v*100)/100), r=cnCalc(cnq), sel=(id,ops,v)=>'<select id="'+id+'">'+ops.map(([k,t])=>'<option value="'+k+'"'+(String(v)===k?' selected':'')+'>'+t+'</option>').join('')+'</select>';
+  const fila=(t,a,b)=>'<tr><td>'+t+'</td><td>'+a+'</td><td>'+b+'</td><td>'+CN_MAR.costo+'</td></tr>';
+  return '<details class="costo"'+(cAbiertos.has('cnmar')?' open':'')+' data-cnmar><summary class="c-sum"><span class="c-nom">Carga marítima desde China · DINA 7 Cargo (puerta a puerta)</span><span class="c-k"><small>Costo por CBM</small><b>'+usd(CN_MAR.costo)+'</b></span><span class="c-k"><small>Cobramos desde</small><b>'+usd(770)+'</b></span><span class="c-k"><small>Ganancia</small><b>'+Math.round((910-CN_MAR.costo)/910*100)+' % *</b></span><span></span></summary>'+
+    '<div class="c-body"><table class="cn-tab"><thead><tr><th>USD por CBM</th><th>Zona 1</th><th>Zona 2</th><th>Costo</th></tr></thead><tbody>'+
+    fila('Carga general 0,5 a 3 CBM',910,'1.000')+fila('4 a 10 CBM',860,960)+fila('11 a 19 CBM',800,890)+fila('20 CBM o más',770,860)+fila('Con litio','1.010','1.100').replace(/<td>690<\/td><\/tr>$/,'<td>690 (por confirmar)</td></tr>')+'</tbody></table>'+
+    '<p class="sub"><b>Zona 1:</b> '+CN_MAR.zona1+'. <b>Zona 2:</b> '+CN_MAR.zona2+'. Otros estados: a confirmar.<br>1 CBM no puede pasar de 600 kg; si pasa, se cobra por peso a 1,5 USD el kilo. Carga mínima: de 0,0 a 0,5 CBM se cobran 455 USD en carga general. Cargas especiales: +20 USD por CBM. CBM de una caja = largo × ancho × alto (cm) ÷ 1.000.000. Entregamos 45 días después de la salida de China.<br>* Ganancia del tramo 0,5 a 3 CBM, zona 1.</p>'+
+    '<div class="cz-g"><label>CBM<input id="cn-cbm" type="number" min="0" step="any" inputmode="decimal" value="'+esc(cnq.cbm)+'"></label><label>Peso total (kg)<input id="cn-kg" type="number" min="0" step="any" inputmode="decimal" value="'+esc(cnq.kg)+'"></label><label>Zona'+sel('cn-zona',[['1','Zona 1'],['2','Zona 2']],cnq.zona)+'</label><label>Tipo'+sel('cn-tipo',[['gen','Carga general (sin litio)'],['lit','Con litio'],['esp','Carga especial (+20 por CBM)']],cnq.tipo)+'</label></div>'+
+    '<div class="c-fin"><div><small>Cobramos</small><b>'+fmt(r.venta)+'</b></div><div><small>Nos cuesta (DINA 7)</small><b>'+fmt(r.costo)+'</b></div><div><small>Ganancia</small><b class="'+(r.gan<0?'neg':'')+'">'+fmt(r.gan)+'</b></div><div><small>% de ganancia</small><b class="'+(r.gan<0?'neg':'')+'">'+Math.round(r.gan/r.venta*100)+' %</b></div></div>'+
+    '<p class="sub">'+[r.min?'Se cobra la carga mínima (0,5 CBM).':'',r.peso?'Pasa de 600 kg por CBM: se cobra por peso ('+r.kg+' kg × 1,5 USD).':'Tarifa: '+usd(r.rate)+' por CBM.',r.kg>r.cbm*CN_MAR.kgCbm?'El costo se calcula como '+(r.kg/CN_MAR.kgCbm).toLocaleString('es-CL',{maximumFractionDigits:2})+' CBM (600 kg por CBM), referencial.':''].filter(Boolean).join(' ')+'</p></div></details>';}
+function bindChina(){const d=document.querySelector('[data-cnmar]'); if(!d) return;
+  d.addEventListener('toggle',()=>{d.open?cAbiertos.add('cnmar'):cAbiertos.delete('cnmar');});
+  [['cn-cbm','cbm'],['cn-kg','kg'],['cn-zona','zona'],['cn-tipo','tipo']].forEach(([id,k])=>{const e=$('#'+id); if(e) e.onchange=()=>{cnq[k]=e.value; pref.set('cnmar',JSON.stringify(cnq)); render();};});}
 function vCostos(){
   const fmt=v=>usd(Math.round(v*100)/100), pct=(g,pr)=>g==null||!pr?'—':Math.round(g/pr*100)+' %';
   const lista=listaCostos(), sel=lista.filter(sv=>cSel.includes(sv.id));
   return '<div class="head"><div><h2>Costos y precios</h2><p>Toca un servicio para ver y editar sus gastos. Con el botón de la derecha lo sumas a la cotización de abajo.</p></div><button class="btn" data-cnuevo>Nuevo servicio</button></div>'+
     '<div class="cod-new" style="grid-template-columns:minmax(0,260px)"><label>Dólar del día (pesos chilenos por 1 USD)<input type="number" min="1" step="1" id="c-tasa" value="'+tasaClp+'"></label></div>'+
-    (cNuevo?modalServicio():'')+
+    (cNuevo?modalServicio():'')+vChina()+
     lista.map(sv=>{const tot=cTot(sv), pr=cPrecio(sv), sin=!sv.lineas.length, g=pr==null||sin?null:pr-tot, on=cSel.includes(sv.id);
       return '<details class="costo" data-csv="'+esc(sv.id)+'"'+(cAbiertos.has(sv.id)?' open':'')+'><summary class="c-sum"><span class="c-nom">'+esc(sv.nombre)+'</span>'+
         '<span class="c-k"><small>Gasto</small><b>'+(sin?'—':fmt(tot))+'</b></span><span class="c-k"><small>Cobramos</small><b>'+(pr==null?'—':fmt(pr))+'</b></span><span class="c-k"><small>Ganancia</small><b class="'+(g<0?'neg':'')+'">'+pct(g,pr)+'</b></span>'+
@@ -960,7 +985,7 @@ async function guardarCosto(sv){await guardar('costos',{...sv,lineas:sv.lineas.m
 
 /* ===== Acciones ===== */
 function bind(){
-  bindCz(); bindPagos(); bindReq();
+  bindCz(); bindPagos(); bindReq(); bindChina();
   const ct=$('#c-tasa'); if(ct) ct.onchange=()=>{const v=+ct.value; if(v>0){tasaClp=v;tasaMano=true;pref.set('clp',String(v));} render();};
   document.querySelectorAll('details[data-csv]').forEach(d=>d.ontoggle=()=>{d.open?cAbiertos.add(d.dataset.csv):cAbiertos.delete(d.dataset.csv);});
   document.querySelectorAll('[data-cpick]').forEach(b=>b.onclick=e=>{e.preventDefault();e.stopPropagation();const id=b.dataset.cpick;cSel=cSel.includes(id)?cSel.filter(x=>x!==id):[...cSel,id];pref.set('cotiza',JSON.stringify(cSel));render();});
