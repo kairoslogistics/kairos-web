@@ -884,8 +884,8 @@ html[data-vista=itinerario] .proto-bar,html[data-vista=itinerario] header.top,ht
       <div class="box"><h3>Tarifas marítimas puerta a puerta (USD por CBM)</h3>
         <table class="cn-tab"><thead><tr><th>Carga general (sin litio)</th><th>Zona 1</th><th>Zona 2</th></tr></thead><tbody>
           <tr><td>0,5 a 3 CBM</td><td>910</td><td>1.000</td></tr><tr><td>4 a 10 CBM</td><td>860</td><td>960</td></tr><tr><td>11 a 19 CBM</td><td>800</td><td>890</td></tr><tr><td>20 CBM o más</td><td>770</td><td>860</td></tr>
-          <tr><td><b>Carga con litio</b></td><td>1.010</td><td>1.100</td></tr></tbody></table>
-        <p class="small muted"><b>Zona 1:</b> Caracas, Maracay (Aragua), Carabobo, Lara (Barquisimeto), Portuguesa, Barinas, Táchira y Cojedes.<br><b>Zona 2:</b> Anzoátegui, Mérida, Yaracuy, Bolívar, Trujillo y Zulia.<br>Otros estados: tarifa a confirmar por WhatsApp.</p></div>
+          <tr><td><b>Carga con litio o peligrosa</b></td><td>1.010</td><td>1.100</td></tr></tbody></table>
+        <p class="small muted"><b>Zona 1:</b> Caracas (Distrito Capital, Miranda y La Guaira), Maracay (Aragua), Carabobo, Lara (Barquisimeto), Portuguesa, Barinas, Táchira y Cojedes.<br><b>Zona 2:</b> Anzoátegui, Mérida, Yaracuy, Bolívar, Trujillo y Zulia.</p></div>
       <div class="stack">
         <p class="aviso-min">Carga mínima: de 0,0 a 0,5 CBM se cobran 455 USD en carga general.</p>
         <div class="box"><h3>Cómo se calcula</h3>
@@ -2042,16 +2042,18 @@ d.querySelector('b').append(e.pausa?'Nacionalización en Santa Elena de Uairén'
     const ZONA1=['Distrito Capital','Miranda','La Guaira','Aragua','Carabobo','Lara','Zulia','Anzoátegui'];
     /* China marítimo puerta a puerta con DINA 7 Cargo (Elise, 5 nov. 2026). USD por CBM según zona y tramo.
        Con litio: tarifa única por zona. 1 CBM no pasa de 600 kg: si pasa, se cobra por peso a 1,5 USD el kilo.
-       Mínimo 0,5 CBM (455 USD en carga general, zona 1). Carga especial: +20 USD por CBM. Otros estados: se calcula con la zona 2 y se confirma. */
-    const CN_MAR={zona1:['Distrito Capital','Aragua','Carabobo','Lara','Portuguesa','Barinas','Táchira','Cojedes'],
+       Mínimo 0,5 CBM (455 USD en carga general, zona 1). Carga especial: +20 USD por CBM. Miranda y La Guaira cuentan como Caracas (zona 1). Solo se muestran los estados de las dos zonas (Elise, 5 nov.). */
+    const CN_MAR={zona1:['Distrito Capital','Miranda','La Guaira','Aragua','Carabobo','Lara','Portuguesa','Barinas','Táchira','Cojedes'],
       zona2:['Anzoátegui','Mérida','Yaracuy','Bolívar','Trujillo','Zulia'],
       tramos:{1:[[4,910],[11,860],[20,800],[Infinity,770]],2:[[4,1000],[11,960],[20,890],[Infinity,860]]},
       litio:{1:1010,2:1100},especial:20,kgCbm:600,porKg:1.5,minCbm:0.5};
     const cnZona=e=>CN_MAR.zona1.includes(e)?1:CN_MAR.zona2.includes(e)?2:0;
     const cnTarifa=(z,tipo,q)=>tipo==='lit'?CN_MAR.litio[z||2]:CN_MAR.tramos[z||2].find(([lim])=>q<lim)[1];
     const TIPOS_STD='<option value="gen">Mercancía general</option><option value="rop">Ropa y calzado</option><option value="rep">Repuestos</option><option value="ele">Electrónica y celulares</option>';
-    const TIPOS_CN='<option value="gen">Carga general (sin litio)</option><option value="lit">Con litio (baterías, celulares, laptops, etc.)</option><option value="esp">Carga especial (+20 USD por CBM)</option>';
-    function opcionesTipo(){const s=$('k-tipo'), w=or()==='cn'&&!aire()?'cn':'std'; if(s.dataset.set===w) return; s.innerHTML=w==='cn'?TIPOS_CN:TIPOS_STD; s.dataset.set=w;}
+    const TIPOS_CN='<option value="gen">Carga general (sin litio)</option><option value="lit">Con litio o carga peligrosa (baterías, celulares, laptops, etc.)</option><option value="esp">Carga especial (+20 USD por CBM)</option>';
+    const EST_STD=$('k-est').innerHTML, EST_CN=[...CN_MAR.zona1,...CN_MAR.zona2].sort((a,b)=>a.localeCompare(b,'es')).map(e=>'<option>'+e+'</option>').join('');
+    function opcionesTipo(){const s=$('k-tipo'), w=or()==='cn'&&!aire()?'cn':'std'; if(s.dataset.set===w) return; s.innerHTML=w==='cn'?TIPOS_CN:TIPOS_STD; s.dataset.set=w;
+      const e=$('k-est'), v=e.value; e.innerHTML=w==='cn'?EST_CN:EST_STD; e.value=[...e.options].some(o=>o.value===v)?v:'Distrito Capital';}
     const IN=2.54, LB=0.45359237;
     let rows=[];
     const def={us:[{d:'Ropa y zapatos',q:2,l:18,w:14,h:12,p:15}],cn:[{d:'Mercancía',q:10,l:60,w:40,h:40,p:15}]};
