@@ -19,6 +19,14 @@ export const AGENDA = {
   semanas: 3,                      // cuántos días hacia adelante se muestran (en semanas)
   antelacion: 90,                  // se puede pedir una hora que empiece en 90 min o más (entra a las 13:00, agenda a las 15:00)
 };
+
+// Elise (6 nov. 2026): asesoría marítima de 35 USD. Llamada de 20 a 25 min (se reservan 30), mismos días, horas y bloqueos fijos.
+// Comparte la agenda con la 1 a 1: una hora pagada de cualquiera de las dos bloquea a la otra.
+export const TIPOS = {
+  '1a1': { nombre: 'asesoría 1 a 1', titulo: 'Asesoría 1 a 1', precio: 150, cfg: AGENDA },
+  maritima: { nombre: 'asesoría marítima', titulo: 'Asesoría marítima', precio: 35, cfg: { ...AGENDA, duracion: 30, paso: 30 } },
+};
+export const tipoDe = t => (TIPOS[t] ? t : '1a1');
 const SAL = 'kairos-1a1';
 const MIN = 60000, DIA = 86400000;
 const OFFSET_VE = -4 * 60; // Venezuela no cambia de hora
@@ -79,8 +87,10 @@ export function horarios(ocupadas = [], ahora = Date.now(), cfg = AGENDA) {
     for (const ini of inicioDelDia(m, cfg)) {
       if (ini < ahora + cfg.antelacion * MIN) continue;
       const fin = ini + cfg.duracion * MIN, lun = lunesVE(ini);
-      if (!azarSem.has(lun)) azarSem.set(lun, tomadasAlAzar(lun, cfg));
-      const tomada = azarSem.get(lun).has(ini) || ocupadas.some(o => +o.inicio < fin && +o.fin > ini);
+      if (!azarSem.has(lun)) azarSem.set(lun, tomadasAlAzar(lun));
+      // En la 1 a 1 el azar marca horas exactas; en las más cortas (marítima), las horas al azar de la 1 a 1 ocupan sus 90 min.
+      const az = azarSem.get(lun), tomadaAzar = cfg === AGENDA || cfg.duracion === AGENDA.duracion ? az.has(ini) : [...az].some(t => t < fin && t + AGENDA.duracion * MIN > ini);
+      const tomada = tomadaAzar || ocupadas.some(o => +o.inicio < fin && +o.fin > ini);
       out.push({ inicio: ini, libre: !tomada });
     }
   }

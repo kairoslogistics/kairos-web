@@ -441,7 +441,7 @@ const pref={get(k){try{return localStorage.getItem('kairos-admin-'+k)}catch(e){r
 
 /* ===== Pantallas ===== */
 function shell(){
-  const T=[['agenda','Agenda 1 a 1'],['aliados','Aliados por país'],['alianzas','Posibles alianzas'],['contactos','Contactos y negociación'],['cargas','Cargas'],['referidos','Referidos'],['costos','Costos y precios'],['cotizacion','Cotización'],['pagos','Pagos'],['codigos','Códigos'],['gastos','Gastos de viaje'],['requisitos','Requisitos']];
+  const T=[['agenda','Agenda asesorías'],['aliados','Aliados por país'],['alianzas','Posibles alianzas'],['contactos','Contactos y negociación'],['cargas','Cargas'],['referidos','Referidos'],['costos','Costos y precios'],['cotizacion','Cotización'],['pagos','Pagos'],['codigos','Códigos'],['gastos','Gastos de viaje'],['requisitos','Requisitos']];
   $('#app').innerHTML='<header class="top"><div class="wrap"><div class="brand"><b>KAIROS LOGISTICS</b><small>Administración</small></div><span class="mode">'+(MODO==='demo'?'Demostración':'Conectado')+'</span>'+(MODO==='real'?'<button class="btn ghost sm" id="salir" style="color:var(--brand-ink);border-color:var(--brand-ink)">Salir</button>':'')+
     '</div></header><div class="lay"><aside class="lat" id="lat"><button type="button" class="menu-btn" id="menu-btn" aria-expanded="false">☰ Menú · '+esc((T.find(t=>t[0]===tab)||T[1])[1])+'</button>'+
     '<nav class="tabs" role="tablist" aria-orientation="vertical">'+T.map(([k,l])=>'<button role="tab" data-tab="'+k+'" aria-selected="'+(tab===k)+'"><span>'+l+'</span>'+(k==='agenda'&&agPendientes()?'<span class="nb">'+agPendientes()+'</span>':'')+'</button>').join('')+'</nav></aside><main><div class="wrap" id="view"></div></main></div>';
@@ -591,10 +591,11 @@ function vReferidos(){
 /* Códigos para la web (Elise, 22 oct. 2026): la página pública ya no trae códigos escritos. Cada código se crea aquí, se manda al cliente
    cuando paga y el servidor lo marca al usarse. La web solo puede leer un código que ya conoce y sumarle un uso (ver firestore.rules). */
 // Elise (30 oct. 2026): el registrador de gastos va aparte (20 USD) y solo viene con la asesoría 1 a 1 (150 USD, se vende por WhatsApp).
-const COD_TIPOS=[['unoauno','Asesoría 1 a 1 150 USD: desglose, video, itinerario y registrador'],['asesoria','Asesoría 45 USD: desglose, video e itinerario'],['calculo','Otro vehículo 20 USD: desglose'],['plan','Itinerario de viaje 30 USD'],['gastos','Registrador de gastos 20 USD']];
+const COD_TIPOS=[['unoauno','Asesoría 1 a 1 150 USD: desglose, video, itinerario y registrador'],['maritima','Asesoría marítima 35 USD: desglose solo por vía marítima'],['asesoria','Asesoría 45 USD: desglose, video e itinerario'],['calculo','Otro vehículo 20 USD: desglose'],['plan','Itinerario de viaje 30 USD'],['gastos','Registrador de gastos 20 USD']];
 // Un vehículo extra (20 USD) es un código de tipo «calculo» con un vehículo.
 // Elise (26 oct. 2026): itinerario y asesoría duran 60 días (el itinerario se abre en hasta 3 dispositivos); otro vehículo, 30.
-const venceDe=t=>new Date(Date.now()+(['plan','asesoria','unoauno','gastos'].includes(t)?60:30)*864e5);
+// Elise (6 nov. 2026): el código de la asesoría marítima (35 USD) abre el desglose solo por vía marítima, un vehículo, 60 días.
+const venceDe=t=>new Date(Date.now()+(['plan','asesoria','unoauno','gastos','maritima'].includes(t)?60:30)*864e5);
 const codTipo=k=>(COD_TIPOS.find(x=>x[0]===k)||[,k])[1];
 function nuevoCodigo(){const A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',b=new Uint32Array(6);crypto.getRandomValues(b);let c;do{c='KAI-'+[...b].map(n=>A[n%32]).join('');crypto.getRandomValues(b);}while(S.codigos.some(x=>x.id===c));return c;}
 // Lo que el cliente vio cuando usó el código: datos del vehículo, el desglose y, si aplica, el plan de viaje.
@@ -1160,6 +1161,10 @@ function loginView(msg){
    La solicitud no bloquea la hora: se bloquea al confirmar el pago aquí (publico/agenda.ocupadas, sin datos del cliente).
    Aquí también van los bloqueos a mano (publico/agenda.bloqueos). Todas las horas son de Venezuela (UTC-4). */
 const AGV='America/Caracas', AGDUR=90*60000;
+// Elise (6 nov. 2026): la misma agenda tiene la asesoría 1 a 1 (150 USD) y la marítima (35 USD, 30 min). Las citas antiguas no tienen tipo: son 1 a 1.
+const AGT={'1a1':{n:'asesoría 1 a 1',t:'1 a 1',p:150},maritima:{n:'asesoría marítima',t:'Marítima',p:35}};
+const agT=c=>AGT[c.tipo]||AGT['1a1'];
+const agFin=c=>c.fin||c.inicio+AGDUR;
 const AG={citas:[],ocupadas:[],bloqueos:[],sub:'pendiente',listo:false,err:''};
 let agEscuchando=false;
 const agPendientes=()=>AG.citas.filter(c=>c.estado==='pendiente'&&c.inicio>Date.now()).length;
@@ -1169,17 +1174,17 @@ const agGcal=ms=>new Date(ms).toISOString().replace(/[-:]/g,'').replace(/\.\d+/,
 const agWa=(c,t)=>'https://wa.me/'+String(c.whatsapp).replace(/\D/g,'')+'?text='+encodeURIComponent(t);
 const agCliente=c=>c.zona&&c.zona!==AGV?agFecha(c.inicio,c.zona)+' (su hora)':'';
 const agNombre=c=>String(c.nombre||'').split(' ')[0];
-function agCalendar(c){return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent('Asesoría 1 a 1 · '+c.nombre)+'&dates='+agGcal(c.inicio)+'/'+agGcal(c.fin||c.inicio+AGDUR)+'&ctz='+AGV+
+function agCalendar(c){return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent((c.tipo==='maritima'?'Asesoría marítima · ':'Asesoría 1 a 1 · ')+c.nombre)+'&dates='+agGcal(c.inicio)+'/'+agGcal(agFin(c))+'&ctz='+AGV+
   '&details='+encodeURIComponent('WhatsApp: '+c.whatsapp+'\nCorreo: '+c.correo+'\nPaís: '+c.pais+(c.vehiculo?'\nVehículo: '+c.vehiculo:'')+(c.notas?'\nNotas: '+c.notas:'')+'\nSolicitud: '+c.id);}
 function escucharAgenda(){
   if(MODO!=='real'||!db||agEscuchando) return; agEscuchando=true;
-  const refrescar=()=>{AG.listo=true; if(tab==='agenda') render(); const b=document.querySelector('[data-tab="agenda"]'); if(b){const n=agPendientes();b.innerHTML='<span>Agenda 1 a 1</span>'+(n?'<span class="nb">'+n+'</span>':'');}};
+  const refrescar=()=>{AG.listo=true; if(tab==='agenda') render(); const b=document.querySelector('[data-tab="agenda"]'); if(b){const n=agPendientes();b.innerHTML='<span>Agenda asesorías</span>'+(n?'<span class="nb">'+n+'</span>':'');}};
   db.collection('citas').orderBy('created_at','desc').limit(300).onSnapshot(s=>{AG.citas=s.docs.map(d=>d.data());refrescar();},e=>{AG.err=e.message;refrescar();});
   db.collection('publico').doc('agenda').onSnapshot(d=>{const a=d.exists?d.data():{};AG.ocupadas=a.ocupadas||[];AG.bloqueos=a.bloqueos||[];refrescar();});
 }
-function agChoca(c){const fin=c.fin||c.inicio+AGDUR;return AG.ocupadas.concat(AG.bloqueos).filter(o=>o.id!==c.id&&o.inicio<fin&&o.fin>c.inicio);}
+function agChoca(c){const fin=agFin(c);return AG.ocupadas.concat(AG.bloqueos).filter(o=>o.id!==c.id&&o.inicio<fin&&o.fin>c.inicio);}
 function vAgenda(){
-  const head='<div class="head"><div><h2>Agenda 1 a 1</h2><p>Las solicitudes no bloquean la hora. Cuando el cliente pague los 150 USD, presiona <b>Confirmar pago</b>: la hora se reserva y deja de verse en la web. Todas las horas son de Venezuela.</p></div><a class="btn ghost" href="/agendar/" target="_blank" rel="noopener" style="text-decoration:none">Ver la página del cliente</a></div>';
+  const head='<div class="head"><div><h2>Agenda de asesorías</h2><p>Asesoría 1 a 1 (150 USD, 1 h 30 min) y asesoría marítima (35 USD, 30 min). Las solicitudes no bloquean la hora. Cuando el cliente pague, presiona <b>Confirmar pago</b>: la hora se reserva y deja de verse en la web para las dos asesorías. Todas las horas son de Venezuela.</p></div><a class="btn ghost" href="/agendar/" target="_blank" rel="noopener" style="text-decoration:none">Ver la página del cliente</a></div>';
   if(MODO!=='real') return head+'<p class="sub">La agenda funciona solo con la base de datos conectada.</p>';
   if(AG.err) return head+'<p class="ag-err">No se pudo leer la agenda: '+esc(AG.err)+'</p>';
   if(!AG.listo) return head+'<p class="sub">Cargando…</p>';
@@ -1192,19 +1197,21 @@ function vAgenda(){
       (l.length?l.map(o=>'<div class="ag-cita"><p class="ag-cuando">'+esc(agFecha(o.inicio))+' a '+esc(agHora(o.fin))+'</p>'+(o.nota?'<p class="sub">'+esc(o.nota)+'</p>':'')+'<div class="ag-acc"><button class="btn danger sm" data-agquitar="'+o.inicio+'">Quitar bloqueo</button></div></div>').join(''):'<p class="sub">No hay bloqueos a mano.</p>');
   }
   const L=AG.sub==='pendiente'?AG.citas.filter(c=>c.estado==='pendiente'&&c.inicio>ahora).sort((a,b)=>a.inicio-b.inicio)
-    :AG.sub==='confirmada'?AG.citas.filter(c=>c.estado==='confirmada'&&c.inicio+AGDUR>ahora).sort((a,b)=>a.inicio-b.inicio)
-    :AG.citas.filter(c=>c.estado==='cancelada'||c.inicio+AGDUR<=ahora).sort((a,b)=>b.inicio-a.inicio);
+    :AG.sub==='confirmada'?AG.citas.filter(c=>c.estado==='confirmada'&&agFin(c)>ahora).sort((a,b)=>a.inicio-b.inicio)
+    :AG.citas.filter(c=>c.estado==='cancelada'||agFin(c)<=ahora).sort((a,b)=>b.inicio-a.inicio);
   if(!L.length) return head+sub+'<p class="sub">'+(AG.sub==='pendiente'?'No hay solicitudes por confirmar.':'Nada por aquí.')+'</p>';
   return head+sub+L.map(c=>{
-    const ch=c.estado==='pendiente'?agChoca(c):[], hc=agCliente(c);
-    return '<div class="ag-cita '+esc(c.estado)+'"><h3>'+esc(c.nombre)+' <span class="pill'+(c.estado==='confirmada'?' done':c.estado==='pendiente'?' mid':' off')+'">'+(c.estado==='pendiente'?'Falta el pago':c.estado==='confirmada'?'Pagada':'Cancelada')+'</span></h3>'+
-      '<p class="ag-cuando">'+esc(agFecha(c.inicio))+' · hora Venezuela</p>'+(hc?'<p class="sub">'+esc(hc)+'</p>':'')+
+    const ch=c.estado==='pendiente'?agChoca(c):[], hc=agCliente(c), T=agT(c), mar=c.tipo==='maritima';
+    return '<div class="ag-cita '+esc(c.estado)+'"><h3>'+esc(c.nombre)+' <span class="pill'+(mar?' mid':'')+'">'+esc(T.t)+' · '+T.p+' USD</span> <span class="pill'+(c.estado==='confirmada'?' done':c.estado==='pendiente'?' mid':' off')+'">'+(c.estado==='pendiente'?'Falta el pago':c.estado==='confirmada'?'Pagada':'Cancelada')+'</span></h3>'+
+      '<p class="ag-cuando">'+esc(agFecha(c.inicio))+' a '+esc(agHora(agFin(c)))+' · hora Venezuela</p>'+(hc?'<p class="sub">'+esc(hc)+'</p>':'')+
       (ch.length?'<p class="ag-err">Ojo: ya hay otra asesoría pagada o un bloqueo en ese horario.</p>':'')+
       '<dl class="cdat"><dt>WhatsApp</dt><dd>'+esc(c.whatsapp)+'</dd><dt>Correo</dt><dd>'+esc(c.correo)+'</dd><dt>País</dt><dd>'+esc(c.pais)+'</dd>'+
       (c.vehiculo?'<dt>Vehículo</dt><dd>'+esc(c.vehiculo)+'</dd>':'')+(c.notas?'<dt>Quiere resolver</dt><dd>'+esc(c.notas)+'</dd>':'')+
-      '<dt>Pidió el</dt><dd>'+esc(agFecha(c.created_at))+'</dd><dt>Solicitud</dt><dd>'+esc(c.id)+'</dd></dl><div class="ag-acc">'+
-      (c.estado==='pendiente'?'<button class="btn" data-agconf="'+esc(c.id)+'">Confirmar pago y reservar</button><a class="btn ghost" target="_blank" rel="noopener" href="'+esc(agWa(c,'Hola '+agNombre(c)+', recibimos tu solicitud de asesoría 1 a 1 para el '+agFecha(c.inicio)+' (hora Venezuela). Para reservarla, el pago es de 150 USD. ¿Cómo prefieres pagar: transferencia, dólares o Binance?'))+'">Escribirle por WhatsApp</a>':'')+
-      (c.estado==='confirmada'?'<a class="btn" target="_blank" rel="noopener" href="'+esc(agCalendar(c))+'">Agregar a mi Google Calendar</a><a class="btn ghost" target="_blank" rel="noopener" href="'+esc(agWa(c,'Hola '+agNombre(c)+', confirmamos tu pago. Tu asesoría 1 a 1 queda reservada para el '+agFecha(c.inicio)+' (hora Venezuela)'+(hc?', '+hc:'')+'. Antes de la hora te enviamos el enlace de la videollamada.'))+'">Confirmarle por WhatsApp</a>':'')+
+      '<dt>Pidió el</dt><dd>'+esc(agFecha(c.created_at))+'</dd><dt>Solicitud</dt><dd>'+esc(c.id)+'</dd>'+(c.codigo?'<dt>Código marítimo</dt><dd class="code">'+esc(c.codigo)+'</dd>':'')+'</dl><div class="ag-acc">'+
+      (c.estado==='pendiente'?'<button class="btn" data-agconf="'+esc(c.id)+'">Confirmar pago y reservar</button><a class="btn ghost" target="_blank" rel="noopener" href="'+esc(agWa(c,'Hola '+agNombre(c)+', recibimos tu solicitud de '+T.n+' para el '+agFecha(c.inicio)+' (hora Venezuela). Para reservarla, el pago es de '+T.p+' USD. ¿Cómo prefieres pagar: transferencia, dólares o Binance?'))+'">Escribirle por WhatsApp</a>':'')+
+      (c.estado==='confirmada'?'<a class="btn" target="_blank" rel="noopener" href="'+esc(agCalendar(c))+'">Agregar a mi Google Calendar</a>'+
+        (mar&&!c.codigo?'<button class="btn" data-agcod="'+esc(c.id)+'">Crear su código marítimo</button>':'')+
+        '<a class="btn ghost" target="_blank" rel="noopener" href="'+esc(agWa(c,'Hola '+agNombre(c)+', confirmamos tu pago. Tu '+T.n+' queda reservada para el '+agFecha(c.inicio)+' (hora Venezuela)'+(hc?', '+hc:'')+'. '+(mar?'Antes de la hora te enviamos el enlace de la llamada.'+(c.codigo?' Tu código para el simulador (solo vía marítima, un vehículo) es '+c.codigo+'. Úsalo en https://kairoslogistics.net/#vehiculo':''):'Antes de la hora te enviamos el enlace de la videollamada.')))+'">Confirmarle por WhatsApp</a>':'')+
       (c.estado!=='cancelada'&&c.inicio>ahora?'<button class="btn danger sm" data-agcanc="'+esc(c.id)+'">Cancelar</button>':'')+'</div></div>';
   }).join('');
 }
@@ -1214,12 +1221,22 @@ function bindAgenda(){
   document.querySelectorAll('[data-agconf]').forEach(b=>b.onclick=()=>{
     const c=AG.citas.find(x=>x.id===b.dataset.agconf); if(!c) return;
     if(agChoca(c).length&&!confirm('Ya hay otra asesoría pagada o un bloqueo en ese horario. ¿Confirmar igual?')) return;
-    if(!confirm('¿Confirmas que '+c.nombre+' pagó los 150 USD? La hora del '+agFecha(c.inicio)+' queda reservada.')) return;
+    if(!confirm('¿Confirmas que '+c.nombre+' pagó los '+agT(c).p+' USD de la '+agT(c).n+'? La hora del '+agFecha(c.inicio)+' queda reservada.')) return;
     b.disabled=true;
-    agTx((t,ref,a)=>{let oc=(a.ocupadas||[]).filter(o=>o.id!==c.id);oc.push({id:c.id,inicio:c.inicio,fin:c.fin||c.inicio+AGDUR});oc=oc.filter(o=>o.fin>Date.now()-7*864e5);
+    agTx((t,ref,a)=>{let oc=(a.ocupadas||[]).filter(o=>o.id!==c.id);oc.push({id:c.id,inicio:c.inicio,fin:agFin(c)});oc=oc.filter(o=>o.fin>Date.now()-7*864e5);
       t.set(ref,{ocupadas:oc},{merge:true});t.update(db.collection('citas').doc(c.id),{estado:'confirmada',confirmada_el:Date.now()});})
       .then(()=>{AG.sub='confirmada';render();alert('Listo, la hora quedó reservada. Ahora agrégala a tu Google Calendar (te avisa en el teléfono) y confírmale al cliente por WhatsApp.');})
       .catch(e=>{b.disabled=false;alert('No se pudo confirmar: '+e.message);});
+  });
+  // Asesoría marítima pagada: crea su código del simulador (solo vía marítima, un vehículo) y lo deja anotado en la cita.
+  document.querySelectorAll('[data-agcod]').forEach(b=>b.onclick=async()=>{
+    const c=AG.citas.find(x=>x.id===b.dataset.agcod); if(!c||c.codigo) return;
+    b.disabled=true; const id=nuevoCodigo();
+    try{
+      await DB.save('codigos',{id,tipo:'maritima',vence:venceDe('maritima'),max:1,usos:0,cliente:c.nombre+' · '+c.correo,cita:c.id});
+      await db.collection('citas').doc(c.id).update({codigo:id});
+      const ok=await copiar(id); toast('Código '+id+' creado'+(ok?' y copiado':''));
+    }catch(e){b.disabled=false; alert('No se pudo crear el código: '+(e.message||'revisa la conexión'));}
   });
   document.querySelectorAll('[data-agcanc]').forEach(b=>b.onclick=()=>{
     const c=AG.citas.find(x=>x.id===b.dataset.agcanc); if(!c) return;

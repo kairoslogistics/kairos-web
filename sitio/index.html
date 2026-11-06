@@ -665,6 +665,7 @@ html[data-vista=itinerario] .proto-bar,html[data-vista=itinerario] header.top,ht
           <!-- Elise (6 nov. 2026): la asesoría de 45 USD queda en «Próximamente»; no se puede comprar por ahora. -->
           <button class="btn primary" type="button" id="v-cta-ases" disabled aria-disabled="true">Asesoría completa · Próximamente</button>
           <a class="btn ghost" href="/agendar/">Agenda tu asesoría 1 a 1 en vivo · 150 USD</a>
+          <a class="btn ghost" href="/agendar/?tipo=maritima">Solo por barco: asesoría marítima · 35 USD</a>
           <a class="small" id="v-cta-mas" href="#curso" data-go="curso">Qué incluye la asesoría</a>
         </div>
         <!-- Jesús (27 oct. 2026): opción de comprar solo el itinerario, debajo de la asesoría. Solo por tierra. -->
@@ -993,6 +994,10 @@ html[data-vista=itinerario] .proto-bar,html[data-vista=itinerario] header.top,ht
     <div class="tier feat" id="uno-a-uno" style="margin-bottom:20px"><span class="chip sim" style="justify-self:start">En vivo</span><h3>Asesoría 1 a 1 personalizada, totalmente en vivo</h3><div class="price">150 USD</div>
       <ul class="clean muted small"><li>Una sesión en vivo de 1 hora y media aproximadamente, solo para tu caso, para revisar tu vehículo y tu plan paso a paso</li><li>Atención personalizada y asistencia 24/7 durante todo el proceso</li><li>Consultas y dudas día tras día, desde cero hasta que tu vehículo esté nacionalizado en Venezuela</li><li>Acompañamiento completo por tierra: qué hacer en cada frontera y en las paradas obligatorias, revisión de tus documentos antes de salir y seguimiento por WhatsApp durante el viaje y la nacionalización</li><li>Todo lo de la asesoría completa: ¿tu vehículo califica? Régimen de equipaje u ordinario, ruta recomendada, documentos y requisitos del certificado de uso, y el detalle de cada gasto en tu resumen</li><li>Tu itinerario de viaje día por día con hoteles recomendados, en una página interactiva que recibes en tu teléfono: dónde dormir cada noche según los kilómetros que manejes por día, mapa con las paradas y ruta en Google Maps por tramos</li><li>El video completo de la asesoría</li><li>Tu registrador de gastos del viaje: anotas en el camino lo que gastas en cada país y te lo suma en dólares, aunque no tengas señal</li><li>Agentes aduanales: con quién y cómo trabajar, y las letras pequeñas que nadie te dice</li><li>Gastos que realizarás: combustible, peajes, alimentación, hospedaje, trámites, impuestos y servicios, cada uno por separado</li><li>Opción de viajar en caravana con Kairos (valor aparte)</li><li>Respaldo de nuestra experiencia: más de 15 viajes por tierra que hicimos nosotros mismos, más de 300 importaciones exitosas y más de 700 asesorías realizadas, y envíos marítimos. Y muchísimo más</li></ul>
       <a class="btn primary" href="/agendar/">Agenda tu asesoría 1 a 1</a></div>
+    <!-- Elise (6 nov. 2026): asesoría marítima, 35 USD. Mismo pago y misma confirmación que la 1 a 1 (la hora se reserva al confirmar el pago). -->
+    <div class="tier feat" id="maritima" style="margin-bottom:20px"><span class="chip sim" style="justify-self:start">Vía marítima</span><h3>Asesoría marítima</h3><div class="price">35 USD</div>
+      <ul class="clean muted small"><li>Para quien ya decidió traer su vehículo a Venezuela por barco, hasta La Guaira</li><li>Llamada en vivo de 20 a 25 minutos: te explico todo el procedimiento paso a paso</li><li>Estudio de tu caso: tu vehículo, el país de salida y el régimen que te corresponde (equipaje u ordinario)</li><li>Tu código para el simulador, solo para la vía marítima: ves el costo exacto de tu vehículo, cada gasto por separado y tu resumen en una hoja (un vehículo por código)</li><li>Pagas por transferencia en pesos chilenos, en dólares o por Binance. Tu hora queda reservada cuando confirmamos el pago</li><li>Si quieres comparar la vía terrestre y la marítima, la asesoría 1 a 1 en vivo cubre las dos</li></ul>
+      <a class="btn primary" href="/agendar/?tipo=maritima">Agenda tu asesoría marítima</a></div>
     <!-- Elise (30 oct. 2026): el registrador de gastos se vende aparte (15 USD) y viene solo con la asesoría 1 a 1. El itinerario ya no lo trae. -->
     <div class="ladder cuatro">
       <div class="tier feat"><span class="chip soon" style="justify-self:start">Próximamente</span><h3>Asesoría para importar tu vehículo a Venezuela</h3><div class="price">45 USD <small id="curso-local"></small></div>
@@ -1395,7 +1400,7 @@ html[data-vista=itinerario] .proto-bar,html[data-vista=itinerario] header.top,ht
 
   /* ---------- Simulador de vehículo ---------- */
   // Códigos (Elise, 22 oct. 2026): viven en Firebase, colección «codigos», y se crean en el panel. Ninguno está escrito en esta página.
-  // Tipos: asesoria (desglose y plan de viaje), unoauno (asesoría 1 a 1: lo mismo más el registrador), calculo (desglose), plan (plan de viaje) y gastos (solo /gastos/). El servidor solo deja sumar un uso mientras queden.
+  // Tipos: asesoria (desglose y plan de viaje), unoauno (asesoría 1 a 1: lo mismo más el registrador), calculo (desglose), maritima (asesoría marítima, 6 nov. 2026: desglose solo por vía marítima), plan (plan de viaje) y gastos (solo /gastos/). El servidor solo deja sumar un uso mientras queden.
   const CODIGOS_URL=c=>'https://firestore.googleapis.com/v1/projects/'+FB_WEB.projectId+'/databases/(default)/documents/codigos/'+encodeURIComponent(c)+'?key='+FB_WEB.apiKey;
   const numF=f=>f?+(f.integerValue??f.doubleValue??0):0;
   async function canjear(code,para){
@@ -1404,8 +1409,9 @@ html[data-vista=itinerario] .proto-bar,html[data-vista=itinerario] header.top,ht
     if(r.status===404||r.status===403) return {err:'no'};
     if(!r.ok) return {err:'red'};
     const f=(await r.json()).fields||{}, tipo=(f.tipo||{}).stringValue||'', usos=numF(f.usos), max=numF(f.max)||1;
-    const ases=tipo==='asesoria'||tipo==='unoauno', sirve=para==='plan'?(tipo==='plan'||ases):(ases||tipo==='calculo');
+    const ases=tipo==='asesoria'||tipo==='unoauno', sirve=para==='plan'?(tipo==='plan'||ases):(ases||tipo==='calculo'||tipo==='maritima');
     if(!sirve) return {err:'tipo',tipo};
+    if(tipo==='maritima'&&vRoute()!=='mar') return {err:'mar',tipo};
     const vence=(f.vence||{}).timestampValue||(f.vence||{}).stringValue; if(vence&&new Date(vence)<new Date()) return {err:'vencido'};
     // Cada código sirve para un vehículo (Elise, 23 oct. 2026). Queda ligado al primero que abre y ese mismo se puede volver a abrir.
     const clave=tipo==='plan'?'plan':vKey(), veh=(f.vehiculo||{}).stringValue||'';
@@ -1427,13 +1433,14 @@ html[data-vista=itinerario] .proto-bar,html[data-vista=itinerario] header.top,ht
     const rutas=[actual,actual==='mar'?'terr':'mar'].filter(r=>!$(r==='mar'?'v-mar':'v-terr').disabled);
     rutas.forEach(r=>{
       $(r==='mar'?'v-mar':'v-terr').checked=true; const c=vCompute();
+      if(tipo==='maritima'&&r!=='mar') return;
       if(tipo!=='plan') f['Desglose vía '+(r==='mar'?'marítima':'terrestre')+(rutas.length>1&&r===actual?' (la que eligió)':'')]=lista(c);
       if(tipo!=='calculo'&&c.land&&c.land.itin) f['Plan de viaje']={arrayValue:{values:c.land.itin.map(e=>({stringValue:e.pausa?'Nacionalización en Santa Elena de Uairén':e.d+': '+e.de+' → '+e.a+(e.ferry?' (ferry)':' ('+e.km+' km)')}))}};
     });
     $(actual==='mar'?'v-mar':'v-terr').checked=true;
     return {mapValue:{fields:f}};
   }
-  const COD_ERR={datos:'Antes de usar tu código, escribe tu nombre y tu correo. Los guardamos con tu código para tu respaldo.',no:'Ese código no existe. Revisa que esté escrito igual que en tu mensaje de compra.',usado:'Este código ya se usó con otro vehículo. El detalle de cada vehículo extra cuesta 20 USD.',vencido:'Este código ya venció. Escríbenos por WhatsApp y te ayudamos.',red:'No pudimos revisar el código. Revisa tu conexión e inténtalo de nuevo.'};
+  const COD_ERR={datos:'Antes de usar tu código, escribe tu nombre y tu correo. Los guardamos con tu código para tu respaldo.',no:'Ese código no existe. Revisa que esté escrito igual que en tu mensaje de compra.',usado:'Este código ya se usó con otro vehículo. El detalle de cada vehículo extra cuesta 20 USD.',vencido:'Este código ya venció. Escríbenos por WhatsApp y te ayudamos.',mar:'Tu código es de la asesoría marítima: sirve solo para la vía marítima. Elige «Marítima» en la ruta y vuelve a presionar «Ver desglose».',red:'No pudimos revisar el código. Revisa tu conexión e inténtalo de nuevo.'};
   // Lo que ya se abrió en este navegador, para no gastar otro uso con el mismo vehículo.
   let abiertos={}; try{abiertos=JSON.parse(ss.get('kairos-cod')||'{}')||{}}catch(e){}
   const guardarAbiertos=()=>ss.set('kairos-cod',JSON.stringify(abiertos));
@@ -1686,7 +1693,8 @@ d.querySelector('b').append(e.pausa?'Nacionalización en Santa Elena de Uairén'
     $('v-reg-note').textContent=c.reg==='equi'?'Requisitos: haber vivido 1 año o más fuera de Venezuela, vehículo a tu nombre con 11 meses o más de registro y certificado de uso legalizado por el consulado. Un vehículo por persona y no puedes venderlo en 3 años. Pagas el 1 % del valor del vehículo si vale hasta 20.000 USD; si vale más, 20 % ad valorem y 1 % de tasa, más 20 % si el motor es de más de 2.0.':'Para cualquier persona con RIF. Solo vehículos de hasta 5 años de uso: en '+ANIO_ACTUAL+', de '+ORD_MIN+' a '+ANIO_ACTUAL+' (recomendado '+ORD_REC+' en adelante). Pagas 20 % ad valorem, 16 % IVA y 1 % de tasa; los motores de más de 2.0 que no son pick-up pagan 20 % adicional.';
     $('v-title').textContent=TIPO[$('v-tipo').value]+' · '+($('v-modelo').value||'Vehículo')+' '+($('v-anio').value||'');
     $('v-route').textContent='Desde '+(c.land?vSalida().n+', ':'')+c.d.name+' · '+(r==='mar'?'marítima, contenedor compartido':'terrestre'+(c.land?(c.land.br==='stm'?' con ferry por Santarém':' por Porto Velho')+' hasta '+c.land.zona+' ('+c.land.dest+')':''))+' · '+(c.reg==='equi'?'régimen de equipaje':'régimen ordinario');
-    const ok=unlockKey&&unlockKey===vKey();
+    // Código de la asesoría marítima: el desglose se ve solo con la ruta marítima.
+    const ok=unlockKey&&unlockKey===vKey()&&!((abiertos.desglose||{}).mar&&r!=='mar');
     // Gratis: solo el total estimado. El desglose se abre con código (Elise, 22 oct. 2026).
     const rows=ok?c.rows.slice():[];
     const ti=rows.findIndex(x=>/^Impuestos/.test(x[0]));
@@ -1722,17 +1730,23 @@ d.querySelector('b').append(e.pausa?'Nacionalización en Santa Elena de Uairén'
   $('v-calc').addEventListener('click',async(ev)=>{
     const code=$('v-code').value.trim().toUpperCase(); const st=$('v-status'), btn=$('v-calc');
     if(ev.isTrusted&&!legalMarcado()){st.textContent='Marca la casilla para aceptar el aviso legal.'; st.className='status err'; $('v-legal').focus(); return;}
-    if(unlockCode===code&&unlockKey===vKey()){vCalc();return;}
+    if(unlockCode===code&&unlockKey===vKey()){
+      if((abiertos.desglose||{}).mar&&vRoute()!=='mar'){ if($('v-mar').disabled){st.textContent='Tu código es solo para la vía marítima, y desde este país no hay vía marítima.';st.className='status err';return;} $('v-mar').checked=true; }
+      vCalc();return;}
     btn.disabled=true; st.textContent='Revisando tu código…'; st.className='status';
-    const r=await canjear(code,'desglose'); btn.disabled=false;
+    // Código marítimo con la ruta terrestre elegida: se pasa a la marítima si el país la tiene.
+    let r=await canjear(code,'desglose');
+    if(r.err==='mar'&&!$('v-mar').disabled){ $('v-mar').checked=true; vCalc(); r=await canjear(code,'desglose'); }
+    btn.disabled=false;
+    if(r.err==='mar'){st.textContent='Tu código es de la asesoría marítima y desde este país no hay vía marítima. Escríbenos por WhatsApp y te ayudamos.';st.className='status err';return;}
     if(r.err==='tipo'&&r.tipo==='plan'&&!$('v-terr').disabled){ $('v-terr').checked=true; vCalc(); $('v-plan-code').value=code; st.textContent=''; $('v-plan-open').click(); $('v-plan-lock').scrollIntoView({block:'center'}); return; }
     if(r.err==='tipo'&&r.tipo==='gastos'){location.href='/gastos/?codigo='+encodeURIComponent(code);return;}
     if(r.err){st.textContent=r.err==='tipo'?'Ese código es del plan de viaje. Escríbelo en el recuadro «Plan de viaje».':COD_ERR[r.err];st.className='status err';return;}
-    vActivo=true; unlockKey=vKey(); unlockCode=code; abiertos.desglose={code,key:unlockKey};
+    vActivo=true; unlockKey=vKey(); unlockCode=code; abiertos.desglose={code,key:unlockKey}; if(r.tipo==='maritima') abiertos.desglose.mar=true;
     if(r.tipo==='unoauno') abiertos.gastos=code;
     if(r.tipo==='asesoria'||r.tipo==='unoauno'){abiertos.video=code; const it=await abrirItin(code); if(!it.error){abiertos.plan=code; planOk=true;} else if(it.motivo!=='red'){ $('v-plan-status').textContent=it.error; $('v-plan-status').className='status err'; }}
     guardarAbiertos();
-    vCalc(); st.textContent='Listo. Ya ves cada gasto y puedes descargar tu resumen. Puedes cambiar la ruta o el régimen. Para otro vehículo, cada detalle extra cuesta 20 USD.'; st.className='status ok';
+    vCalc(); st.textContent=r.tipo==='maritima'?'Listo. Ya ves cada gasto por vía marítima y puedes descargar tu resumen. Puedes cambiar el régimen. Tu código es solo para la vía marítima; para otro vehículo, cada detalle extra cuesta 20 USD.':'Listo. Ya ves cada gasto y puedes descargar tu resumen. Puedes cambiar la ruta o el régimen. Para otro vehículo, cada detalle extra cuesta 20 USD.'; st.className='status ok';
   });
   /* Itinerario privado (Elise, 26 oct. 2026): /api/itinerario revisa que el código esté vigente (60 días) y lo cuenta por dispositivo
      (máximo 3). Devuelve lo que el cliente eligió en el simulador para armar el mismo itinerario en otro teléfono. */
