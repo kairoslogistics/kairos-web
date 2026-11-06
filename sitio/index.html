@@ -650,7 +650,7 @@ html[data-vista=itinerario] .proto-bar,html[data-vista=itinerario] header.top,ht
           <label class="check v-sub"><input type="checkbox" id="v-baja"> y la baja del vehículo ante el Registro Civil</label></div>
           <p class="note" id="v-val-usd"></p>
         </fieldset>
-        <p class="note" id="v-tax-note">Impuestos según la experiencia de Kairos, por confirmar con el agente de aduanas. Régimen de equipaje: 1 % del valor del vehículo hasta 20.000 USD; si vale más, 20 % ad valorem y 1 % de tasa aduanera, más 20 % adicional para motores de más de 2.0 (salvo pick-up). Régimen ordinario: 20 % ad valorem, 16 % IVA y 1 % de tasa aduanera, más 20 % adicional para motores de más de 2.0 (salvo pick-up). Fletes por contenedor, valor variable. Los demás trámites en Venezuela los ves uno por uno en el desglose con tu código.</p>
+        <p class="note" id="v-tax-note">Impuestos según la experiencia de Kairos, por confirmar con el agente de aduanas. Régimen de equipaje: 1 % del valor del vehículo hasta 20.000 USD; si vale más, 20 % ad valorem y 1 % de tasa aduanera, más 20 % adicional para motores de más de 2.0. Régimen ordinario: 20 % ad valorem, 16 % IVA y 1 % de tasa aduanera, más 20 % adicional para motores de más de 2.0. Pick-up, en cualquier régimen y con cualquier motor: 20 % ad valorem, 16 % IVA y 1 % de tasa aduanera, más 0,12 % de impuesto municipal Gran Sabana sobre el ad valorem. Fletes por contenedor, valor variable. Los demás trámites en Venezuela los ves uno por uno en el desglose con tu código.</p>
       </form>
       <aside class="slip" id="v-slip" aria-live="polite">
         <div class="slip-head"><h3 id="v-title">Toyota Corolla 2018</h3><span class="stamp example" id="v-stamp">Estimado</span></div>
@@ -1599,7 +1599,7 @@ html[data-vista=itinerario] .proto-bar,html[data-vista=itinerario] header.top,ht
     const p=$('v-pais').value, d=PAIS[p], r=vRoute(), reg=vReg();
     const val=p==='cl'?vVal()/RATES.clpUsd:vVal();
     // Elise (28 oct. 2026): motor de 2.1 en adelante paga 20 % más; en equipaje también las camionetas.
-    const pick=$('v-tipo').value==='pick', grande=vCil()>=2.1, big=grande||pick;
+    const pick=$('v-tipo').value==='pick', grande=vCil()>=2.1;
     let log, logRows, base, land=null;
     if(r==='mar'&&p==='cl'){
       logRows=MAR_CL.slice(); log=logRows.reduce((a,x)=>a+x[1],0); base=val+MAR_CL[0][1]+val*VEH.seguro/100;
@@ -1609,14 +1609,20 @@ html[data-vista=itinerario] .proto-bar,html[data-vista=itinerario] header.top,ht
     }else{
       land=tierra(p); logRows=land.rows; log=logRows.reduce((a,x)=>a+(typeof x[1]==='number'?x[1]:0),0); base=val+VEH.fleteTierra+val*VEH.seguro/100;
     }
-    let taxRows, tax;
+    let taxRows, tax, alcPick=false;
+    // Elise (6 nov. 2026): la pick-up paga siempre 20 % ad valorem, 16 % IVA y 1 % de tasa, sin importar el motor ni el régimen,
+    // más la alcaldía de Gran Sabana 0,12 % calculada solo sobre el monto del ad valorem.
+    if(pick){
+      const adv=base*VEH.adv/100, iva=base*VEH.iva/100, ts=base*VEH.tasa/100; tax=adv+iva+ts; alcPick=adv;
+      taxRows=[['Impuestos (pick-up, '+(reg==='equi'?'régimen de equipaje':'régimen ordinario')+')',tax,1],['Ad valorem '+VEH.adv+' %',adv,2],['IVA '+VEH.iva+' %',iva,2],['Tasa aduanera '+VEH.tasa+' %',ts,2]];
+    }
     // Jesús (27 oct. 2026): en equipaje, hasta 20.000 USD de valor se paga 1 %. Sobre 20.000 USD: 20 % ad valorem y 1 % de tasa aduanera,
     // más 20 % si el motor es de más de 2.0 (como en el ordinario, salvo pick-up). Sin IVA.
-    if(reg==='equi'&&base<=VEH.equiTope){ tax=base*VEH.equiPct/100; taxRows=[['Impuestos (régimen de equipaje)',tax,1],[VEH.equiPct+' % del valor del vehículo (hasta 20.000 USD)',tax,2]]; }
+    else if(reg==='equi'&&base<=VEH.equiTope){ tax=base*VEH.equiPct/100; taxRows=[['Impuestos (régimen de equipaje)',tax,1],[VEH.equiPct+' % del valor del vehículo (hasta 20.000 USD)',tax,2]]; }
     else if(reg==='equi'){
-      const adv=base*VEH.adv/100, ext=big?base*VEH.motorExtra/100:0, ts=base*VEH.tasa/100; tax=adv+ext+ts;
+      const adv=base*VEH.adv/100, ext=grande?base*VEH.motorExtra/100:0, ts=base*VEH.tasa/100; tax=adv+ext+ts;
       taxRows=[['Impuestos (régimen de equipaje, vehículo de más de 20.000 USD)',tax,1],['Ad valorem '+VEH.adv+' %',adv,2]];
-      if(big) taxRows.push(['Motor de más de 2.0: '+VEH.motorExtra+' % adicional',ext,2]);
+      if(grande) taxRows.push(['Motor de más de 2.0: '+VEH.motorExtra+' % adicional',ext,2]);
       taxRows.push(['Tasa aduanera '+VEH.tasa+' %',ts,2]);
     }
     else{
@@ -1628,7 +1634,7 @@ html[data-vista=itinerario] .proto-bar,html[data-vista=itinerario] header.top,ht
     }
     // Elise (2 nov. 2026): la segunda revisión de la Guardia Nacional en Puerto Ordaz vuelve a sumarse en el cálculo por tierra (500 USD).
     // Elise (3 nov. 2026): alcaldía 0,12 % sobre el CIF (costo, seguro y flete), en los dos regímenes.
-    const alc=base*VEH.alcaldia/100; tax+=alc; taxRows[0][1]=tax; taxRows.push(['Alcaldía '+VEH.alcaldia+' % (sobre el CIF)',alc,2]);
+    const alc=(alcPick!==false?alcPick:base)*VEH.alcaldia/100; tax+=alc; taxRows[0][1]=tax; taxRows.push([alcPick!==false?'Impuesto municipal Gran Sabana '+VEH.alcaldia+' % (sobre el ad valorem)':'Alcaldía '+VEH.alcaldia+' % (sobre el CIF)',alc,2]);
     const venRows=r==='terr'?[['Agente de aduanas en Santa Elena de Uairén (gastos a terceros)',VEH.ageTierra],['Segunda revisión de la Guardia Nacional en Puerto Ordaz',VEH.gnb]]:[...MAR_VE_AGENCIA,...MAR_VE_PUERTO];
     venRows.push(['Homologación (gastos a terceros)',VEH.homolog],['Título y placas (gastos a terceros)',VEH.titulo]);
     if(reg==='ord') venRows.push(['SENCAMER (gastos a terceros)',VEH.sencamer]); // Elise: el régimen de equipaje no lleva SENCAMER.
