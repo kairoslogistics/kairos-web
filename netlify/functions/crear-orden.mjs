@@ -12,6 +12,8 @@ export default async (req) => {
   let d; try { d = await req.json(); } catch { return json({ error: 'Datos inválidos' }, 400); }
   const v = validarCliente(d);
   if (v.error) return json({ error: v.error }, 400);
+  // Elise (6 nov. 2026): la asesoría de 45 USD está en «Próximamente»; no se cobra por ahora.
+  if (d.producto === 'asesoria') return json({ error: 'La asesoría de 45 USD estará disponible próximamente.' }, 403);
   const { p, nombre, correo, whatsapp, pais, sim } = v;
 
   const id = nuevaOrden();
