@@ -1,11 +1,11 @@
-// Agenda de la asesoría 1 a 1 (Elise, 2 nov. 2026). Página: /agendar/. Panel: /admin/agenda/.
+// Agenda de la asesoría 1 a 1 (Elise, 2 nov. 2026) y de la asesoría marítima (6 nov. 2026, ?tipo=maritima). Página: /agendar/. Panel: /admin/agenda/.
 // GET  /api/agenda → horarios de las próximas semanas [{ inicio, libre }] (sin datos de nadie).
 // POST /api/agenda → el cliente pide una hora: se guarda en citas/{id} como «pendiente» y se avisa a Kairos.
 //      No bloquea la hora: se bloquea cuando Elise confirma el pago en el panel (publico/agenda.ocupadas).
 import { leer, crear, cambiar } from '../lib/firestore.mjs';
 import { json, texto, correoValido, azar, PAISES } from '../lib/comun.mjs';
 import { enviar } from '../lib/correo.mjs';
-import { horarios, AGENDA } from '../lib/agenda.mjs';
+import { horarios, TIPOS, tipoDe } from '../lib/agenda.mjs';
 import { correoNuevaCita, correoSolicitud, whatsNuevaCita } from '../lib/citas.mjs';
 import { avisoWhatsApp } from '../lib/whatsapp.mjs';
 
@@ -17,7 +17,8 @@ async function ocupadas() {
 export default async (req) => {
   try {
     if (req.method === 'GET') {
-      return new Response(JSON.stringify({ horarios: horarios(await ocupadas()), duracion: AGENDA.duracion, zona: AGENDA.zona }),
+      const t = TIPOS[tipoDe(new URL(req.url).searchParams.get('tipo'))];
+      return new Response(JSON.stringify({ horarios: horarios(await ocupadas(), Date.now(), t.cfg), duracion: t.cfg.duracion, zona: t.cfg.zona, precio: t.precio }),
         { headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' } });
     }
     if (req.method !== 'POST') return json({ error: 'Usa GET o POST' }, 405);
@@ -28,11 +29,12 @@ export default async (req) => {
     if (!correoValido(correo)) return json({ error: 'Revisa tu correo.' }, 400);
     if (!/^\+?\d[\d\s-]{6,}$/.test(whatsapp)) return json({ error: 'Escribe tu WhatsApp con el código de país, por ejemplo +56 9 1234 5678.' }, 400);
     if (!PAISES.includes(pais)) return json({ error: 'Elige el país donde vives.' }, 400);
-    const inicio = +d.inicio, h = horarios(await ocupadas()).find(x => x.inicio === inicio);
+    const tipo = tipoDe(d.tipo), T = TIPOS[tipo];
+    const inicio = +d.inicio, h = horarios(await ocupadas(), Date.now(), T.cfg).find(x => x.inicio === inicio);
     if (!h || !h.libre) return json({ error: 'Esa hora ya no está disponible. Elige otra.', ocupada: true }, 409);
     let zona = texto(d.zona, 60); try { new Intl.DateTimeFormat('es', { timeZone: zona }); } catch { zona = ''; }
     const id = 'C-' + new Date().toISOString().slice(0, 10).replace(/-/g, '') + '-' + azar(4);
-    const cita = { id, estado: 'pendiente', inicio, fin: inicio + AGENDA.duracion * 60000, nombre, correo, whatsapp: whatsapp.startsWith('+') ? whatsapp : '+' + whatsapp,
+    const cita = { id, tipo, estado: 'pendiente', inicio, fin: inicio + T.cfg.duracion * 60000, nombre, correo, whatsapp: whatsapp.startsWith('+') ? whatsapp : '+' + whatsapp,
       pais, zona, vehiculo: texto(d.vehiculo, 200), notas: texto(d.notas, 600), creada: new Date(), created_at: Date.now() };
     if (!await crear('citas/' + id, cita)) return json({ error: 'Inténtalo de nuevo.' }, 409);
     // Avisos. Si alguno falla, la solicitud igual queda en el panel.
